@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -15,10 +16,217 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css">
     <!-- Page-specific CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pages/user/home.css">
+    <style>
+        /* Thêm style cho dropdown menu người dùng */
+        .user-dropdown {
+            margin-left: 1rem;
+        }
+        
+        .user-dropdown .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #4267B2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        
+        .user-dropdown .dropdown-menu {
+            padding: 0;
+        }
+        
+        .user-dropdown .dropdown-item {
+            padding: 0.6rem 1rem;
+        }
+        
+        .user-dropdown .dropdown-item i {
+            width: 20px;
+            margin-right: 8px;
+            text-align: center;
+        }
+        
+        .user-dropdown .dropdown-divider {
+            margin: 0;
+        }
+        
+        .dropdown-header {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            font-weight: bold;
+        }
+        
+        .role-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            margin-left: 0.5rem;
+            border-radius: 10px;
+        }
+        
+        .role-admin {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .role-staff {
+            background-color: #fd7e14;
+            color: white;
+        }
+        
+        .role-user {
+            background-color: #0d6efd;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
-    <jsp:include page="/WEB-INF/views/user/includes/header.jsp" />
+    <header class="site-header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="${pageContext.request.contextPath}/home">
+                    <i class="fas fa-book-open"></i> Nhà Sách Online
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="${pageContext.request.contextPath}/home">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/shop">Cửa hàng</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="${pageContext.request.contextPath}/categories">Danh mục</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop?category=1">Văn học Việt Nam</a></li>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop?category=2">Văn học nước ngoài</a></li>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop?category=3">Sách thiếu nhi</a></li>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop?category=4">Kỹ năng sống</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop">Tất cả danh mục</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/authors">Tác giả</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/contact">Liên hệ</a>
+                        </li>
+                        
+                        <!-- Các mục menu chỉ dành cho Admin và Staff
+                        <c:if test="${sessionScope.role == 'Admin' || sessionScope.role == 'Staff'}">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog"></i> Quản lý
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <c:if test="${sessionScope.role == 'Admin'}">
+                                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/dashboard">
+                                            <i class="fas fa-tachometer-alt"></i> Bảng điều khiển
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/accounts">
+                                            <i class="fas fa-users-cog"></i> Quản lý tài khoản
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    </c:if>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/books">
+                                        <i class="fas fa-book"></i> Quản lý sách
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/orders">
+                                        <i class="fas fa-shopping-basket"></i> Quản lý đơn hàng
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/customers">
+                                        <i class="fas fa-user-friends"></i> Quản lý khách hàng
+                                    </a></li>
+                                </ul>
+                            </li>
+                        </c:if> -->
+                    </ul>
+                    
+                    <div class="d-flex align-items-center">
+                        <!-- Giỏ hàng - Luôn hiển thị nhưng chỉ có chức năng khi đăng nhập -->
+                        <a href="${pageContext.request.contextPath}/cart" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge bg-danger rounded-pill cart-count">0</span>
+                        </a>
+                        
+                        <!-- Đã đăng nhập: Hiển thị thông tin người dùng -->
+                        <c:if test="${not empty sessionScope.account}">
+                            <div class="dropdown user-dropdown">
+                                <a href="#" class="dropdown-toggle" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="user-avatar">
+                                        ${fn:substring(sessionScope.account.username, 0, 1).toUpperCase()}
+                                    </div>
+                                    <span>${sessionScope.account.username}
+                                        <c:choose>
+                                            <c:when test="${sessionScope.role == 'Admin'}">
+                                                <span class="role-badge role-admin">Admin</span>
+                                            </c:when>
+                                            <c:when test="${sessionScope.role == 'Staff'}">
+                                                <span class="role-badge role-staff">Staff</span>
+                                            </c:when>
+                                            <c:when test="${sessionScope.role == 'User'}">
+                                                <span class="role-badge role-user">User</span>
+                                            </c:when>
+                                        </c:choose>
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li class="dropdown-header">
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.customerName}">
+                                                ${sessionScope.customerName}
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${sessionScope.account.username}
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/profile">
+                                        <i class="fas fa-user"></i> Thông tin tài khoản
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/orders">
+                                        <i class="fas fa-clipboard-list"></i> Đơn hàng của tôi
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/wishlist">
+                                        <i class="fas fa-heart"></i> Sản phẩm yêu thích
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout">
+                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </c:if>
+                        
+                        <!-- Chưa đăng nhập: Hiển thị nút đăng nhập/đăng ký -->
+                        <c:if test="${empty sessionScope.account}">
+                            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                            </button>
+                            <a href="${pageContext.request.contextPath}/register" class="btn btn-outline-primary">
+                                <i class="fas fa-user-plus"></i> Đăng ký
+                            </a>
+                        </c:if>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
     
     <!-- Hero Section -->
     <section class="hero-section">
@@ -220,7 +428,7 @@
                         <div class="mb-3">
                             <label for="username" class="form-label">Tên đăng nhập</label>
                             <input type="text" class="form-control" id="username" name="username" 
-                                   value="${cookie.username != null ? cookie.username.value : ''}" required>
+                                value="${cookie.username != null ? cookie.username.value : ''}" required>
                         </div>
 
                         <!-- Password input -->

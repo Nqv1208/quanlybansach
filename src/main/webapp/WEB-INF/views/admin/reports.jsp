@@ -23,47 +23,47 @@
                 <div class="col-md-12">
                     <div class="card shadow">
                         <div class="card-body">
-                           <form action="${pageContext.request.contextPath}/admin/reports/export" method="post">
-                              <div class="row g-3">
-                                 <!-- Report Type -->
-                                 <div class="col-md-6">
-                                       <label for="reportType" class="form-label">Loại báo cáo</label>
-                                       <select class="form-select" id="reportType" name="reportType" required>
-                                          <option value="">-- Chọn loại báo cáo --</option>
-                                          <option value="sales">Báo cáo doanh thu</option>
-                                          <option value="inventory">Báo cáo tồn kho</option>
-                                          <option value="customers">Báo cáo khách hàng</option>
-                                       </select>
-                                 </div>
+                        <form action="${pageContext.request.contextPath}/admin/reports/export" method="post">
+                            <div class="row g-3">
+                                <!-- Report Type -->
+                                <div class="col-md-6">
+                                    <label for="reportType" class="form-label">Loại báo cáo</label>
+                                    <select class="form-select" id="reportType" name="reportType" required>
+                                        <option value="">-- Chọn loại báo cáo --</option>
+                                        <option value="sales">Báo cáo doanh thu</option>
+                                        <option value="inventory">Báo cáo tồn kho</option>
+                                        <option value="customers">Báo cáo khách hàng</option>
+                                    </select>
+                                </div>
 
-                                 <!-- Date Range -->
-                                 <div class="col-md-3">
+                                <!-- Date Range -->
+                                <div class="col-md-3">
                                     <label for="startDate" class="form-label">Từ ngày</label>
                                     <input type="date" class="form-control" id="startDate" name="startDate" required>
-                                 </div>
-                                 <div class="col-md-3">
+                                </div>
+                                <div class="col-md-3">
                                     <label for="endDate" class="form-label">Đến ngày</label>
                                     <input type="date" class="form-control" id="endDate" name="endDate" required>
-                                 </div>
+                                </div>
 
-                                 <!-- File Format -->
-                                 <div class="col-md-6">
-                                       <label for="fileFormat" class="form-label">Định dạng file</label>
-                                       <select class="form-select" id="fileFormat" name="fileFormat" required>
-                                       <option value="">-- Chọn định dạng --</option>
-                                       <option value="pdf">PDF</option>
-                                       <option value="excel">Excel</option>
-                                       </select>
-                                 </div>
+                                <!-- File Format -->
+                                <div class="col-md-6">
+                                    <label for="fileFormat" class="form-label">Định dạng file</label>
+                                    <select class="form-select" id="fileFormat" name="fileFormat" required>
+                                    <option value="">-- Chọn định dạng --</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                    </select>
+                                </div>
 
-                                 <!-- Submit Button -->
-                                 <div class="col-md-12 d-flex justify-content-end">
-                                       <button type="submit" class="btn btn-primary">
-                                       <i class="fas fa-download"></i> Xuất báo cáo
-                                       </button>
-                                 </div>
-                              </div>
-                           </form>
+                                <!-- Submit Button -->
+                                <div class="col-md-12 d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-download"></i> Xuất báo cáo
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                         </div>
                     </div>
                 </div>

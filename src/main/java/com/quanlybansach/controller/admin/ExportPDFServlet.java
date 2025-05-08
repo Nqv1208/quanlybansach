@@ -31,7 +31,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-@WebServlet(urlPatterns = {"/admin/reports/export"})
+// @WebServlet(urlPatterns = {"/admin/reports/export"})
 public class ExportPDFServlet extends HttpServlet {
    private static final long serialVersionUID = 1L;
    

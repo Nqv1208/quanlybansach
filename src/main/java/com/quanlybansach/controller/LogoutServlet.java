@@ -20,6 +20,12 @@ public class LogoutServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         
         if (session != null) {
+            // Xóa các thuộc tính session liên quan đến đăng nhập
+            session.removeAttribute("account");
+            session.removeAttribute("role");
+            session.removeAttribute("customerId");
+            session.removeAttribute("customerName");
+            
             // Invalidate the session
             session.invalidate();
         }
@@ -38,6 +44,6 @@ public class LogoutServlet extends HttpServlet {
         }
         
         // Redirect to home page
-        response.sendRedirect(request.getContextPath() + "/user/home");
+        response.sendRedirect(request.getContextPath() + "/home");
     }
 } 

@@ -195,31 +195,34 @@ BEGIN
 END
 GO
 
--- Trigger để cập nhật thời gian chỉnh sửa giỏ hàng khi thêm/sửa/xóa sản phẩm
-CREATE OR ALTER TRIGGER trg_update_cart_modified_time
-ON CART_ITEMS
-AFTER INSERT, UPDATE, DELETE
-AS
+-- Bảng vai trò người dùng
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ROLES')
 BEGIN
-    SET NOCOUNT ON;
-    
-    -- Cập nhật thời gian chỉnh sửa cho giỏ hàng có sản phẩm được thêm/sửa
-    IF EXISTS (SELECT * FROM inserted)
-    BEGIN
-        UPDATE c
-        SET c.last_modified = GETDATE()
-        FROM CARTS c
-        INNER JOIN inserted i ON c.cart_id = i.cart_id;
-    END
-    
-    -- Cập nhật thời gian chỉnh sửa cho giỏ hàng có sản phẩm bị xóa
-    IF EXISTS (SELECT * FROM deleted)
-    BEGIN
-        UPDATE c
-        SET c.last_modified = GETDATE()
-        FROM CARTS c
-        INNER JOIN deleted d ON c.cart_id = d.cart_id;
-    END
+    CREATE TABLE ROLES (
+        role_id INT IDENTITY(1,1) PRIMARY KEY,
+        role_name NVARCHAR(50) NOT NULL UNIQUE,
+        description NVARCHAR(255)
+    );
+END
+GO
+
+-- Bảng tài khoản
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ACCOUNTS')
+BEGIN
+    CREATE TABLE ACCOUNTS (
+        account_id INT IDENTITY(1,1) PRIMARY KEY,
+        username NVARCHAR(50) NOT NULL UNIQUE,
+        password_hash NVARCHAR(255) NOT NULL,
+        email NVARCHAR(100) NOT NULL UNIQUE,
+        role_id INT NOT NULL,
+        customer_id INT NULL,
+        is_active BIT DEFAULT 1,
+        created_date DATETIME DEFAULT GETDATE(),
+        last_login DATETIME NULL,
+        CONSTRAINT FK_ACCOUNTS_ROLES FOREIGN KEY (role_id) REFERENCES ROLES(role_id),
+        CONSTRAINT FK_ACCOUNTS_CUSTOMERS FOREIGN KEY (customer_id) REFERENCES CUSTOMERS(customer_id) ON DELETE SET NULL,
+        CONSTRAINT CHK_ACCOUNTS_EMAIL CHECK (email LIKE '%_@_%.__%')
+    );
 END
 GO
 
@@ -361,6 +364,32 @@ BEGIN
 END
 GO
 
+-- Dữ liệu mẫu cho bảng ROLES
+IF NOT EXISTS (SELECT * FROM ROLES)
+BEGIN
+    INSERT INTO ROLES (role_name, description)
+    VALUES 
+        (N'Admin', N'Quản trị viên hệ thống với toàn quyền truy cập'),
+        (N'Staff', N'Nhân viên với quyền quản lý sách, đơn hàng và khách hàng'),
+        (N'User', N'Người dùng đã đăng ký có thể mua sách và quản lý tài khoản cá nhân'),
+        (N'Guest', N'Khách vãng lai chỉ có quyền xem sách');
+END
+GO
+
+-- Dữ liệu mẫu cho bảng ACCOUNTS (Mật khẩu mẫu là 'password123')
+IF NOT EXISTS (SELECT * FROM ACCOUNTS)
+BEGIN
+    INSERT INTO ACCOUNTS (username, password_hash, email, role_id, customer_id, is_active, created_date, last_login)
+    VALUES 
+        ('admin', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'admin@bookstore.com', 1, NULL, 1, '2025-01-01', '2025-04-15'),
+        ('staff1', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'staff@bookstore.com', 2, NULL, 1, '2025-01-10', '2025-04-10'),
+        ('user1', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'an.nguyen@email.com', 3, 1, 1, '2025-01-15', '2025-04-01'),
+        ('user2', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'binh.tran@email.com', 3, 2, 1, '2025-02-20', '2025-04-05'),
+        ('user3', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'cuong.le@email.com', 3, 3, 1, '2025-03-10', NULL),
+        ('admin2', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'admin2@gmail.com', 1, NULL, 1, '2025-03-10', '2025-04-15');
+END
+GO
+
 ------------------------------------------------
 -- Thêm ràng buộc cho bảng AUTHORS
 ALTER TABLE AUTHORS
@@ -476,6 +505,23 @@ ADD CONSTRAINT CHK_invoice_item_quantity CHECK (quantity > 0),
 GO
 
 ------------------------------------------------
+-- Ràng buộc và chỉ mục cho bảng ROLES
+CREATE INDEX IX_roles_name ON ROLES(role_name);
+GO
+
+------------------------------------------------
+-- Ràng buộc và chỉ mục cho bảng ACCOUNTS
+ALTER TABLE ACCOUNTS
+ADD CONSTRAINT CHK_accounts_username CHECK (LEN(username) >= 4),
+    CONSTRAINT CHK_accounts_password CHECK (LEN(password_hash) >= 8);
+
+CREATE INDEX IX_accounts_username ON ACCOUNTS(username);
+CREATE INDEX IX_accounts_email ON ACCOUNTS(email);
+CREATE INDEX IX_accounts_role_id ON ACCOUNTS(role_id);
+CREATE INDEX IX_accounts_customer_id ON ACCOUNTS(customer_id);
+GO
+
+------------------------------------------------
 /*
 -- Tạo bảng giảm giá (PROMOTIONS)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'PROMOTIONS')
@@ -523,7 +569,9 @@ BEGIN
 END
 GO
 
-
+--=====================================================
+---------------------- TRIGGER ------------------------
+--=====================================================
 -- Tạo trigger cập nhật số lượng sách khi thêm INVENTORY
 CREATE OR ALTER TRIGGER trg_update_book_quantity
 ON INVENTORY
@@ -574,6 +622,34 @@ BEGIN
         INNER JOIN inserted i ON od.order_id = i.order_id;
     END
 END;
+GO
+
+-- Trigger để cập nhật thời gian chỉnh sửa giỏ hàng khi thêm/sửa/xóa sản phẩm
+CREATE OR ALTER TRIGGER trg_update_cart_modified_time
+ON CART_ITEMS
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Cập nhật thời gian chỉnh sửa cho giỏ hàng có sản phẩm được thêm/sửa
+    IF EXISTS (SELECT * FROM inserted)
+    BEGIN
+        UPDATE c
+        SET c.last_modified = GETDATE()
+        FROM CARTS c
+        INNER JOIN inserted i ON c.cart_id = i.cart_id;
+    END
+    
+    -- Cập nhật thời gian chỉnh sửa cho giỏ hàng có sản phẩm bị xóa
+    IF EXISTS (SELECT * FROM deleted)
+    BEGIN
+        UPDATE c
+        SET c.last_modified = GETDATE()
+        FROM CARTS c
+        INNER JOIN deleted d ON c.cart_id = d.cart_id;
+    END
+END
 GO
 
 /*
@@ -656,6 +732,7 @@ GO
 
 --===================================================--
 ---------------------- FUNTION ------------------------
+--===================================================--
 -- Tạo Function để tính giá sau khuyến mãi
 CREATE OR ALTER FUNCTION fn_get_discounted_price(
     @book_id INT,
@@ -1047,6 +1124,165 @@ BEGIN
 END;
 GO
 
+-----------------------------------------------------
+-- Stored Procedure để đăng nhập
+CREATE OR ALTER PROCEDURE pr_login
+    @username NVARCHAR(50),
+    @password_hash NVARCHAR(255),
+    @login_success BIT OUTPUT,
+    @role_name NVARCHAR(50) OUTPUT,
+    @customer_id INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @account_id INT
+    DECLARE @role_id INT
+    
+    -- Kiểm tra đăng nhập
+    SELECT 
+        @account_id = a.account_id,
+        @role_id = a.role_id,
+        @customer_id = a.customer_id
+    FROM 
+        ACCOUNTS a
+    WHERE 
+        a.username = @username 
+        AND a.password_hash = @password_hash
+        AND a.is_active = 1
+    
+    -- Xác định thành công và lấy tên vai trò
+    IF @account_id IS NOT NULL
+    BEGIN
+        SET @login_success = 1
+        
+        SELECT @role_name = r.role_name
+        FROM ROLES r
+        WHERE r.role_id = @role_id
+        
+        -- Cập nhật thời gian đăng nhập cuối
+        UPDATE ACCOUNTS
+        SET last_login = GETDATE()
+        WHERE account_id = @account_id
+    END
+    ELSE
+    BEGIN
+        SET @login_success = 0
+        SET @role_name = NULL
+        SET @customer_id = NULL
+    END
+    
+    RETURN
+END;
+GO
+
+-- Stored Procedure để đăng ký tài khoản mới
+CREATE OR ALTER PROCEDURE pr_register_account
+    @username NVARCHAR(50),
+    @password_hash NVARCHAR(255),
+    @email NVARCHAR(100),
+    @customer_name NVARCHAR(255),
+    @phone NVARCHAR(20),
+    @address NVARCHAR(255),
+    @success BIT OUTPUT,
+    @customer_id INT OUTPUT,
+    @account_id INT OUTPUT,
+    @error_message NVARCHAR(255) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION
+            
+            -- Kiểm tra username đã tồn tại chưa
+            IF EXISTS (SELECT 1 FROM ACCOUNTS WHERE username = @username)
+            BEGIN
+                SET @success = 0
+                SET @error_message = N'Tên đăng nhập đã tồn tại'
+                SET @customer_id = NULL
+                SET @account_id = NULL
+                ROLLBACK
+                RETURN
+            END
+            
+            -- Kiểm tra email đã tồn tại chưa
+            IF EXISTS (SELECT 1 FROM ACCOUNTS WHERE email = @email)
+            BEGIN
+                SET @success = 0
+                SET @error_message = N'Email đã được sử dụng'
+                SET @customer_id = NULL
+                SET @account_id = NULL
+                ROLLBACK
+                RETURN
+            END
+            
+            -- Thêm thông tin khách hàng
+            INSERT INTO CUSTOMERS (name, email, phone, address, registration_date)
+            VALUES (@customer_name, @email, @phone, @address, GETDATE())
+            
+            SET @customer_id = SCOPE_IDENTITY()
+            
+            -- Thêm tài khoản với vai trò User (role_id = 3)
+            INSERT INTO ACCOUNTS (username, password_hash, email, role_id, customer_id, is_active, created_date)
+            VALUES (@username, @password_hash, @email, 3, @customer_id, 1, GETDATE())
+            
+            SET @account_id = SCOPE_IDENTITY()
+            SET @success = 1
+            SET @error_message = NULL
+            
+        COMMIT TRANSACTION
+    END TRY
+    BEGIN CATCH
+        ROLLBACK
+        SET @success = 0
+        SET @customer_id = NULL
+        SET @account_id = NULL
+        SET @error_message = ERROR_MESSAGE()
+    END CATCH
+    
+    RETURN
+END;
+GO
+
+-- Stored Procedure để thay đổi quyền người dùng
+CREATE OR ALTER PROCEDURE pr_change_user_role
+    @account_id INT,
+    @new_role_id INT,
+    @success BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    BEGIN TRY
+        -- Kiểm tra tài khoản tồn tại
+        IF NOT EXISTS (SELECT 1 FROM ACCOUNTS WHERE account_id = @account_id)
+        BEGIN
+            SET @success = 0
+            RETURN
+        END
+        
+        -- Kiểm tra vai trò tồn tại
+        IF NOT EXISTS (SELECT 1 FROM ROLES WHERE role_id = @new_role_id)
+        BEGIN
+            SET @success = 0
+            RETURN
+        END
+        
+        -- Cập nhật vai trò
+        UPDATE ACCOUNTS
+        SET role_id = @new_role_id
+        WHERE account_id = @account_id
+        
+        SET @success = 1
+    END TRY
+    BEGIN CATCH
+        SET @success = 0
+    END CATCH
+    
+    RETURN
+END;
+GO
+
 --================================================--
 -------------------- VIEW----------------------
 --================================================--
@@ -1070,6 +1306,30 @@ AS
         i.customer_phone, 
         i.created_date, 
         i.status
+GO
+
+-- View hiển thị thông tin tài khoản và vai trò
+CREATE OR ALTER VIEW vw_account_details
+AS
+    SELECT 
+        a.account_id,
+        a.username,
+        a.email,
+        r.role_name,
+        r.role_id,
+        a.is_active,
+        a.created_date,
+        a.last_login,
+        a.customer_id,
+        c.name AS customer_name,
+        c.phone AS customer_phone,
+        c.address AS customer_address
+    FROM 
+        ACCOUNTS a
+    JOIN 
+        ROLES r ON a.role_id = r.role_id
+    LEFT JOIN 
+        CUSTOMERS c ON a.customer_id = c.customer_id
 GO
 
 --================================================--
@@ -1166,4 +1426,8 @@ SELECT * FROM dbo.CATEGORIES
 SELECT * FROM dbo.PUBLISHERS
 -------------------------------------
 SELECT * FROM dbo.AUTHORS
+-------------------------------------
+SELECT * FROM dbo.ACCOUNTS
+-------------------------------------
+SELECT * FROM dbo.ROLES
 -------------------------------------

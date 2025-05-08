@@ -9,6 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Cookie;
 
+import com.quanlybansach.dao.AccountDAO;
+import com.quanlybansach.model.Account;
+
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
@@ -22,7 +25,7 @@ public class LoginServlet extends HttpServlet {
       }
       
       // Redirect to home page with showLogin parameter to display login modal
-      response.sendRedirect(request.getContextPath() + "/user/home?showLogin=true");
+      response.sendRedirect(request.getContextPath() + "/home?showLogin=true");
    }
 
    @Override
@@ -31,74 +34,62 @@ public class LoginServlet extends HttpServlet {
       String username = request.getParameter("username");
       String password = request.getParameter("password");
       String rememberMe = request.getParameter("rememberMe");
+      String role = request.getParameter("roleUI");
       
-      // Authentication logic here...
-      boolean isAuthenticated = authenticate(username, password);
+      // Sử dụng AccountDAO để xác thực đăng nhập
+      AccountDAO accountDAO = new AccountDAO();
+      Account account = accountDAO.login(username, password);
       
-      if (isAuthenticated) {
-            // Set session attributes for authenticated user
-            HttpSession session = request.getSession();
-            
-            // For demo, simple user object storage. In real app, get from DB
-            User user = new User();
-            user.setUsername(username);
-            user.setFullName("Người dùng " + username);
-            
-            session.setAttribute("user", user);
-            
-            // Handle "Remember me" functionality
-            if (rememberMe != null) {
-               Cookie usernameCookie = new Cookie("username", username);
-               usernameCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
-               response.addCookie(usernameCookie);
+      System.out.println(account.toString());
+      
+      if (account != null) {
+         // Đăng nhập thành công
+         HttpSession session = request.getSession();
+         
+         // Lưu thông tin tài khoản vào session
+         session.setAttribute("account", account);
+         
+         // Lưu thông tin phân quyền
+         session.setAttribute("role", account.getRoleName());
+         
+         // Lưu thông tin khách hàng nếu có
+         if (account.getCustomerId() != null) {
+            session.setAttribute("customerId", account.getCustomerId());
+            session.setAttribute("customerName", account.getCustomerName());
+         }
+         
+         // Handle "Remember me" functionality
+         if (rememberMe != null) {
+            Cookie usernameCookie = new Cookie("username", username);
+            usernameCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
+            response.addCookie(usernameCookie);
+         } else {
+            // Remove any existing cookie
+            Cookie usernameCookie = new Cookie("username", "");
+            usernameCookie.setMaxAge(0);
+            response.addCookie(usernameCookie);
+         }
+         
+         // Redirect to intended page or default depending on role
+         String redirectURL = (String) session.getAttribute("loginRedirect");
+         if (redirectURL != null) {
+            session.removeAttribute("loginRedirect");
+            response.sendRedirect(redirectURL);
+         } else {
+            // Chuyển hướng dựa trên vai trò
+            if ("Admin".equals(account.getRoleName())) {
+               response.sendRedirect(request.getContextPath() + "/admin/home");
+            } else if ("Staff".equals(account.getRoleName())) {
+               response.sendRedirect(request.getContextPath() + "/staff/dashboard");
             } else {
-               // Remove any existing cookie
-               Cookie usernameCookie = new Cookie("username", "");
-               usernameCookie.setMaxAge(0);
-               response.addCookie(usernameCookie);
+               // Người dùng thông thường
+               response.sendRedirect(request.getContextPath() + "/home");
             }
-            
-            // Redirect to intended page or default to home
-            String redirectURL = (String) session.getAttribute("loginRedirect");
-            if (redirectURL != null) {
-               session.removeAttribute("loginRedirect");
-               response.sendRedirect(redirectURL);
-            } else {
-               response.sendRedirect(request.getContextPath() + "/user/home");
-            }
+         }
       } else {
-            // Set error message and redirect back to home with parameters to show modal and error
-            request.getSession().setAttribute("errorMessage", "Tên đăng nhập hoặc mật khẩu không đúng");
-            response.sendRedirect(request.getContextPath() + "/user/home?loginError=true");
-      }
-   }
-   
-   private boolean authenticate(String username, String password) {
-      // Simple authentication for demo purposes
-      // In a real application, this would check against a database
-      return "demo".equals(username) && "password".equals(password) || 
-               "admin".equals(username) && "admin".equals(password);
-   }
-   
-   // Simple User class for demo
-   public class User {
-      private String username;
-      private String fullName;
-      
-      public String getUsername() {
-            return username;
-      }
-      
-      public void setUsername(String username) {
-            this.username = username;
-      }
-      
-      public String getFullName() {
-            return fullName;
-      }
-      
-      public void setFullName(String fullName) {
-            this.fullName = fullName;
+         // Đăng nhập thất bại
+         request.getSession().setAttribute("errorMessage", "Tên đăng nhập hoặc mật khẩu không đúng");
+         response.sendRedirect(request.getContextPath() + "/home?loginError=true");
       }
    }
 }

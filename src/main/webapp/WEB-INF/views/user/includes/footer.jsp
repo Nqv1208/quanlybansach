@@ -18,10 +18,10 @@
             <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
                 <h5 class="footer-title">Liên Kết Nhanh</h5>
                 <ul class="footer-links list-unstyled">
-                    <li><a href="${pageContext.request.contextPath}/user/home">Trang Chủ</a></li>
+                    <li><a href="${pageContext.request.contextPath}/home">Trang Chủ</a></li>
                     <li><a href="${pageContext.request.contextPath}/shop">Cửa Hàng</a></li>
-                    <li><a href="${pageContext.request.contextPath}/user/cart">Giỏ Hàng</a></li>
-                    <li><a href="${pageContext.request.contextPath}/user/orders">Đơn Hàng</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cart">Giỏ Hàng</a></li>
+                    <li><a href="${pageContext.request.contextPath}/orders">Đơn Hàng</a></li>
                 </ul>
             </div>
 
@@ -38,8 +38,8 @@
             <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
                 <h5 class="footer-title">Liên Hệ</h5>
                 <ul class="footer-links list-unstyled">
-                    <li><i class="fas fa-map-marker-alt me-2"></i> 123 Nguyễn Văn Linh, Q.7, TP.HCM</li>
-                    <li><i class="fas fa-phone-alt me-2"></i> (028) 1234 5678</li>
+                    <li><i class="fas fa-map-marker-alt me-2"></i> 48 Cao Thắng, Hải Châu, Đà Nẵngs</li>
+                    <li><i class="fas fa-phone-alt me-2"></i> (012) 1234 5678</li>
                     <li><i class="fas fa-envelope me-2"></i> contact@nhasachonline.com</li>
                     <li><i class="fas fa-clock me-2"></i> 08:00 - 22:00, Thứ 2 - Chủ Nhật</li>
                 </ul>
