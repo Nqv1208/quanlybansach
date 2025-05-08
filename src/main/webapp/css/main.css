@@ -1,0 +1,216 @@
+/**
+ * Main CSS file for Quản Lý Bán Sách application
+ * This file imports all modular CSS components
+ */
+
+/* Import theme variables */
+@import url('themes/variables.css');
+
+/* Import base styles */
+@import url('common/base.css');
+
+/* Import component styles */
+@import url('components/header.css');
+@import url('components/footer.css');
+@import url('components/cards.css');
+@import url('components/login-modal.css');
+
+/* Import utility styles - uncomment as they're created */
+@import url('utils/buttons.css');
+@import url('utils/forms.css');
+@import url('utils/animations.css');
+
+/**
+ * Note: Page-specific CSS files should be loaded in their respective 
+ * JSP files to avoid unnecessary loading of unused CSS.
+ */
+
+/* Main CSS for the bookstore website */
+
+:root {
+    --primary-color: #3c40c6;
+    --secondary-color: #0fbcf9;
+    --accent-color: #00d8d6;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --error-color: #e74c3c;
+    --white-color: #fff;
+    --text-color: #333;
+    --light-text-color: #666;
+    --border-color: #ddd;
+    --background-color: #f5f6fa;
+    --font-size-small: 0.875rem;
+    --font-size-medium: 1rem;
+    --font-size-large: 1.125rem;
+    --font-size-xl: 1.5rem;
+    --font-size-xxl: 2rem;
+    --border-radius-s: 4px;
+    --border-radius-m: 8px;
+    --border-radius-l: 12px;
+    --border-radius-circle: 50%;
+    --spacing-xs: 0.25rem;
+    --spacing-s: 0.5rem;
+    --spacing-m: 1rem;
+    --spacing-l: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+    --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --transition-fast: 0.3s;
+    --transition-medium: 0.5s;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: var(--white-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 0.75rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand i {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+.nav-link {
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color var(--transition-fast);
+}
+
+.nav-link:hover, 
+.nav-link:focus {
+    color: var(--primary-color);
+}
+
+.nav-link.active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: var(--border-radius-m);
+    font-weight: 500;
+    padding: 0.5rem 1.25rem;
+    transition: all var(--transition-fast);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    opacity: 0.9;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Footer Styles */
+footer {
+    background-color: var(--white-color);
+    color: var(--text-color);
+    padding: var(--spacing-xl) 0;
+    margin-top: var(--spacing-xxl);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.footer-title {
+    font-weight: 600;
+    margin-bottom: var(--spacing-m);
+    color: var(--primary-color);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.footer-links a {
+    color: var(--light-text-color);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+}
+
+.social-links {
+    display: flex;
+    gap: var(--spacing-s);
+}
+
+.social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    border-radius: var(--border-radius-circle);
+    transition: all var(--transition-fast);
+}
+
+.social-links a:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+/* Common utility classes */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background-color: var(--white-color);
+        padding: 1rem;
+        border-radius: var(--border-radius-m);
+        box-shadow: var(--shadow-light);
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .container {
+        padding-left: var(--spacing-m);
+        padding-right: var(--spacing-m);
+    }
+} 

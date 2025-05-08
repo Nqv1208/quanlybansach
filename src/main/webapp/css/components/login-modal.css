@@ -1,0 +1,198 @@
+/* Login modal styles */
+@import url('../../themes/variables.css');
+
+.login-modal .modal-content {
+    border-radius: var(--border-radius-l);
+    box-shadow: var(--shadow-medium);
+    border: none;
+    overflow: hidden;
+}
+
+.login-modal .modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--white-color);
+    border-bottom: none;
+    padding: var(--spacing-l);
+    text-align: center;
+    position: relative;
+}
+
+.login-modal .modal-title {
+    font-size: var(--font-size-large);
+    font-weight: 700;
+    margin: 0 auto;
+}
+
+.login-modal .modal-header .btn-close {
+    position: absolute;
+    right: var(--spacing-m);
+    top: var(--spacing-m);
+    color: var(--white-color);
+    opacity: 0.8;
+    background: transparent;
+    font-size: var(--font-size-large);
+}
+
+.login-modal .modal-body {
+    padding: var(--spacing-l);
+}
+
+.login-modal .form-label {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-color);
+}
+
+.login-modal .form-control {
+    padding: var(--spacing-s) var(--spacing-m);
+    border-radius: var(--border-radius-m);
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    margin-bottom: var(--spacing-s);
+}
+
+.login-modal .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+}
+
+.login-modal .btn-login {
+    width: 100%;
+    padding: var(--spacing-s) var(--spacing-m);
+    border-radius: var(--border-radius-m);
+    background-color: var(--primary-color);
+    border: none;
+    color: var(--white-color);
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.login-modal .btn-login:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.login-modal .login-footer {
+    text-align: center;
+    margin-top: var(--spacing-m);
+    color: var(--light-text-color);
+}
+
+.login-modal .login-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-modal .login-footer a:hover {
+    text-decoration: underline;
+}
+
+.login-modal .social-login {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-m);
+    gap: var(--spacing-s);
+}
+
+.login-modal .social-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-circle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white-color);
+    transition: all var(--transition-fast);
+}
+
+.login-modal .social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-light);
+}
+
+.login-modal .facebook {
+    background-color: #3b5998;
+}
+
+.login-modal .google {
+    background-color: #db4437;
+}
+
+.login-modal .twitter {
+    background-color: #1da1f2;
+}
+
+.login-modal .github {
+    background-color: #333;
+}
+
+.login-modal .divider {
+    display: flex;
+    align-items: center;
+    margin: var(--spacing-m) 0;
+    color: var(--light-text-color);
+}
+
+.login-modal .divider::before,
+.login-modal .divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.login-modal .divider::before {
+    margin-right: var(--spacing-s);
+}
+
+.login-modal .divider::after {
+    margin-left: var(--spacing-s);
+}
+
+.login-modal .form-check {
+    display: flex;
+    align-items: center;
+}
+
+.login-modal .form-check-input {
+    margin-right: var(--spacing-xs);
+}
+
+.login-modal .forgot-password {
+    text-align: right;
+}
+
+.login-modal .error-message {
+    color: var(--error-color);
+    background-color: rgba(var(--error-color-rgb), 0.1);
+    padding: var(--spacing-s);
+    border-radius: var(--border-radius-m);
+    margin-bottom: var(--spacing-m);
+    font-size: var(--font-size-small);
+}
+
+.login-modal .role-toggle {
+    display: flex;
+    margin-bottom: var(--spacing-m);
+    background-color: var(--background-color);
+    border-radius: var(--border-radius-m);
+    overflow: hidden;
+}
+
+.login-modal .role-toggle label {
+    flex: 1;
+    text-align: center;
+    padding: var(--spacing-s) 0;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--text-color);
+}
+
+.login-modal .role-toggle input[type="radio"] {
+    display: none;
+}
+
+.login-modal .role-toggle input[type="radio"]:checked + label {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+} 

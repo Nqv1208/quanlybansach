@@ -1,0 +1,204 @@
+/* Homepage styles */
+@import url('../../../themes/variables.css');
+
+/* Hero section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--white-color);
+    padding: 4rem 0;
+    margin-bottom: var(--spacing-xl);
+    border-radius: 0 0 var(--border-radius-l) var(--border-radius-l);
+}
+
+.hero-title {
+    font-size: var(--font-size-xxxl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-m);
+}
+
+.hero-subtitle {
+    font-size: var(--font-size-large);
+    margin-bottom: var(--spacing-xl);
+    opacity: 0.9;
+}
+
+.hero-search {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.hero-search-input {
+    width: 100%;
+    padding: var(--spacing-m) var(--spacing-xl);
+    border: none;
+    border-radius: var(--border-radius-l);
+    font-size: var(--font-size-medium);
+    box-shadow: var(--shadow-medium);
+}
+
+.hero-search-button {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border: none;
+    border-radius: var(--border-radius-l);
+    padding: var(--spacing-s) var(--spacing-m);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.hero-search-button:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Section styles */
+.section {
+    margin-bottom: var(--spacing-xxl);
+}
+
+.section-title {
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-l);
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    height: 3px;
+    width: 80px;
+    background-color: var(--accent-color);
+}
+
+.section-subtitle {
+    color: var(--light-text-color);
+    margin-bottom: var(--spacing-l);
+}
+
+/* Featured books slider */
+.featured-books {
+    position: relative;
+}
+
+.featured-book-nav {
+    position: absolute;
+    top: -70px;
+    right: 0;
+    display: flex;
+    gap: var(--spacing-s);
+}
+
+.featured-book-nav button {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-circle);
+    background-color: var(--white-color);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.featured-book-nav button:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border-color: var(--primary-color);
+}
+
+/* Categories section */
+.categories-section {
+    padding: var(--spacing-xl) 0;
+}
+
+/* Testimonials section */
+.testimonials-section {
+    background-color: var(--background-color);
+    padding: var(--spacing-xl) 0;
+    margin: var(--spacing-xxl) 0;
+}
+
+/* Newsletter section */
+.newsletter-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--white-color);
+    padding: var(--spacing-xl) 0;
+    text-align: center;
+    border-radius: var(--border-radius-l);
+    margin-bottom: var(--spacing-xxl);
+}
+
+.newsletter-title {
+    font-size: var(--font-size-xxl);
+    margin-bottom: var(--spacing-m);
+}
+
+.newsletter-text {
+    margin-bottom: var(--spacing-l);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.newsletter-form {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+}
+
+.newsletter-input {
+    flex: 1;
+    padding: var(--spacing-m);
+    border: none;
+    border-radius: var(--border-radius-l) 0 0 var(--border-radius-l);
+    font-size: var(--font-size-base);
+}
+
+.newsletter-button {
+    background-color: var(--accent-color);
+    color: var(--white-color);
+    border: none;
+    padding: 0 var(--spacing-l);
+    border-radius: 0 var(--border-radius-l) var(--border-radius-l) 0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.newsletter-button:hover {
+    background-color: #00bfbd;
+}
+
+/* Responsive styles */
+@media (max-width: 767.98px) {
+    .hero-title {
+        font-size: var(--font-size-xxl);
+    }
+    
+    .hero-subtitle {
+        font-size: var(--font-size-base);
+    }
+    
+    .newsletter-form {
+        flex-direction: column;
+    }
+    
+    .newsletter-input {
+        border-radius: var(--border-radius-l);
+        margin-bottom: var(--spacing-s);
+    }
+    
+    .newsletter-button {
+        border-radius: var(--border-radius-l);
+        padding: var(--spacing-s) 0;
+    }
+} 

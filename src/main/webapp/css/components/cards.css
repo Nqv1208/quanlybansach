@@ -1,0 +1,217 @@
+/* Card component styles */
+@import url('../themes/variables.css');
+
+/* Book card styles */
+.card {
+    border: none;
+    border-radius: var(--border-radius-l);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    margin-bottom: var(--spacing-l);
+    box-shadow: var(--shadow-light);
+    background-color: var(--white-color);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.card-img-container {
+    height: 200px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    padding: var(--spacing-s);
+}
+
+.card-img-top {
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform var(--transition-medium);
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.1);
+}
+
+.card-body {
+    padding: var(--spacing-l);
+}
+
+.card-title {
+    font-weight: 600;
+    font-size: var(--font-size-medium);
+    margin-bottom: var(--spacing-s);
+    height: 2.4rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.card-author {
+    color: var(--light-text-color);
+    font-size: var(--font-size-small);
+    margin-bottom: var(--spacing-s);
+}
+
+.card-rating {
+    margin-bottom: var(--spacing-s);
+    color: #f39c12;
+}
+
+.card-price {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: var(--font-size-large);
+    margin-bottom: var(--spacing-m);
+}
+
+.card-text {
+    color: var(--light-text-color);
+    margin-bottom: var(--spacing-m);
+    height: 3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.card-footer {
+    background-color: transparent;
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-m);
+}
+
+/* Category card styles */
+.category-card {
+    background-color: var(--white-color);
+    border-radius: var(--border-radius-l);
+    padding: var(--spacing-l);
+    text-align: center;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-light);
+    margin-bottom: var(--spacing-l);
+    display: block;
+    color: var(--text-color);
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+    color: var(--primary-color);
+}
+
+.category-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-m);
+}
+
+.category-title {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.category-count {
+    color: var(--light-text-color);
+    font-size: var(--font-size-small);
+}
+
+/* Testimonial card */
+.testimonial-card {
+    background-color: var(--white-color);
+    border-radius: var(--border-radius-l);
+    padding: var(--spacing-l);
+    margin-bottom: var(--spacing-l);
+    box-shadow: var(--shadow-light);
+    transition: all var(--transition-fast);
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.testimonial-text {
+    font-style: italic;
+    color: var(--light-text-color);
+    margin-bottom: var(--spacing-m);
+    position: relative;
+    padding: 0 var(--spacing-m);
+}
+
+.testimonial-text::before,
+.testimonial-text::after {
+    content: '"';
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    opacity: 0.3;
+}
+
+.testimonial-rating {
+    color: #f39c12;
+    margin-bottom: var(--spacing-s);
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+}
+
+.testimonial-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--border-radius-circle);
+    overflow: hidden;
+    margin-right: var(--spacing-m);
+}
+
+.testimonial-name {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.testimonial-info {
+    color: var(--light-text-color);
+    font-size: var(--font-size-small);
+}
+
+/* Card actions */
+.card-actions {
+    display: flex;
+    gap: var(--spacing-s);
+}
+
+.btn-cart {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-cart i {
+    margin-right: var(--spacing-xs);
+}
+
+.btn-wishlist {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-circle);
+    color: var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    transition: all var(--transition-fast);
+}
+
+.btn-wishlist:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+} 

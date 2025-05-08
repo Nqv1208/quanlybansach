@@ -1,0 +1,46 @@
+body {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   min-height: 100vh; /* Đảm bảo form căn giữa theo chiều dọc */
+   background-color: #f8f9fa; /* Màu nền nhẹ để tạo độ tương phản */
+   margin: 0; /* Loại bỏ margin mặc định của body */
+}
+
+form {
+   max-width: 400px; /* Giới hạn chiều rộng của form */
+   width: 100%; /* Đảm bảo form responsive */
+   padding: 2rem; /* Giảm padding so với p-5 (padding: 3rem) */
+   border: 1px solid #dee2e6; /* Giữ viền nhẹ */
+   border-radius: 8px; /* Bo góc form */
+   background-color: #fff; /* Nền trắng cho form */
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng nhẹ */
+}
+
+.form-outline {
+   margin-bottom: 1.5rem; /* Giảm khoảng cách giữa các input */
+}
+
+.form-control {
+   padding: 0.75rem; /* Tăng padding cho input để dễ nhập liệu */
+   font-size: 0.9rem; /* Giảm kích thước chữ một chút */
+}
+
+.form-check {
+   margin-bottom: 1rem; /* Giảm khoảng cách cho phần "Remember me" */
+}
+
+.btn-primary {
+   padding: 0.75rem; /* Tăng padding cho nút Sign in */
+   font-size: 0.9rem; /* Giảm kích thước chữ của nút */
+}
+
+.text-center p {
+   margin: 0.5rem 0; /* Giảm khoảng cách giữa các đoạn văn bản */
+   font-size: 0.9rem; /* Giảm kích thước chữ */
+}
+
+.btn-floating {
+   font-size: 1rem; /* Giảm kích thước biểu tượng */
+   padding: 0.5rem; /* Giảm padding của nút mạng xã hội */
+}
