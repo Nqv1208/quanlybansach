@@ -159,21 +159,28 @@ public class BookDAO {
                      "b.ISBN, b.price, b.stock_quantity, b.publication_date, b.description, " +
                      "b.image_url, a.name, c.name, p.name";
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+        Connection conn = null;
+        Book book = null;
+        
+        try {
+            conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, bookId);
             
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToBook(rs);
-                }
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                book = mapResultSetToBook(rs);
             }
+            
+            rs.close();
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(conn);
         }
         
-        return null;
+        return book;
     }
     
     public List<Book> getBooksByCategory(int categoryId) {

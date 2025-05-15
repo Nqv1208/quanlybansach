@@ -31,6 +31,12 @@ public class CartServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         
+        System.out.println("Action: " + pathInfo);
+        
+        if (pathInfo == null) {
+            pathInfo = "/";
+        }
+
         if (pathInfo == null || pathInfo.equals("/") || pathInfo.equals("/view")) {
             // Hiển thị giỏ hàng
             viewCart(request, response);
@@ -42,6 +48,8 @@ public class CartServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
+
+        System.out.println("Action: " + pathInfo);
         
         if (pathInfo == null) {
             pathInfo = "/";
@@ -73,7 +81,29 @@ public class CartServlet extends HttpServlet {
      * Hiển thị giỏ hàng
      */
     private void viewCart(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Cart cart = cartService.getCart(request);
+    Cart cart = cartService.getCart(request);
+    
+    // Debug: In thông tin giỏ hàng
+    System.out.println("Cart items count: " + (cart != null && cart.getItems() != null ? cart.getItems().size() : 0));
+    
+    // Kiểm tra xem giỏ hàng có tồn tại không
+    if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
+        // Nếu giỏ hàng trống, đặt attribute cart là null để hiện thông báo "giỏ hàng trống"
+        request.setAttribute("cart", null);
+        
+        // Vẫn cần tạo CartSummary với giá trị mặc định
+        CartSummary emptySummary = new CartSummary();
+        emptySummary.setItemCount(0);
+        emptySummary.setSubtotal(0);
+        emptySummary.setShippingFee(0);
+        emptySummary.setDiscount(0);
+        emptySummary.calculateTotal();
+        request.setAttribute("cartSummary", emptySummary);
+    } else {
+        // In debug thông tin chi tiết từng item
+        for (com.quanlybansach.model.CartItem item : cart.getItems()) {
+            System.out.println("Book ID: " + item.getBookId() + ", Quantity: " + item.getQuantity());
+        }
         
         // Tạo CartSummary từ dữ liệu trong giỏ hàng
         CartSummary cartSummary = new CartSummary();
@@ -93,9 +123,17 @@ public class CartServlet extends HttpServlet {
         
         request.setAttribute("cart", cart.getItems());
         request.setAttribute("cartSummary", cartSummary);
-        
-        request.getRequestDispatcher("/WEB-INF/views/user/cart.jsp").forward(request, response);
     }
+    
+    try {
+        request.getRequestDispatcher("/WEB-INF/views/user/cart.jsp").forward(request, response);
+    } catch (Exception e) {
+        System.err.println("Lỗi khi forward đến cart.jsp: " + e.getMessage());
+        e.printStackTrace();
+        // Có thể xử lý lỗi tại đây, ví dụ chuyển hướng đến trang lỗi
+        response.sendRedirect(request.getContextPath() + "/error");
+    }
+}
     
     /**
      * Thêm sản phẩm vào giỏ hàng
@@ -104,11 +142,18 @@ public class CartServlet extends HttpServlet {
         String bookIdParam = request.getParameter("bookId");
         String quantityParam = request.getParameter("quantity");
         
+        System.out.println("AddToCart - bookId: " + bookIdParam + ", quantity: " + quantityParam);
+        
         try {
             int bookId = Integer.parseInt(bookIdParam);
             int quantity = quantityParam != null ? Integer.parseInt(quantityParam) : 1;
             
             boolean success = cartService.addToCart(request, bookId, quantity);
+            System.out.println("AddToCart - success: " + success);
+            
+            // Debug giỏ hàng sau khi thêm
+            Cart cart = cartService.getCart(request);
+            System.out.println("Cart after add - items count: " + (cart != null && cart.getItems() != null ? cart.getItems().size() : 0));
             
             // Chuyển hướng về trang hiện tại hoặc trang giỏ hàng
             String referer = request.getHeader("Referer");
@@ -117,6 +162,7 @@ public class CartServlet extends HttpServlet {
             
             response.sendRedirect(redirectUrl);
         } catch (NumberFormatException e) {
+            System.out.println("AddToCart - Error: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/shop");
         }
     }

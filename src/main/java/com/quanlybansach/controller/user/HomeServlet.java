@@ -12,7 +12,7 @@ import com.quanlybansach.dao.BookDAO;
 import com.quanlybansach.service.BookService;
 
 
-@WebServlet("/home")
+@WebServlet("/home/*")
 public class HomeServlet extends HttpServlet {
 
    private BookDAO bookDAO;

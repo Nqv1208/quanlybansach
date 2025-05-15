@@ -19,32 +19,72 @@ public class CustomerService {
     /**
      * Lấy danh sách tất cả khách hàng
      */
-    public List<Customer> getAllCustomers() throws SQLException {
+    public List<Customer> getAllCustomers() {
         return customerDAO.getAllCustomers();
     }
     
     /**
      * Lấy thông tin chi tiết một khách hàng
      */
-    public Customer getCustomerById(int customerId) throws SQLException {
-        // Trong thực tế, bạn sẽ gọi hàm tương ứng từ CustomerDAO
-        List<Customer> customers = customerDAO.getAllCustomers();
-        
+    public Customer getCustomerById(int customerId) {
+        // Phương thức getCustomerById trong DAO chưa được triển khai đầy đủ
+        // Tạm thời tìm khách hàng từ danh sách
+        List<Customer> customers = getAllCustomers();
         for (Customer customer : customers) {
             if (customer.getCustomerId() == customerId) {
                 return customer;
             }
         }
-        
         return null;
+    }
+    
+    /**
+     * Lấy tổng số khách hàng
+     */
+    public int getTotalCustomers() {
+        return customerDAO.getTotalCustomers();
     }
     
     /**
      * Tìm kiếm khách hàng theo từ khóa
      */
-    public List<Customer> searchCustomers(String keyword) throws SQLException {
-        // Trong thực tế, bạn sẽ gọi hàm tương ứng từ CustomerDAO
-        return customerDAO.getAllCustomers();
+    public List<Customer> searchCustomers(String keyword) {
+        List<Customer> allCustomers = getAllCustomers();
+        List<Customer> result = new java.util.ArrayList<>();
+        
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return allCustomers;
+        }
+        
+        keyword = keyword.toLowerCase();
+        
+        for (Customer customer : allCustomers) {
+            if (customer.getName().toLowerCase().contains(keyword) ||
+                (customer.getEmail() != null && customer.getEmail().toLowerCase().contains(keyword)) ||
+                (customer.getPhone() != null && customer.getPhone().contains(keyword))) {
+                result.add(customer);
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Kiểm tra email đã tồn tại chưa
+     */
+    public boolean isEmailExists(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        
+        List<Customer> customers = getAllCustomers();
+        for (Customer customer : customers) {
+            if (email.equalsIgnoreCase(customer.getEmail())) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -81,28 +121,5 @@ public class CustomerService {
         // Trong thực tế, bạn sẽ gọi hàm tương ứng từ CustomerDAO
         // customerDAO.updateCustomer(customer);
         return true;
-    }
-    
-    /**
-     * Kiểm tra email đã tồn tại chưa
-     */
-    public boolean isEmailExists(String email) throws SQLException {
-        // Trong thực tế, bạn sẽ gọi hàm tương ứng từ CustomerDAO
-        List<Customer> customers = customerDAO.getAllCustomers();
-        
-        for (Customer customer : customers) {
-            if (customer.getEmail() != null && customer.getEmail().equals(email)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Lấy tổng số khách hàng
-     */
-    public int getTotalCustomers() throws SQLException {
-        return customerDAO.getTotalCustomers();
     }
 } 

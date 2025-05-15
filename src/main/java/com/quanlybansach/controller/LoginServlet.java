@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.Cookie;
 
 import com.quanlybansach.dao.AccountDAO;
+import com.quanlybansach.dao.CartDAO;
 import com.quanlybansach.model.Account;
 
 @WebServlet("/login")
@@ -18,6 +19,11 @@ public class LoginServlet extends HttpServlet {
    @Override
    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
                throws ServletException, IOException {
+      // Set character encoding
+      request.setCharacterEncoding("UTF-8");
+      response.setCharacterEncoding("UTF-8");
+      response.setContentType("text/html; charset=UTF-8");
+      
       // Check if user is coming from a protected page, so we know where to redirect after login
       String referer = request.getHeader("Referer");
       if (referer != null && !referer.contains("/login")) {
@@ -28,9 +34,15 @@ public class LoginServlet extends HttpServlet {
       response.sendRedirect(request.getContextPath() + "/home?showLogin=true");
    }
 
+   @SuppressWarnings("unused")
    @Override
    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
                throws ServletException, IOException {
+      // Set character encoding
+      request.setCharacterEncoding("UTF-8");
+      response.setCharacterEncoding("UTF-8");
+      response.setContentType("text/html; charset=UTF-8");
+      
       String username = request.getParameter("username");
       String password = request.getParameter("password");
       String rememberMe = request.getParameter("rememberMe");
@@ -40,9 +52,10 @@ public class LoginServlet extends HttpServlet {
       AccountDAO accountDAO = new AccountDAO();
       Account account = accountDAO.login(username, password);
       
-      System.out.println(account.toString());
-      
+      // Kiểm tra null trước khi gọi toString()
       if (account != null) {
+         System.out.println(account.toString());
+         
          // Đăng nhập thành công
          HttpSession session = request.getSession();
          
@@ -51,17 +64,22 @@ public class LoginServlet extends HttpServlet {
          
          // Lưu thông tin phân quyền
          session.setAttribute("role", account.getRoleName());
+
+         CartDAO cartDAO = new CartDAO();
+         session.setAttribute("cart", cartDAO.getCartByCustomerId(account.getCustomerId()));
          
          // Lưu thông tin khách hàng nếu có
          if (account.getCustomerId() != null) {
             session.setAttribute("customerId", account.getCustomerId());
             session.setAttribute("customerName", account.getCustomerName());
+            // Lưu thông tin giỏ hàng vào session
+            session.setAttribute("cart", cartDAO.getCartByCustomerId(account.getCustomerId()));
          }
          
          // Handle "Remember me" functionality
          if (rememberMe != null) {
             Cookie usernameCookie = new Cookie("username", username);
-            usernameCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
+            usernameCookie.setMaxAge(60 * 60 * 24); // 1 day
             response.addCookie(usernameCookie);
          } else {
             // Remove any existing cookie

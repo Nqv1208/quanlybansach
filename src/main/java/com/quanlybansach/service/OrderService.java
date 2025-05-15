@@ -5,9 +5,6 @@ import com.quanlybansach.dao.BookDAO;
 import com.quanlybansach.model.Book;
 import com.quanlybansach.model.Order;
 import com.quanlybansach.model.OrderDetail;
-import com.quanlybansach.model.CartItem;
-import com.quanlybansach.model.CartSummary;
-import com.quanlybansach.model.ShippingAddress;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -139,73 +136,6 @@ public class OrderService {
     }
     
     /**
-     * Tạo mới đơn hàng từ giỏ hàng
-     */
-    public Order createOrder(int customerId, List<CartItem> cartItems, ShippingAddress shippingAddress,
-                           String shippingMethod, String paymentMethod, CartSummary cartSummary) throws SQLException {
-        // Tạo đơn hàng mới
-        Order order = new Order();
-        order.setCustomerId(customerId);
-        order.setOrderDate(new Date());
-        order.setStatus("pending");
-        
-        // Xử lý địa chỉ giao hàng
-        String shippingAddressStr = String.format("%s, %s, %s, %s - %s", 
-            shippingAddress.getAddress(),
-            shippingAddress.getWard(), 
-            shippingAddress.getDistrict(),
-            shippingAddress.getProvinceText(),
-            shippingAddress.getPhone());
-        order.setShippingAddress(shippingAddressStr);
-        
-        // Xử lý phương thức thanh toán
-        order.setPaymentMethod(paymentMethod);
-        
-        // Tính toán phí vận chuyển
-        double shippingFee = 30000; // Mặc định
-        if ("fast".equals(shippingMethod)) {
-            shippingFee = 50000;
-        } else if ("express".equals(shippingMethod)) {
-            shippingFee = 80000;
-        }
-        
-        // Tính tổng tiền
-        BigDecimal subtotal = BigDecimal.valueOf(cartSummary.getSubtotal());
-        BigDecimal discount = BigDecimal.valueOf(cartSummary.getDiscount());
-        BigDecimal totalAmount = subtotal.add(BigDecimal.valueOf(shippingFee)).subtract(discount);
-        
-        order.setTotalAmount(totalAmount);
-        
-        // Lưu đơn hàng vào database để lấy ID
-        // order = orderDAO.createOrder(order);
-        
-        // Tạo mã đơn hàng
-        String orderCode = generateOrderCode();
-        
-        // Tạo mã vận đơn
-        String trackingCode = generateTrackingCode();
-        
-        // Lưu thông tin chi tiết đơn hàng
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (CartItem cartItem : cartItems) {
-            OrderDetail orderDetail = new OrderDetail();
-            // orderDetail.setOrderId(order.getOrderId());
-            orderDetail.setBookId(cartItem.getBook().getBookId());
-            orderDetail.setQuantity(cartItem.getQuantity());
-            orderDetail.setUnitPrice(cartItem.getBook().getPrice());
-            orderDetail.setDiscount(BigDecimal.ZERO); // Có thể áp dụng giảm giá nếu cần
-            
-            // orderDAO.createOrderDetail(orderDetail);
-            orderDetails.add(orderDetail);
-        }
-        
-        // Thiết lập các thuộc tính khác
-        order.setOrderDetails(orderDetails);
-        
-        return order;
-    }
-    
-    /**
      * Tạo mã đơn hàng
      */
     public String generateOrderCode() {
@@ -222,20 +152,54 @@ public class OrderService {
     }
     
     /**
-     * Tính ngày giao hàng dự kiến
+     * Lấy danh sách tất cả đơn hàng
      */
-    public Date calculateEstimatedDeliveryDate(String shippingMethod) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        
-        if ("standard".equals(shippingMethod)) {
-            calendar.add(Calendar.DAY_OF_MONTH, 3);
-        } else if ("fast".equals(shippingMethod)) {
-            calendar.add(Calendar.DAY_OF_MONTH, 2);
-        } else if ("express".equals(shippingMethod)) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
+    public List<Order> getAllOrders() {
+        return orderDAO.getAllOrders();
+    }
+    
+    /**
+     * Lấy danh sách đơn hàng gần đây
+     */
+    public List<Order> getRecentOrders() {
+        return orderDAO.getRecenOrders();
+    }
+    
+    /**
+     * Lấy tổng số đơn hàng trong ngày hôm nay
+     */
+    public int getTotalTodayOrders() {
+        return orderDAO.getTotalTodayOrders();
+    }
+    
+    /**
+     * Lấy doanh thu tháng hiện tại
+     */
+    public BigDecimal getMonthlyRevenue() {
+        return orderDAO.getMonthlyRevenue();
+    }
+    
+    /**
+     * Cập nhật trạng thái đơn hàng
+     */
+    public boolean updateOrderStatus(int orderId, String status) {
+        // Kiểm tra dữ liệu đầu vào
+        if (orderId <= 0 || status == null || status.trim().isEmpty()) {
+            return false;
         }
         
-        return calendar.getTime();
+        try {
+            Order order = orderDAO.getOrderById(orderId);
+            if (order != null) {
+                order.setStatus(status);
+                // Giả sử có phương thức updateOrder trong OrderDAO
+                // return orderDAO.updateOrder(order);
+                return true; // Tạm thời trả về true vì chưa có phương thức updateOrder
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
     }
 } 

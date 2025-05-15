@@ -113,7 +113,6 @@
     <div class="register-container">
         <div class="register-header">
             <h1>Đăng ký tài khoản</h1>
-            <p>Hệ thống Quản lý Bán Sách</p>
         </div>
 
         <!-- Error message display -->
@@ -132,13 +131,15 @@
                     <!-- Username input -->
                     <div class="form-outline">
                         <label class="form-label" for="username">Tên đăng nhập *</label>
-                        <input type="text" id="username" class="form-control" name="username" required />
+                        <input type="text" id="username" class="form-control" name="username" 
+                               value="${requestScope.username != null ? requestScope.username : ''}" required />
                     </div>
 
                     <!-- Email input -->
                     <div class="form-outline">
                         <label class="form-label" for="email">Email *</label>
-                        <input type="email" id="email" class="form-control" name="email" required />
+                        <input type="email" id="email" class="form-control" name="email" 
+                               value="${requestScope.email != null ? requestScope.email : ''}" required />
                     </div>
 
                     <!-- Password input -->
@@ -161,19 +162,21 @@
                     <!-- Name input -->
                     <div class="form-outline">
                         <label class="form-label" for="name">Họ và tên *</label>
-                        <input type="text" id="name" class="form-control" name="name" required />
+                        <input type="text" id="name" class="form-control" name="name" 
+                               value="${requestScope.name != null ? requestScope.name : ''}" required />
                     </div>
 
                     <!-- Phone input -->
                     <div class="form-outline">
                         <label class="form-label" for="phone">Số điện thoại *</label>
-                        <input type="tel" id="phone" class="form-control" name="phone" required />
+                        <input type="tel" id="phone" class="form-control" name="phone" 
+                               value="${requestScope.phone != null ? requestScope.phone : ''}" required />
                     </div>
 
                     <!-- Address input -->
                     <div class="form-outline">
                         <label class="form-label" for="address">Địa chỉ</label>
-                        <textarea id="address" class="form-control" name="address" rows="3"></textarea>
+                        <textarea id="address" class="form-control" name="address" rows="3">${requestScope.address != null ? requestScope.address : ''}</textarea>
                     </div>
                 </div>
             </div>

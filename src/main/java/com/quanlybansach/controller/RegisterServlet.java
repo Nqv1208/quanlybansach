@@ -17,6 +17,11 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        // Set character encoding
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+        
         // Forward to register page
         request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
     }
@@ -40,6 +45,33 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
         
+        // Kiểm tra tài khoản đã tồn tại
+        AccountDAO accountDAO = new AccountDAO();
+        
+        // Kiểm tra username đã tồn tại chưa
+        if (accountDAO.checkUsernameExists(username)) {
+            request.setAttribute("errorMessage", "Tên đăng nhập đã tồn tại!");
+            request.setAttribute("username", username);
+            request.setAttribute("email", email);
+            request.setAttribute("name", name);
+            request.setAttribute("phone", phone);
+            request.setAttribute("address", address);
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        
+        // Kiểm tra email đã tồn tại chưa
+        if (accountDAO.checkEmailExists(email)) {
+            request.setAttribute("errorMessage", "Email đã được sử dụng!");
+            request.setAttribute("username", username);
+            request.setAttribute("email", email);
+            request.setAttribute("name", name);
+            request.setAttribute("phone", phone);
+            request.setAttribute("address", address);
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        
         // Tạo đối tượng tài khoản
         Account account = new Account();
         account.setUsername(username);
@@ -49,7 +81,6 @@ public class RegisterServlet extends HttpServlet {
         account.setActive(true);
         
         // Đăng ký tài khoản
-        AccountDAO accountDAO = new AccountDAO();
         Account registeredAccount = accountDAO.registerAccount(account, name, phone, address);
         
         if (registeredAccount != null) {
@@ -64,7 +95,12 @@ public class RegisterServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/home");
         } else {
             // Đăng ký thất bại
-            request.setAttribute("errorMessage", "Đăng ký không thành công. Tên đăng nhập hoặc email đã tồn tại.");
+            request.setAttribute("errorMessage", "Đăng ký không thành công. Vui lòng thử lại sau.");
+            request.setAttribute("username", username);
+            request.setAttribute("email", email);
+            request.setAttribute("name", name);
+            request.setAttribute("phone", phone);
+            request.setAttribute("address", address);
             request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
         }
     }

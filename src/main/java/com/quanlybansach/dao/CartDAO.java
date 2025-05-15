@@ -27,21 +27,26 @@ public class CartDAO {
     public Cart getCartByCustomerId(int customerId) {
         Cart cart = null;
         String sql = "SELECT * FROM CARTS WHERE customer_id = ?";
+        Connection conn = null;
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+        try {
+            conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, customerId);
             
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    cart = mapResultSetToCart(rs);
-                    // Lấy các mục trong giỏ hàng
-                    cart.setItems(getCartItemsByCartId(cart.getCartId()));
-                }
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                cart = mapResultSetToCart(rs);
+                // Lấy các mục trong giỏ hàng
+                cart.setItems(getCartItemsByCartId(cart.getCartId()));
             }
+            
+            rs.close();
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(conn);
         }
         
         // Nếu không tìm thấy giỏ hàng, tạo mới
@@ -60,26 +65,33 @@ public class CartDAO {
      */
     public boolean createCart(Cart cart) {
         String sql = "INSERT INTO CARTS (customer_id, created_date, last_modified) VALUES (?, GETDATE(), GETDATE())";
+        Connection conn = null;
+        boolean success = false;
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try {
+            conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             
             pstmt.setInt(1, cart.getCustomerId());
             
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        cart.setCartId(generatedKeys.getInt(1));
-                        return true;
-                    }
+                ResultSet generatedKeys = pstmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    cart.setCartId(generatedKeys.getInt(1));
+                    success = true;
                 }
+                generatedKeys.close();
             }
+            
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(conn);
         }
         
-        return false;
+        return success;
     }
     
     /**
@@ -97,9 +109,12 @@ public class CartDAO {
         } else {
             // Thêm mới nếu sách chưa có trong giỏ hàng
             String sql = "INSERT INTO CART_ITEMS (cart_id, book_id, quantity, added_date) VALUES (?, ?, ?, GETDATE())";
+            Connection conn = null;
+            boolean success = false;
             
-            try (Connection conn = DBConnection.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            try {
+                conn = DBConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 
                 pstmt.setInt(1, cartItem.getCartId());
                 pstmt.setInt(2, cartItem.getBookId());
@@ -107,19 +122,23 @@ public class CartDAO {
                 
                 int affectedRows = pstmt.executeUpdate();
                 if (affectedRows > 0) {
-                    try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                        if (generatedKeys.next()) {
-                            cartItem.setCartItemId(generatedKeys.getInt(1));
-                            return true;
-                        }
+                    ResultSet generatedKeys = pstmt.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        cartItem.setCartItemId(generatedKeys.getInt(1));
+                        success = true;
                     }
+                    generatedKeys.close();
                 }
+                
+                pstmt.close();
             } catch (SQLException e) {
                 e.printStackTrace();
+            } finally {
+                DBConnection.closeConnection(conn);
             }
+            
+            return success;
         }
-        
-        return false;
     }
     
     /**
@@ -130,19 +149,25 @@ public class CartDAO {
      */
     public boolean updateCartItemQuantity(int cartItemId, int quantity) {
         String sql = "UPDATE CART_ITEMS SET quantity = ? WHERE cart_item_id = ?";
+        Connection conn = null;
+        boolean success = false;
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {
+            conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             
             pstmt.setInt(1, quantity);
             pstmt.setInt(2, cartItemId);
             
-            return pstmt.executeUpdate() > 0;
+            success = pstmt.executeUpdate() > 0;
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(conn);
         }
         
-        return false;
+        return success;
     }
     
     /**
@@ -152,18 +177,24 @@ public class CartDAO {
      */
     public boolean removeCartItem(int cartItemId) {
         String sql = "DELETE FROM CART_ITEMS WHERE cart_item_id = ?";
+        Connection conn = null;
+        boolean success = false;
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {
+            conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             
             pstmt.setInt(1, cartItemId);
             
-            return pstmt.executeUpdate() > 0;
+            success = pstmt.executeUpdate() > 0;
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(conn);
         }
         
-        return false;
+        return success;
     }
     
     /**
@@ -173,19 +204,25 @@ public class CartDAO {
      */
     public boolean clearCart(int cartId) {
         String sql = "DELETE FROM CART_ITEMS WHERE cart_id = ?";
+        Connection conn = null;
+        boolean success = false;
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {
+            conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             
             pstmt.setInt(1, cartId);
             
             pstmt.executeUpdate();
-            return true;
+            success = true;
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(conn);
         }
         
-        return false;
+        return success;
     }
     
     /**
@@ -196,23 +233,29 @@ public class CartDAO {
     public List<CartItem> getCartItemsByCartId(int cartId) {
         List<CartItem> items = new ArrayList<>();
         String sql = "SELECT * FROM CART_ITEMS WHERE cart_id = ?";
+        Connection conn = null;
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {
+            conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             
             pstmt.setInt(1, cartId);
             
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    CartItem item = mapResultSetToCartItem(rs);
-                    // Lấy thông tin sách tương ứng
-                    Book book = bookDAO.getBookById(item.getBookId());
-                    item.setBook(book);
-                    items.add(item);
-                }
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                CartItem item = mapResultSetToCartItem(rs);
+                // Lấy thông tin sách tương ứng
+                Book book = bookDAO.getBookById(item.getBookId());
+                item.setBook(book);
+                items.add(item);
             }
+            
+            rs.close();
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(conn);
         }
         
         return items;
@@ -226,30 +269,35 @@ public class CartDAO {
      */
     public CartItem getCartItemByBookId(int cartId, int bookId) {
         String sql = "SELECT * FROM CART_ITEMS WHERE cart_id = ? AND book_id = ?";
+        Connection conn = null;
+        CartItem item = null;
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {
+            conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             
             pstmt.setInt(1, cartId);
             pstmt.setInt(2, bookId);
             
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    CartItem item = mapResultSetToCartItem(rs);
-                    // Lấy thông tin sách tương ứng
-                    Book book = bookDAO.getBookById(item.getBookId());
-                    item.setBook(book);
-                    return item;
-                }
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                item = mapResultSetToCartItem(rs);
+                // Lấy thông tin sách tương ứng
+                Book book = bookDAO.getBookById(item.getBookId());
+                item.setBook(book);
             }
+            
+            rs.close();
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(conn);
         }
         
-        return null;
+        return item;
     }
     
-    // Helper methods to map ResultSet to objects
     private Cart mapResultSetToCart(ResultSet rs) throws SQLException {
         Cart cart = new Cart();
         cart.setCartId(rs.getInt("cart_id"));

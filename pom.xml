@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.quanlybansach</groupId>
-    <artifactId>quanlybansach</artifactId>
+    <artifactId>nhasachonline</artifactId>
     <version>1.0.0</version>
     <packaging>war</packaging>
 

@@ -6,6 +6,7 @@ BEGIN
 END
 */
 USE master
+GO	
 DROP DATABASE IF EXISTS BOOKSTORE_MANAGEMENT
 GO
 CREATE DATABASE BOOKSTORE_MANAGEMENT;
@@ -66,9 +67,9 @@ BEGIN
         publication_date DATE,
         description NVARCHAR(MAX),
         image_url NVARCHAR(255),
-        CONSTRAINT FK_BOOKS_AUTHORS FOREIGN KEY (author_id) REFERENCES AUTHORS(author_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT FK_BOOKS_CATEGORIES FOREIGN KEY (category_id) REFERENCES CATEGORIES(category_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT FK_BOOKS_PUBLISHERS FOREIGN KEY (publisher_id) REFERENCES PUBLISHERS(publisher_id) ON DELETE CASCADE ON UPDATE CASCADE
+        CONSTRAINT FK_BOOKS_AUTHORS FOREIGN KEY (author_id) REFERENCES AUTHORS(author_id),
+        CONSTRAINT FK_BOOKS_CATEGORIES FOREIGN KEY (category_id) REFERENCES CATEGORIES(category_id),
+        CONSTRAINT FK_BOOKS_PUBLISHERS FOREIGN KEY (publisher_id) REFERENCES PUBLISHERS(publisher_id)
     );
 END
 GO
@@ -140,8 +141,8 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'INVOICES')
 BEGIN
     CREATE TABLE INVOICES (
         invoice_id VARCHAR(20) PRIMARY KEY,
-        customer_name NVARCHAR(255) NOT NULL,
-        customer_phone NVARCHAR(20),
+        customer_name NVARCHAR(255) NULL,
+        customer_phone NVARCHAR(20) NULL,
         created_date DATETIME DEFAULT GETDATE(),
         status NVARCHAR(50) DEFAULT N'Đã thanh toán'
     );
@@ -226,6 +227,8 @@ BEGIN
 END
 GO
 
+--===========================================================================--
+--============================= INSERT INTO==================================--
 -- Chèn dữ liệu mẫu cho AUTHORS
 IF NOT EXISTS (SELECT * FROM AUTHORS)
 BEGIN
@@ -235,7 +238,12 @@ BEGIN
         ('https://static.tuoitre.vn/tto/i/s626/2014/07/07/tN7e4d46.jpg', N'Tô Hoài', N'Nhà văn nổi tiếng với tác phẩm Dế Mèn Phiêu Lưu Ký', 1920, N'Việt Nam'),
         ('https://lovebookslovelife.vn/wp-content/uploads/2019/11/jjk-01-1200x1200.png', N'J.K. Rowling', N'Tác giả của series Harry Potter', 1965, N'Anh'),
         ('https://upload.wikimedia.org/wikipedia/vi/a/ad/Picturecarnegie.jpg', N'Dale Carnegie', N'Tác giả của nhiều sách về kỹ năng sống và thành công', 1888, N'Mỹ'),
-        ('https://upload.wikimedia.org/wikipedia/vi/thumb/9/92/NgoTatTo.jpg/175px-NgoTatTo.jpg', N'Ngô Tất Tố', N'Nhà văn, nhà báo nổi tiếng với tác phẩm Tắt Đèn', 1894, N'Việt Nam');
+        ('https://upload.wikimedia.org/wikipedia/vi/thumb/9/92/NgoTatTo.jpg/175px-NgoTatTo.jpg', N'Ngô Tất Tố', N'Nhà văn, nhà báo nổi tiếng với tác phẩm Tắt Đèn', 1894, N'Việt Nam'),
+		('https://upload.wikimedia.org/wikipedia/commons/1/1e/Paulo_Coelho_nrkbeta.jpg', N'Paulo Coelho', N'Nhà văn nổi tiếng người Brazil với tác phẩm Nhà Giả Kim', 1947, N'Brazil'),
+		('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Haruki_Murakami_2005.jpg/440px-Haruki_Murakami_2005.jpg', N'Haruki Murakami', N'Nhà văn Nhật Bản nổi tiếng thế giới', 1949, N'Nhật Bản'),
+		('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/J._D._Salinger_%28Catcher_in_the_Rye_portrait%29.jpg/440px-J._D._Salinger_%28Catcher_in_the_Rye_portrait%29.jpg', N'J.D. Salinger', N'Tác giả nổi tiếng với Bắt Trẻ Đồng Xanh', 1919, N'Mỹ'),
+		('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/George_Orwell_press_photo.jpg/440px-George_Orwell_press_photo.jpg', N'George Orwell', N'Nhà văn, nhà báo người Anh nổi tiếng với 1984 và Animal Farm', 1903, N'Anh'),
+		('https://upload.wikimedia.org/wikipedia/vi/thumb/c/c2/Nam_Cao.jpg/440px-Nam_Cao.jpg', N'Nam Cao', N'Nhà văn hiện thực xuất sắc của Việt Nam', 1917, N'Việt Nam');
 END
 GO
 
@@ -248,7 +256,12 @@ BEGIN
         (N'Văn học nước ngoài', N'Các tác phẩm văn học của tác giả nước ngoài'),
         (N'Sách thiếu nhi', N'Sách dành cho trẻ em và thiếu niên'),
         (N'Kỹ năng sống', N'Sách hướng dẫn kỹ năng sống và phát triển bản thân'),
-        (N'Kinh tế', N'Sách về kinh tế, kinh doanh, tài chính');
+        (N'Kinh tế', N'Sách về kinh tế, kinh doanh, tài chính'),
+		(N'Tiểu thuyết', N'Các tác phẩm tiểu thuyết'),
+		(N'Tâm lý - Kỹ năng', N'Sách về tâm lý học và phát triển kỹ năng'),
+		(N'Khoa học', N'Sách về các lĩnh vực khoa học'),
+		(N'Lịch sử', N'Sách về lịch sử Việt Nam và thế giới'),
+		(N'Triết học', N'Sách về triết học và tư tưởng');
 END
 GO
 
@@ -261,7 +274,12 @@ BEGIN
         (N'NXB Kim Đồng', N'55 Quang Trung, Hai Bà Trưng, Hà Nội', N'024 3943 4730', N'info@nxbkimdong.com.vn'),
         (N'NXB Tổng hợp TP.HCM', N'62 Nguyễn Thị Minh Khai, Quận 1, TP.HCM', N'028 3822 5340', N'tonghop@nxbhcm.com.vn'),
         (N'NXB Giáo Dục', N'81 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội', N'024 3822 0801', N'contact@nxbgd.vn'),
-        (N'First News', N'11H Nguyễn Thị Minh Khai, Quận 1, TP.HCM', N'028 3822 7979', N'firstnews@firstnews.com.vn');
+        (N'First News', N'11H Nguyễn Thị Minh Khai, Quận 1, TP.HCM', N'028 3822 7979', N'firstnews@firstnews.com.vn'),
+		(N'Alpha Books', N'120/3 Bạch Đằng, Hai Bà Trưng, Hà Nội', N'024 3984 5288', N'contact@alphabooks.vn'),
+		(N'NXB Văn Học', N'18 Nguyễn Trường Tộ, Ba Đình, Hà Nội', N'024 3828 2967', N'nxbvanhoc@gmail.com'),
+		(N'NXB Phụ Nữ', N'39 Hàng Chuối, Hai Bà Trưng, Hà Nội', N'024 3971 6727', N'nhaxuatbanphunu@gmail.com'),
+		(N'Nhã Nam', N'59 Đỗ Quang, Cầu Giấy, Hà Nội', N'024 3797 7740', N'info@nhanam.vn'),
+		(N'IPM', N'110 Nguyễn Ngọc Nại, Thanh Xuân, Hà Nội', N'024 3868 4946', N'contact@ipm.com.vn');
 END
 GO
 
@@ -274,7 +292,22 @@ BEGIN
         (N'Dế Mèn Phiêu Lưu Ký', 2, 3, 2, N'8934974170617', 75000, 120, '2019-06-15', N'Tác phẩm kể về những cuộc phiêu lưu của chú Dế Mèn', N'https://salt.tikicdn.com/ts/product/eb/62/6b/0e56b45bddc01b57277484865818ab9b.jpg'),
         (N'Harry Potter và Hòn đá Phù thủy', 3, 2, 5, N'8935235203150', 195000, 85, '2020-03-10', N'Tập đầu tiên trong series Harry Potter', N'https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcShmnC05uJSeCT1MA3N2CIf6Taa9D1Y_qpCXO6W06kIFsjsOOZDUG_IxKRD2Q8M7fyNDfZCJnnqhhI6UYTveeD6LoulnTtiuDjv5Nw9IxJ6ScOoMN49uESkplciik8NVqOYu0Pl16wfI09A&usqp=CAc'),
         (N'Đắc Nhân Tâm', 4, 4, 5, N'8935086854395', 86000, 10, '2021-01-20', N'Cuốn sách nổi tiếng về nghệ thuật đối nhân xử thế', N'https://nhanvietmedia.edu.vn/publics/files/sach-dac-nhan-tam.jpg'),
-        (N'Tắt Đèn', 5, 1, 3, N'8934974158066', 69000, 100, '2019-05-05', N'Tác phẩm phản ánh cuộc sống khổ cực của người nông dân Việt Nam', N'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSs0Zx7Dgs6a74lq623kmqHTS4nO30QSqbEEZ4jkzvXGaUWIxS0');
+        (N'Tắt Đèn', 5, 1, 3, N'8934974158066', 69000, 100, '2019-05-05', N'Tác phẩm phản ánh cuộc sống khổ cực của người nông dân Việt Nam', N'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSs0Zx7Dgs6a74lq623kmqHTS4nO30QSqbEEZ4jkzvXGaUWIxS0'),
+		(N'Nhà Giả Kim', 6, 2, 4, N'8935235228047', 79000, 150, '2020-05-10', N'Câu chuyện về hành trình theo đuổi giấc mơ của chàng chăn cừu Santiago', N'https://salt.tikicdn.com/ts/product/45/3b/fc/aa81d0a534b45706ae1eee1e344e80d9.jpg'),
+		(N'Rừng Na Uy', 7, 6, 4, N'8935235224278', 150000, 80, '2020-06-12', N'Tiểu thuyết tình cảm nổi tiếng của Haruki Murakami', N'https://salt.tikicdn.com/ts/product/e1/04/31/7763d9035acc32247059158b59ab5be2.jpg'),
+		(N'Kafka Bên Bờ Biển', 7, 6, 4, N'8935235221307', 160000, 70, '2020-07-15', N'Tiểu thuyết siêu thực đầy ẩn dụ của Haruki Murakami', N'https://salt.tikicdn.com/ts/product/15/c9/ec/9b3acb1fd7d5bd1588faa79c7ab8523d.jpg'),
+		(N'Bắt Trẻ Đồng Xanh', 8, 6, 4, N'8935235223127', 105000, 90, '2020-08-20', N'Tiểu thuyết kinh điển về sự nổi loạn của giới trẻ', N'https://salt.tikicdn.com/ts/product/8e/d1/98/ecb2c15d593fd31139bdf31916132092.jpg'),
+		(N'1984', 9, 6, 6, N'8935235229822', 120000, 100, '2020-09-25', N'Tiểu thuyết chính trị viễn tưởng nổi tiếng', N'https://salt.tikicdn.com/ts/product/be/cc/8a/8a940dab33333a0680a53e173b7c9e90.jpg'),
+		(N'Animal Farm (Chuyện Trại Súc Vật)', 9, 6, 6, N'8935235225371', 85000, 120, '2020-10-30', N'Truyện ngụ ngôn chính trị sâu sắc', N'https://salt.tikicdn.com/ts/product/7a/98/e1/8b180b8727bbf131a28e22abf9baf841.jpg'),
+		(N'Chí Phèo', 10, 1, 2, N'8934974159773', 60000, 110, '2019-11-05', N'Tác phẩm nổi tiếng của Nam Cao về bi kịch của một người nông dân', N'https://salt.tikicdn.com/ts/product/6a/c1/8d/ba6df2bfb560bf5db3019ef09e969dff.jpg'),
+		(N'Lão Hạc', 10, 1, 2, N'8934974159780', 55000, 130, '2019-12-10', N'Truyện ngắn cảm động về cuộc sống người nông dân nghèo khó', N'https://salt.tikicdn.com/ts/product/3c/16/75/3ce5527e2dd6535e57ff2c0e7420aa27.jpg'),
+		(N'Những Đứa Con Trong Gia Đình', 5, 1, 3, N'8934974160526', 78000, 95, '2021-01-15', N'Tác phẩm về tình yêu thương gia đình trong khói lửa chiến tranh', N'https://salt.tikicdn.com/ts/product/14/6d/4d/f6b517a3b4cd84f49da1be9bdee95f26.jpg'),
+		(N'Tuổi Thơ Dữ Dội', 2, 1, 2, N'8934974161233', 92000, 85, '2021-02-20', N'Truyện về những đứa trẻ trong thời chiến tranh', N'https://salt.tikicdn.com/ts/product/ab/09/5f/8a8ac0258d5f61c4a6da93bb026b72be.jpg'),
+		(N'Đắc Nhân Tâm (Bản mới)', 4, 7, 8, N'8935086854401', 115000, 200, '2021-03-25', N'Phiên bản cập nhật của cuốn sách kinh điển về nghệ thuật giao tiếp', N'https://salt.tikicdn.com/ts/product/14/76/62/0f9a28f655d62c170b67bc00fbfed7ba.jpg'),
+		(N'Điều Kỳ Diệu Của Tiệm Tạp Hóa Namiya', 7, 6, 4, N'8935235227057', 108000, 75, '2021-04-30', N'Câu chuyện về một tiệm tạp hóa có thể kết nối quá khứ và hiện tại', N'https://salt.tikicdn.com/ts/product/a0/88/89/4cb29a4e56847bfe4f47df2340187885.jpg'),
+		(N'Sapiens: Lược Sử Loài Người', 6, 8, 6, N'8935235228986', 189000, 65, '2021-05-05', N'Sách về lịch sử phát triển của loài người', N'https://salt.tikicdn.com/ts/product/c3/f7/08/37767cd954185bfb7d888463740ff8bf.jpg'),
+		(N'Homo Deus: Lược Sử Tương Lai', 6, 8, 6, N'8935235229235', 199000, 60, '2021-06-10', N'Sách dự đoán về tương lai của loài người', N'https://salt.tikicdn.com/ts/product/46/f4/52/7211ba953e0389f33f19c0420c2253a6.jpg'),
+		(N'Nghĩ Giàu Làm Giàu', 4, 7, 8, N'8935086855163', 125000, 180, '2021-07-15', N'Sách kinh điển về thành công và làm giàu', N'https://salt.tikicdn.com/ts/product/21/f6/fa/fc1ce1e9a9162d63b8a8b2e5870df93a.jpg');
 END
 GO
 
@@ -287,7 +320,12 @@ BEGIN
         (N'Trần Thị Bình', N'binh.tran@email.com', N'0912345678', N'456 Nguyễn Huệ, Quận 1, TP.HCM', '2025-02-20'),
         (N'Lê Văn Cường', N'cuong.le@email.com', N'0923456789', N'789 Trần Hưng Đạo, Quận 5, TP.HCM', '2025-03-10'),
         (N'Phạm Thị Dung', N'dung.pham@email.com', N'0934567890', N'101 Hai Bà Trưng, Quận 3, TP.HCM', '2025-04-05'),
-        (N'Hoàng Văn Em', N'em.hoang@email.com', N'0945678901', N'202 Võ Văn Tần, Quận 3, TP.HCM', '2025-04-12');
+        (N'Hoàng Văn Em', N'em.hoang@email.com', N'0945678901', N'202 Võ Văn Tần, Quận 3, TP.HCM', '2025-04-12'),
+		(N'Vũ Thị Thanh', N'thanh.vu@email.com', N'0956789012', N'303 Cách Mạng Tháng 8, Quận 10, TP.HCM', '2025-04-18'),
+		(N'Đặng Văn Giáp', N'giap.dang@email.com', N'0967890123', N'404 Nguyễn Công Trứ, Quận 1, TP.HCM', '2025-04-20'),
+		(N'Lý Thị Hồng', N'hong.ly@email.com', N'0978901234', N'505 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', '2025-04-22'),
+		(N'Trương Văn Khải', N'khai.truong@email.com', N'0989012345', N'606 Lê Văn Sỹ, Quận Phú Nhuận, TP.HCM', '2025-04-25'),
+		(N'Ngô Thị Lan', N'lan.ngo@email.com', N'0990123456', N'707 Lý Thường Kiệt, Quận 10, TP.HCM', '2025-04-28');
 END
 GO
 
@@ -296,7 +334,52 @@ IF NOT EXISTS (SELECT * FROM ORDERS)
 BEGIN
     INSERT INTO ORDERS (customer_id, order_date, total_amount, status, shipping_address, payment_method)
     VALUES 
-        (1, '2025-04-01', 263000, N'Đã giao hàng', N'123 Lê Lợi, Quận 1, TP.HCM', N'Thẻ tín dụng'),
+		-- Tháng 1/2024
+		(1, '2024-01-05', 158000, N'Đã giao hàng', N'123 Lê Lợi, Quận 1, TP.HCM', N'Thẻ tín dụng'),
+		(2, '2024-01-12', 235000, N'Đã giao hàng', N'456 Nguyễn Huệ, Quận 1, TP.HCM', N'Tiền mặt khi nhận hàng'),
+		(3, '2024-01-20', 339000, N'Đã giao hàng', N'789 Trần Hưng Đạo, Quận 5, TP.HCM', N'Chuyển khoản'),
+    
+		-- Tháng 2/2024
+		(4, '2024-02-03', 125000, N'Đã giao hàng', N'101 Hai Bà Trưng, Quận 3, TP.HCM', N'Ví điện tử'),
+		(5, '2024-02-15', 304000, N'Đã giao hàng', N'202 Võ Văn Tần, Quận 3, TP.HCM', N'Tiền mặt khi nhận hàng'),
+		(1, '2024-02-25', 189000, N'Đã giao hàng', N'123 Lê Lợi, Quận 1, TP.HCM', N'Thẻ tín dụng'),
+    
+		-- Tháng 3/2024
+		(2, '2024-03-07', 174000, N'Đã giao hàng', N'456 Nguyễn Huệ, Quận 1, TP.HCM', N'Chuyển khoản'),
+		(3, '2024-03-18', 229000, N'Đã giao hàng', N'789 Trần Hưng Đạo, Quận 5, TP.HCM', N'Tiền mặt khi nhận hàng'),
+		(6, '2024-03-26', 310000, N'Đã giao hàng', N'303 Cách Mạng Tháng 8, Quận 10, TP.HCM', N'Thẻ tín dụng'),
+    
+		-- Tháng 4/2024
+		(7, '2024-04-02', 148000, N'Đã giao hàng', N'404 Nguyễn Công Trứ, Quận 1, TP.HCM', N'Ví điện tử'),
+		(8, '2024-04-14', 234000, N'Đã giao hàng', N'505 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', N'Chuyển khoản'),
+		(9, '2024-04-23', 178000, N'Đã giao hàng', N'606 Lê Văn Sỹ, Quận Phú Nhuận, TP.HCM', N'Tiền mặt khi nhận hàng'),
+    
+		-- Tháng 5/2024
+		(10, '2024-05-06', 265000, N'Đã giao hàng', N'707 Lý Thường Kiệt, Quận 10, TP.HCM', N'Thẻ tín dụng'),
+		(4, '2024-05-15', 322000, N'Đã giao hàng', N'101 Hai Bà Trưng, Quận 3, TP.HCM', N'Chuyển khoản'),
+		(5, '2024-05-24', 190000, N'Đã giao hàng', N'202 Võ Văn Tần, Quận 3, TP.HCM', N'Ví điện tử'),
+    
+		-- Tháng 6/2024
+		(1, '2024-06-03', 245000, N'Đã giao hàng', N'123 Lê Lợi, Quận 1, TP.HCM', N'Tiền mặt khi nhận hàng'),
+		(7, '2024-06-16', 297000, N'Đã giao hàng', N'404 Nguyễn Công Trứ, Quận 1, TP.HCM', N'Thẻ tín dụng'),
+		(8, '2024-06-28', 168000, N'Đã giao hàng', N'505 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', N'Chuyển khoản'),
+    
+		-- Tháng 7/2024
+		(2, '2024-07-05', 208000, N'Đã giao hàng', N'456 Nguyễn Huệ, Quận 1, TP.HCM', N'Ví điện tử'),
+		(9, '2024-07-17', 258000, N'Đã giao hàng', N'606 Lê Văn Sỹ, Quận Phú Nhuận, TP.HCM', N'Thẻ tín dụng'),
+		(10, '2024-07-29', 179000, N'Đã giao hàng', N'707 Lý Thường Kiệt, Quận 10, TP.HCM', N'Tiền mặt khi nhận hàng'),
+    
+		-- Tháng 8/2024
+		(3, '2024-08-04', 285000, N'Đã giao hàng', N'789 Trần Hưng Đạo, Quận 5, TP.HCM', N'Chuyển khoản'),
+		(6, '2024-08-16', 165000, N'Đã giao hàng', N'303 Cách Mạng Tháng 8, Quận 10, TP.HCM', N'Ví điện tử'),
+		(4, '2024-08-25', 196000, N'Đã giao hàng', N'101 Hai Bà Trưng, Quận 3, TP.HCM', N'Thẻ tín dụng'),
+    
+		-- Tháng 9/2024
+		(5, '2024-09-03', 238000, N'Đã giao hàng', N'202 Võ Văn Tần, Quận 3, TP.HCM', N'Tiền mặt khi nhận hàng'),
+		(7, '2024-09-14', 273000, N'Đã giao hàng', N'404 Nguyễn Công Trứ, Quận 1, TP.HCM', N'Chuyển khoản'),
+		(8, '2024-09-26', 215000, N'Đã giao hàng', N'505 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', N'Ví điện tử'),
+
+		(1, '2025-04-01', 263000, N'Đã giao hàng', N'123 Lê Lợi, Quận 1, TP.HCM', N'Thẻ tín dụng'),
         (2, '2025-04-05', 195000, N'Đã giao hàng', N'456 Nguyễn Huệ, Quận 1, TP.HCM', N'Tiền mặt khi nhận hàng'),
         (3, '2025-04-10', 144000, N'Đang giao hàng', N'789 Trần Hưng Đạo, Quận 5, TP.HCM', N'Chuyển khoản'),
         (4, '2025-04-15', 86000, N'Chờ xử lý', N'101 Hai Bà Trưng, Quận 3, TP.HCM', N'Ví điện tử'),
@@ -319,7 +402,79 @@ BEGIN
         (5, 1, 1, 88000, 0),
         (5, 3, 1, 195000, 0),
         (5, 4, 1, 86000, 10),
-        (6, 4, 1, 86000, 10);
+        (6, 4, 1, 86000, 10),
+		-- Đơn hàng tháng 1/2024
+		(7, 6, 2, 79000, 0),      -- 2 cuốn Nhà Giả Kim
+		(8, 7, 1, 150000, 0),     -- 1 cuốn Rừng Na Uy
+		(8, 9, 1, 85000, 0),      -- 1 cuốn Animal Farm
+		(9, 8, 1, 160000, 0),     -- 1 cuốn Kafka Bên Bờ Biển
+		(9, 12, 2, 92000, 5),     -- 2 cuốn Tuổi Thơ Dữ Dội (giảm 5%)
+    
+		-- Đơn hàng tháng 2/2024
+		(10, 13, 1, 115000, 0),   -- 1 cuốn Đắc Nhân Tâm (Bản mới)
+		(10, 6, 1, 79000, 15),    -- 1 cuốn Nhà Giả Kim (giảm 15%)
+		(11, 14, 1, 108000, 0),   -- 1 cuốn Điều Kỳ Diệu Của Tiệm Tạp Hóa Namiya
+		(11, 15, 1, 189000, 0),   -- 1 cuốn Sapiens
+		(11, 10, 1, 55000, 10),   -- 1 cuốn Lão Hạc (giảm 10%)
+		(12, 15, 1, 189000, 0),   -- 1 cuốn Sapiens
+    
+		-- Đơn hàng tháng 3/2024
+		(13, 11, 1, 78000, 0),    -- 1 cuốn Những Đứa Con Trong Gia Đình
+		(13, 10, 1, 55000, 0),    -- 1 cuốn Lão Hạc
+		(13, 3, 1, 195000, 25),   -- 1 cuốn Harry Potter (giảm 25%)
+		(14, 7, 1, 150000, 0),    -- 1 cuốn Rừng Na Uy
+		(14, 9, 1, 85000, 10),    -- 1 cuốn Animal Farm (giảm 10%)
+		(15, 16, 1, 199000, 0),   -- 1 cuốn Homo Deus
+		(15, 12, 1, 92000, 0),    -- 1 cuốn Tuổi Thơ Dữ Dội
+		(15, 4, 1, 86000, 15),    -- 1 cuốn Đắc Nhân Tâm (giảm 15%)
+    
+		-- Đơn hàng tháng 4/2024
+		(16, 8, 1, 160000, 20),   -- 1 cuốn Kafka Bên Bờ Biển (giảm 20%)
+		(16, 6, 1, 79000, 10),    -- 1 cuốn Nhà Giả Kim (giảm 10%)
+		(17, 15, 1, 189000, 0),   -- 1 cuốn Sapiens
+		(17, 5, 1, 69000, 5),     -- 1 cuốn Tắt Đèn (giảm 5%)
+		(18, 14, 1, 108000, 0),   -- 1 cuốn Điều Kỳ Diệu Của Tiệm Tạp Hóa Namiya
+		(18, 17, 1, 125000, 15),  -- 1 cuốn Nghĩ Giàu Làm Giàu (giảm 15%)
+    
+		-- Đơn hàng tháng 5/2024
+		(19, 3, 1, 195000, 0),    -- 1 cuốn Harry Potter
+		(19, 6, 1, 79000, 10),    -- 1 cuốn Nhà Giả Kim (giảm 10%)
+		(20, 16, 1, 199000, 0),   -- 1 cuốn Homo Deus
+		(20, 7, 1, 150000, 15),   -- 1 cuốn Rừng Na Uy (giảm 15%)
+		(21, 15, 1, 189000, 0),   -- 1 cuốn Sapiens
+		(21, 6, 1, 79000, 20),    -- 1 cuốn Nhà Giả Kim (giảm 20%)
+    
+		-- Đơn hàng tháng 6/2024
+		(22, 8, 1, 160000, 0),    -- 1 cuốn Kafka Bên Bờ Biển
+		(22, 9, 1, 85000, 0),     -- 1 cuốn Animal Farm
+		(23, 15, 1, 189000, 0),   -- 1 cuốn Sapiens
+		(23, 17, 1, 125000, 10),  -- 1 cuốn Nghĩ Giàu Làm Giàu (giảm 10%)
+		(24, 7, 1, 150000, 0),    -- 1 cuốn Rừng Na Uy
+		(24, 10, 1, 55000, 15),   -- 1 cuốn Lão Hạc (giảm 15%)
+    
+		-- Đơn hàng tháng 7/2024
+		(25, 14, 1, 108000, 0),   -- 1 cuốn Điều Kỳ Diệu Của Tiệm Tạp Hóa Namiya
+		(25, 17, 1, 125000, 20),  -- 1 cuốn Nghĩ Giàu Làm Giàu (giảm 20%)
+		(26, 16, 1, 199000, 0),   -- 1 cuốn Homo Deus
+		(26, 6, 1, 79000, 25),    -- 1 cuốn Nhà Giả Kim (giảm 25%)
+		(27, 7, 1, 150000, 0),    -- 1 cuốn Rừng Na Uy
+		(27, 11, 1, 78000, 15),   -- 1 cuốn Những Đứa Con Trong Gia Đình (giảm 15%)
+    
+		-- Đơn hàng tháng 8/2024
+		(28, 3, 1, 195000, 0),    -- 1 cuốn Harry Potter
+		(28, 9, 1, 85000, 0),     -- 1 cuốn Animal Farm
+		(28, 11, 1, 78000, 15),   -- 1 cuốn Những Đứa Con Trong Gia Đình (giảm 15%)
+		(29, 16, 1, 199000, 20),  -- 1 cuốn Homo Deus (giảm 20%)
+		(30, 7, 1, 150000, 0),    -- 1 cuốn Rừng Na Uy
+		(30, 5, 1, 69000, 15),    -- 1 cuốn Tắt Đèn (giảm 15%)
+    
+		-- Đơn hàng tháng 9/2024
+		(31, 8, 1, 160000, 10),   -- 1 cuốn Kafka Bên Bờ Biển (giảm 10%)
+		(31, 17, 1, 125000, 5),   -- 1 cuốn Nghĩ Giàu Làm Giàu (giảm 5%)
+		(32, 15, 1, 189000, 0),   -- 1 cuốn Sapiens
+		(32, 9, 1, 85000, 0),     -- 1 cuốn Animal Farm
+		(32, 11, 1, 78000, 5),    -- 1 cuốn Những Đứa Con Trong Gia Đình (giảm 5%)
+		(33, 7, 2, 150000, 15);   -- 2 cuốn Rừng Na Uy (giảm 15%)
 END
 GO
 
@@ -588,6 +743,7 @@ END
 GO
 */
 
+-----------------------------------------------------------------
 -- Tạo trigger cập nhật số lượng sách khi xử lý đơn hàng
 CREATE OR ALTER TRIGGER trg_update_stock_on_order
 ON ORDERS
@@ -606,9 +762,10 @@ BEGIN
     IF (@old_status IN (N'Chờ xử lý', N'Đã xác nhận') AND @new_status = N'Đang giao hàng')
     BEGIN
         -- Tự động giảm số lượng tồn kho
-        INSERT INTO INVENTORY (book_id, quantity_change, transaction_type, notes)
-        SELECT od.book_id, -od.quantity, N'Xuất kho', N'Tự động xuất kho cho đơn hàng #' + CAST(od.order_id AS NVARCHAR)
-        FROM ORDER_DETAILS od
+        UPDATE b
+        SET b.stock_quantity = b.stock_quantity - od.quantity
+        FROM BOOKS b
+        INNER JOIN ORDER_DETAILS od ON b.book_id = od.book_id
         INNER JOIN inserted i ON od.order_id = i.order_id;
     END
     
@@ -616,14 +773,343 @@ BEGIN
     IF (@old_status = N'Đang giao hàng' AND @new_status = N'Đã hủy')
     BEGIN
         -- Tự động hoàn lại số lượng tồn kho
-        INSERT INTO INVENTORY (book_id, quantity_change, transaction_type, notes)
-        SELECT od.book_id, od.quantity, N'Nhập kho', N'Tự động nhập lại kho cho đơn hàng #' + CAST(od.order_id AS NVARCHAR) + N' bị hủy'
-        FROM ORDER_DETAILS od
+        UPDATE b
+        SET b.stock_quantity = b.stock_quantity + od.quantity
+        FROM BOOKS b
+        INNER JOIN ORDER_DETAILS od ON b.book_id = od.book_id
         INNER JOIN inserted i ON od.order_id = i.order_id;
+    END
+    
+    -- Nếu đơn hàng chuyển sang trạng thái "Đã giao hàng" hoặc "Đã thanh toán"
+    IF (@new_status IN (N'Đã giao hàng', N'Đã thanh toán') AND @old_status NOT IN (N'Đã giao hàng', N'Đã thanh toán'))
+    BEGIN
+        -- Kiểm tra xem đơn hàng này đã có hóa đơn chưa
+        DECLARE @check_order_id INT
+        SELECT @check_order_id = i.order_id FROM inserted i
+
+        IF NOT EXISTS (
+            SELECT 1
+            FROM INVOICES inv
+            JOIN INVOICE_ITEMS ii ON inv.invoice_id = ii.invoice_id
+            JOIN ORDER_DETAILS od ON ii.book_id = od.book_id AND ii.quantity = od.quantity
+            WHERE od.order_id = @check_order_id
+        )
+        BEGIN
+            -- Tạo hóa đơn mới
+            DECLARE @invoice_id VARCHAR(20)
+            DECLARE @customer_name NVARCHAR(255)
+            DECLARE @customer_phone NVARCHAR(20)
+            DECLARE @order_id INT
+            
+            SELECT @order_id = i.order_id,
+                   @customer_name = c.name,
+                   @customer_phone = c.phone
+            FROM inserted i
+            INNER JOIN CUSTOMERS c ON i.customer_id = c.customer_id
+            
+            -- Tạo mã hóa đơn
+            DECLARE @current_year INT = YEAR(GETDATE())
+            DECLARE @last_invoice_num INT
+            
+            SELECT @last_invoice_num = ISNULL(MAX(CAST(SUBSTRING(invoice_id, 10, 4) AS INT)), 0)
+            FROM INVOICES
+            WHERE invoice_id LIKE 'INV-' + CAST(@current_year AS VARCHAR) + '-%'
+            
+            SET @invoice_id = 'INV-' + CAST(@current_year AS VARCHAR) + '-' + RIGHT('0000' + CAST(@last_invoice_num + 1 AS VARCHAR), 4)
+            
+            -- Thêm hóa đơn mới
+            INSERT INTO INVOICES (invoice_id, customer_name, customer_phone, created_date, status)
+            VALUES (@invoice_id, @customer_name, @customer_phone, GETDATE(), N'Đã thanh toán')
+            
+            -- Thêm chi tiết hóa đơn
+            INSERT INTO INVOICE_ITEMS (invoice_id, book_id, book_title, book_author, quantity, price)
+            SELECT @invoice_id, b.book_id, b.title, a.name, od.quantity, od.unit_price
+            FROM ORDER_DETAILS od
+            INNER JOIN BOOKS b ON od.book_id = b.book_id
+            INNER JOIN AUTHORS a ON b.author_id = a.author_id
+            WHERE od.order_id = @order_id
+        END
     END
 END;
 GO
 
+-----------------------------------------------------------------
+-- Trigger tự động tạo giỏ hàng khi tạo khách hàng mới
+CREATE OR ALTER TRIGGER trg_create_cart_for_new_customer
+ON CUSTOMERS
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    INSERT INTO CARTS (customer_id, created_date, last_modified)
+    SELECT customer_id, GETDATE(), GETDATE()
+    FROM inserted;
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger kiểm tra số lượng sách trước khi thêm vào chi tiết đơn hàng
+CREATE OR ALTER TRIGGER trg_check_stock_before_order
+ON ORDER_DETAILS
+INSTEAD OF INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra số lượng tồn kho
+    IF EXISTS (
+        SELECT 1 
+        FROM inserted i
+        JOIN BOOKS b ON i.book_id = b.book_id
+        WHERE i.quantity > b.stock_quantity
+    )
+    BEGIN
+        DECLARE @book_title NVARCHAR(255)
+        DECLARE @available INT
+        DECLARE @requested INT
+        
+        SELECT TOP 1 
+            @book_title = b.title,
+            @available = b.stock_quantity,
+            @requested = i.quantity
+        FROM inserted i
+        JOIN BOOKS b ON i.book_id = b.book_id
+        WHERE i.quantity > b.stock_quantity
+        
+        RAISERROR('Không đủ số lượng sách "%s" trong kho. Hiện có: %d, Yêu cầu: %d', 16, 1, @book_title, @available, @requested)
+        RETURN
+    END
+    
+    -- Nếu đủ số lượng, thêm chi tiết đơn hàng
+    INSERT INTO ORDER_DETAILS (order_id, book_id, quantity, unit_price, discount)
+    SELECT order_id, book_id, quantity, unit_price, discount
+    FROM inserted;
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger cập nhật tổng tiền đơn hàng khi thêm/sửa/xóa chi tiết đơn hàng
+CREATE OR ALTER TRIGGER trg_update_order_total
+ON ORDER_DETAILS
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Lấy danh sách các order_id bị ảnh hưởng
+    DECLARE @affected_orders TABLE (order_id INT);
+    
+    -- Từ các bản ghi được thêm mới
+    INSERT INTO @affected_orders
+    SELECT DISTINCT order_id FROM inserted
+    WHERE order_id IS NOT NULL;
+    
+    -- Từ các bản ghi bị xóa
+    INSERT INTO @affected_orders
+    SELECT DISTINCT order_id FROM deleted
+    WHERE order_id IS NOT NULL
+      AND order_id NOT IN (SELECT order_id FROM @affected_orders);
+    
+    -- Cập nhật tổng tiền cho từng đơn hàng
+    UPDATE o
+    SET total_amount = (
+        SELECT SUM(od.quantity * od.unit_price * (1 - od.discount/100))
+        FROM ORDER_DETAILS od
+        WHERE od.order_id = o.order_id
+    )
+    FROM ORDERS o
+    WHERE o.order_id IN (SELECT order_id FROM @affected_orders);
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger kiểm tra và cập nhật thông tin khách hàng khi cập nhật tài khoản
+CREATE OR ALTER TRIGGER trg_sync_customer_account
+ON ACCOUNTS
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Nếu email được cập nhật và tài khoản liên kết với khách hàng
+    IF UPDATE(email)
+    BEGIN
+        UPDATE c
+        SET c.email = i.email
+        FROM CUSTOMERS c
+        JOIN inserted i ON c.customer_id = i.customer_id
+        JOIN deleted d ON d.account_id = i.account_id
+        WHERE i.customer_id IS NOT NULL
+          AND i.email <> d.email;
+    END
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger xóa giỏ hàng khi xóa khách hàng
+CREATE OR ALTER TRIGGER trg_delete_cart_on_customer_delete
+ON CUSTOMERS
+INSTEAD OF DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Xóa các mục trong giỏ hàng trước
+    DELETE ci
+    FROM CART_ITEMS ci
+    JOIN CARTS c ON ci.cart_id = c.cart_id
+    JOIN deleted d ON c.customer_id = d.customer_id;
+    
+    -- Xóa giỏ hàng
+    DELETE c
+    FROM CARTS c
+    JOIN deleted d ON c.customer_id = d.customer_id;
+    
+    -- Xóa đánh giá của khách hàng
+    DELETE r
+    FROM REVIEWS r
+    JOIN deleted d ON r.customer_id = d.customer_id;
+    
+    -- Cập nhật tài khoản: gỡ liên kết với khách hàng
+    UPDATE a
+    SET customer_id = NULL
+    FROM ACCOUNTS a
+    JOIN deleted d ON a.customer_id = d.customer_id;
+    
+    -- Cuối cùng xóa khách hàng
+    DELETE c
+    FROM CUSTOMERS c
+    JOIN deleted d ON c.customer_id = d.customer_id;
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger kiểm tra và cập nhật đánh giá sách
+CREATE OR ALTER TRIGGER trg_validate_review
+ON REVIEWS
+INSTEAD OF INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra khách hàng đã mua sách chưa
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM ORDERS o
+            JOIN ORDER_DETAILS od ON o.order_id = od.order_id
+            WHERE o.customer_id = i.customer_id
+              AND od.book_id = i.book_id
+              AND o.status = N'Đã giao hàng'
+        )
+    )
+    BEGIN
+        RAISERROR('Khách hàng chỉ có thể đánh giá sách đã mua.', 16, 1)
+        RETURN
+    END
+    
+    -- Kiểm tra nếu khách hàng đã đánh giá sách này trước đó
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN REVIEWS r ON r.customer_id = i.customer_id AND r.book_id = i.book_id
+    )
+    BEGIN
+        -- Cập nhật đánh giá hiện có
+        UPDATE r
+        SET r.rating = i.rating,
+            r.comment = i.comment,
+            r.review_date = GETDATE()
+        FROM REVIEWS r
+        JOIN inserted i ON r.customer_id = i.customer_id AND r.book_id = i.book_id;
+    END
+    ELSE
+    BEGIN
+        -- Thêm đánh giá mới
+        INSERT INTO REVIEWS (book_id, customer_id, rating, comment, review_date)
+        SELECT book_id, customer_id, rating, comment, GETDATE()
+        FROM inserted;
+    END
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger để tự động hủy đơn hàng nếu không được xử lý sau một khoảng thời gian
+CREATE OR ALTER TRIGGER trg_auto_cancel_pending_orders
+ON ORDERS
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Tự động hủy các đơn hàng đã ở trạng thái "Chờ xử lý" quá 7 ngày
+    UPDATE o
+    SET status = N'Đã hủy'
+    FROM ORDERS o
+    WHERE o.status = N'Chờ xử lý'
+      AND DATEDIFF(DAY, o.order_date, GETDATE()) > 7;
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger để kiểm tra tính hợp lệ của đơn hàng trước khi thêm
+CREATE OR ALTER TRIGGER trg_validate_order
+ON ORDERS
+INSTEAD OF INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra khách hàng có tồn tại không
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE i.customer_id IS NOT NULL
+          AND NOT EXISTS (SELECT 1 FROM CUSTOMERS c WHERE c.customer_id = i.customer_id)
+    )
+    BEGIN
+        RAISERROR('Khách hàng không tồn tại trong hệ thống.', 16, 1)
+        RETURN
+    END
+    
+    -- Kiểm tra địa chỉ giao hàng
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE i.shipping_address IS NULL OR LEN(TRIM(i.shipping_address)) = 0
+    )
+    BEGIN
+        RAISERROR('Địa chỉ giao hàng không được để trống.', 16, 1)
+        RETURN
+    END
+    
+    -- Kiểm tra phương thức thanh toán
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE i.payment_method IS NULL OR LEN(TRIM(i.payment_method)) = 0
+    )
+    BEGIN
+        RAISERROR('Phương thức thanh toán không được để trống.', 16, 1)
+        RETURN
+    END
+    
+    -- Nếu hợp lệ, thêm đơn hàng
+    INSERT INTO ORDERS (customer_id, order_date, total_amount, status, shipping_address, payment_method)
+    SELECT customer_id, 
+           ISNULL(order_date, GETDATE()), 
+           total_amount, 
+           ISNULL(status, N'Chờ xử lý'), 
+           shipping_address, 
+           payment_method
+    FROM inserted;
+END;
+GO
+
+-----------------------------------------------------------------
 -- Trigger để cập nhật thời gian chỉnh sửa giỏ hàng khi thêm/sửa/xóa sản phẩm
 CREATE OR ALTER TRIGGER trg_update_cart_modified_time
 ON CART_ITEMS
@@ -652,83 +1138,370 @@ BEGIN
 END
 GO
 
-/*
--- Thêm dữ liệu mẫu cho PROMOTIONS
-IF NOT EXISTS (SELECT * FROM PROMOTIONS)
-BEGIN
-    INSERT INTO PROMOTIONS (name, description, discount_percentage, start_date, end_date, active)
-    VALUES 
-        (N'Khuyến mãi Mùa hè', N'Giảm giá cho tất cả sách thiếu nhi', 15.00, '2025-06-01', '2025-08-31', 1),
-        (N'Tựu trường', N'Giảm giá sách giáo khoa và tham khảo', 10.00, '2025-08-15', '2025-09-15', 1),
-        (N'Black Friday', N'Giảm giá tất cả sách', 25.00, '2025-11-24', '2025-11-26', 0);
-END
-GO
-
--- Thêm dữ liệu mẫu cho BOOK_PROMOTIONS
-IF NOT EXISTS (SELECT * FROM BOOK_PROMOTIONS)
-BEGIN
-    INSERT INTO BOOK_PROMOTIONS (book_id, promotion_id)
-    VALUES 
-        (1, 1), -- Tôi thấy hoa vàng trên cỏ xanh - Khuyến mãi Mùa hè
-        (2, 1), -- Dế Mèn Phiêu Lưu Ký - Khuyến mãi Mùa hè
-        (3, 1), -- Harry Potter - Khuyến mãi Mùa hè
-        (1, 3), -- Tôi thấy hoa vàng trên cỏ xanh - Black Friday
-        (2, 3), -- Dế Mèn Phiêu Lưu Ký - Black Friday
-        (3, 3), -- Harry Potter - Black Friday
-        (4, 3), -- Đắc Nhân Tâm - Black Friday
-        (5, 3); -- Tắt Đèn - Black Friday
-END
-GO
-
--- Thêm dữ liệu mẫu cho INVENTORY
-IF NOT EXISTS (SELECT * FROM INVENTORY)
-BEGIN
-    INSERT INTO INVENTORY (book_id, quantity_change, transaction_type, transaction_date, notes)
-    VALUES 
-        (1, 150, N'Nhập kho', '2025-01-05', N'Nhập kho lần đầu'),
-        (2, 120, N'Nhập kho', '2025-01-05', N'Nhập kho lần đầu'),
-        (3, 85, N'Nhập kho', '2025-01-05', N'Nhập kho lần đầu'),
-        (4, 200, N'Nhập kho', '2025-01-05', N'Nhập kho lần đầu'),
-        (5, 100, N'Nhập kho', '2025-01-05', N'Nhập kho lần đầu'),
-        (1, 50, N'Nhập kho', '2025-03-10', N'Bổ sung kho'),
-        (3, 30, N'Nhập kho', '2025-03-10', N'Bổ sung kho'),
-        (1, -2, N'Xuất kho', '2025-06-01', N'Đơn hàng #1'),
-        (3, -1, N'Xuất kho', '2025-06-05', N'Đơn hàng #2'),
-        (2, -1, N'Xuất kho', '2025-06-10', N'Đơn hàng #3'),
-        (5, -1, N'Xuất kho', '2025-06-10', N'Đơn hàng #3');
-END
-GO
-
-GO
-
--- Tạo View để xem thông tin sách đầy đủ
-CREATE OR ALTER VIEW vw_book_details
+-----------------------------------------------------------------
+-- Trigger để xử lý khi sách bị xóa
+CREATE OR ALTER TRIGGER trg_handle_book_deletion
+ON BOOKS
+INSTEAD OF DELETE
 AS
-    SELECT 
-        b.book_id,
-        b.title,
-        a.name AS author_name,
-        c.name AS category_name,
-        p.name AS publisher_name,
-        b.ISBN,
-        b.price,
-        b.stock_quantity,
-        b.publication_date,
-        b.description,
-        b.image_url,
-        COALESCE(AVG(CAST(r.rating AS FLOAT)), 0) AS avg_rating,
-        COUNT(r.review_id) AS review_count
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra nếu sách đang có trong đơn hàng chưa giao
+    IF EXISTS (
+        SELECT 1
+        FROM deleted d
+        JOIN ORDER_DETAILS od ON d.book_id = od.book_id
+        JOIN ORDERS o ON od.order_id = o.order_id
+        WHERE o.status IN (N'Chờ xử lý', N'Đã xác nhận', N'Đang giao hàng')
+    )
+    BEGIN
+        RAISERROR('Không thể xóa sách đang có trong đơn hàng chưa hoàn thành.', 16, 1)
+        RETURN
+    END
+    
+    -- Xóa các mục trong giỏ hàng liên quan đến sách
+    DELETE ci
+    FROM CART_ITEMS ci
+    JOIN deleted d ON ci.book_id = d.book_id;
+    
+    -- Xóa đánh giá của sách
+    DELETE r
+    FROM REVIEWS r
+    JOIN deleted d ON r.book_id = d.book_id;
+    
+    -- Xóa sách khỏi các chi tiết đơn hàng đã hoàn thành hoặc hủy (tùy chọn)
+    -- Nếu muốn giữ lại lịch sử, có thể bỏ qua bước này
+    -- DELETE od
+    -- FROM ORDER_DETAILS od
+    -- JOIN deleted d ON od.book_id = d.book_id;
+    
+    -- Cuối cùng xóa sách
+    DELETE b
     FROM BOOKS b
-    LEFT JOIN AUTHORS a ON b.author_id = a.author_id
-    LEFT JOIN CATEGORIES c ON b.category_id = c.category_id
-    LEFT JOIN PUBLISHERS p ON b.publisher_id = p.publisher_id
-    LEFT JOIN REVIEWS r ON b.book_id = r.book_id
-    GROUP BY 
-        b.book_id, b.title, a.name, c.name, p.name, 
-        b.ISBN, b.price, b.stock_quantity, b.publication_date, 
-        b.description, b.image_url
+    JOIN deleted d ON b.book_id = d.book_id;
+END;
 GO
-*/
+
+-----------------------------------------------------------------
+-- Trigger để kiểm tra và xử lý khi thêm mục vào hóa đơn
+CREATE OR ALTER TRIGGER trg_validate_invoice_items
+ON INVOICE_ITEMS
+INSTEAD OF INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra hóa đơn có tồn tại không
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE NOT EXISTS (SELECT 1 FROM INVOICES WHERE invoice_id = i.invoice_id)
+    )
+    BEGIN
+        RAISERROR('Hóa đơn không tồn tại.', 16, 1)
+        RETURN
+    END
+    
+    -- Kiểm tra sách có tồn tại không
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE NOT EXISTS (SELECT 1 FROM BOOKS WHERE book_id = i.book_id)
+    )
+    BEGIN
+        RAISERROR('Sách không tồn tại trong hệ thống.', 16, 1)
+        RETURN
+    END
+    
+    -- Kiểm tra số lượng
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE i.quantity <= 0
+    )
+    BEGIN
+        RAISERROR('Số lượng sách phải lớn hơn 0.', 16, 1)
+        RETURN
+    END
+    
+    -- Kiểm tra giá
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE i.price < 0
+    )
+    BEGIN
+        RAISERROR('Giá sách không được âm.', 16, 1)
+        RETURN
+    END
+    
+    -- Kiểm tra số lượng tồn kho
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN BOOKS b ON i.book_id = b.book_id
+        WHERE i.quantity > b.stock_quantity
+    )
+    BEGIN
+        DECLARE @book_title NVARCHAR(255)
+        DECLARE @available INT
+        DECLARE @requested INT
+        
+        SELECT TOP 1
+            @book_title = b.title,
+            @available = b.stock_quantity,
+            @requested = i.quantity
+        FROM inserted i
+        JOIN BOOKS b ON i.book_id = b.book_id
+        WHERE i.quantity > b.stock_quantity
+        
+        RAISERROR('Không đủ số lượng sách "%s" trong kho. Hiện có: %d, Yêu cầu: %d', 16, 1, @book_title, @available, @requested)
+        RETURN
+    END
+    
+    -- Nếu hợp lệ, thêm chi tiết hóa đơn
+    INSERT INTO INVOICE_ITEMS (invoice_id, book_id, book_title, book_author, quantity, price)
+    SELECT 
+        i.invoice_id,
+        i.book_id,
+        COALESCE(i.book_title, b.title),
+        COALESCE(i.book_author, a.name),
+        i.quantity,
+        COALESCE(i.price, b.price)
+    FROM inserted i
+    JOIN BOOKS b ON i.book_id = b.book_id
+    JOIN AUTHORS a ON b.author_id = a.author_id;
+    
+    -- Cập nhật số lượng tồn kho
+    UPDATE b
+    SET b.stock_quantity = b.stock_quantity - i.quantity
+    FROM BOOKS b
+    JOIN inserted i ON b.book_id = i.book_id;
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger để xử lý khi xóa mục trong hóa đơn
+CREATE OR ALTER TRIGGER trg_handle_invoice_item_deletion
+ON INVOICE_ITEMS
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra trạng thái hóa đơn
+    IF EXISTS (
+        SELECT 1
+        FROM deleted d
+        JOIN INVOICES i ON d.invoice_id = i.invoice_id
+        WHERE i.status = N'Đã thanh toán'
+    )
+    BEGIN
+        -- Hoàn lại số lượng sách vào kho
+        UPDATE b
+        SET b.stock_quantity = b.stock_quantity + d.quantity
+        FROM BOOKS b
+        JOIN deleted d ON b.book_id = d.book_id
+        JOIN INVOICES i ON d.invoice_id = i.invoice_id
+        WHERE i.status = N'Đã thanh toán';
+    END
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger để xử lý khi sửa mục trong hóa đơn
+CREATE OR ALTER TRIGGER trg_handle_invoice_item_update
+ON INVOICE_ITEMS
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Nếu có thay đổi về số lượng
+    IF UPDATE(quantity)
+    BEGIN
+        -- Cập nhật số lượng tồn kho
+        UPDATE b
+        SET b.stock_quantity = b.stock_quantity + d.quantity - i.quantity
+        FROM BOOKS b
+        JOIN deleted d ON b.book_id = d.book_id
+        JOIN inserted i ON i.id = d.id
+        WHERE i.quantity <> d.quantity;
+    END
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger để xử lý khi xóa hóa đơn
+CREATE OR ALTER TRIGGER trg_handle_invoice_deletion
+ON INVOICES
+INSTEAD OF DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra trạng thái hóa đơn
+    IF EXISTS (
+        SELECT 1
+        FROM deleted
+        WHERE status = N'Đã thanh toán'
+    )
+    BEGIN
+        -- Hoàn lại số lượng sách vào kho
+        UPDATE b
+        SET b.stock_quantity = b.stock_quantity + ii.quantity
+        FROM BOOKS b
+        JOIN INVOICE_ITEMS ii ON b.book_id = ii.book_id
+        JOIN deleted d ON ii.invoice_id = d.invoice_id
+        WHERE d.status = N'Đã thanh toán';
+        
+        -- Xóa các mục trong hóa đơn
+        DELETE ii
+        FROM INVOICE_ITEMS ii
+        JOIN deleted d ON ii.invoice_id = d.invoice_id;
+        
+        -- Xóa hóa đơn
+        DELETE i
+        FROM INVOICES i
+        JOIN deleted d ON i.invoice_id = d.invoice_id;
+    END
+    ELSE
+    BEGIN
+        -- Xóa các mục trong hóa đơn
+        DELETE ii
+        FROM INVOICE_ITEMS ii
+        JOIN deleted d ON ii.invoice_id = d.invoice_id;
+        
+        -- Xóa hóa đơn
+        DELETE i
+        FROM INVOICES i
+        JOIN deleted d ON i.invoice_id = d.invoice_id;
+    END
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger để cập nhật trạng thái hóa đơn
+CREATE OR ALTER TRIGGER trg_update_invoice_status
+ON INVOICES
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Nếu trạng thái hóa đơn thay đổi từ "Đã thanh toán" sang "Đã hủy"
+    IF EXISTS (
+        SELECT 1
+        FROM deleted d
+        JOIN inserted i ON d.invoice_id = i.invoice_id
+        WHERE d.status = N'Đã thanh toán' AND i.status = N'Đã hủy'
+    )
+    BEGIN
+        -- Hoàn lại số lượng sách vào kho
+        UPDATE b
+        SET b.stock_quantity = b.stock_quantity + ii.quantity
+        FROM BOOKS b
+        JOIN INVOICE_ITEMS ii ON b.book_id = ii.book_id
+        JOIN inserted i ON ii.invoice_id = i.invoice_id
+        JOIN deleted d ON d.invoice_id = i.invoice_id
+        WHERE d.status = N'Đã thanh toán' AND i.status = N'Đã hủy';
+    END
+    
+    -- Nếu trạng thái hóa đơn thay đổi từ "Đã hủy" hoặc "Chờ xử lý" sang "Đã thanh toán"
+    IF EXISTS (
+        SELECT 1
+        FROM deleted d
+        JOIN inserted i ON d.invoice_id = i.invoice_id
+        WHERE d.status IN (N'Đã hủy', N'Chờ xử lý') AND i.status = N'Đã thanh toán'
+    )
+    BEGIN
+        -- Giảm số lượng sách trong kho
+        UPDATE b
+        SET b.stock_quantity = b.stock_quantity - ii.quantity
+        FROM BOOKS b
+        JOIN INVOICE_ITEMS ii ON b.book_id = ii.book_id
+        JOIN inserted i ON ii.invoice_id = i.invoice_id
+        JOIN deleted d ON d.invoice_id = i.invoice_id
+        WHERE d.status IN (N'Đã hủy', N'Chờ xử lý') AND i.status = N'Đã thanh toán';
+    END
+END;
+GO
+
+-----------------------------------------------------------------
+-- Trigger để tự động tạo hóa đơn khi thêm mới đơn hàng với trạng thái "Đã thanh toán" hoặc "Đã giao hàng"
+CREATE OR ALTER TRIGGER trg_create_invoice_on_new_order
+ON ORDERS
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Kiểm tra nếu có đơn hàng mới với trạng thái "Đã thanh toán" hoặc "Đã giao hàng"
+    IF EXISTS (
+        SELECT 1
+        FROM inserted
+        WHERE status IN (N'Đã thanh toán', N'Đã giao hàng')
+    )
+    BEGIN
+        -- Lặp qua từng đơn hàng mới có trạng thái phù hợp
+        DECLARE @order_id INT
+        DECLARE @customer_id INT
+        DECLARE @customer_name NVARCHAR(255)
+        DECLARE @customer_phone NVARCHAR(20)
+        
+        DECLARE order_cursor CURSOR FOR
+        SELECT i.order_id, i.customer_id
+        FROM inserted i
+        WHERE i.status IN (N'Đã thanh toán', N'Đã giao hàng')
+        
+        OPEN order_cursor
+        FETCH NEXT FROM order_cursor INTO @order_id, @customer_id
+        
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            -- Lấy thông tin khách hàng
+            SELECT @customer_name = name, @customer_phone = phone
+            FROM CUSTOMERS
+            WHERE customer_id = @customer_id
+            
+            -- Tạo mã hóa đơn
+            DECLARE @invoice_id VARCHAR(20)
+            DECLARE @current_year INT = YEAR(GETDATE())
+            DECLARE @last_invoice_num INT
+            
+            SELECT @last_invoice_num = ISNULL(MAX(CAST(SUBSTRING(invoice_id, 10, 4) AS INT)), 0)
+            FROM INVOICES
+            WHERE invoice_id LIKE 'INV-' + CAST(@current_year AS VARCHAR) + '-%'
+            
+            SET @invoice_id = 'INV-' + CAST(@current_year AS VARCHAR) + '-' + RIGHT('0000' + CAST(@last_invoice_num + 1 AS VARCHAR), 4)
+            
+            -- Thêm hóa đơn mới
+            INSERT INTO INVOICES (invoice_id, customer_name, customer_phone, created_date, status)
+            VALUES (@invoice_id, @customer_name, @customer_phone, GETDATE(), N'Đã thanh toán')
+            
+            -- Thêm chi tiết hóa đơn
+            INSERT INTO INVOICE_ITEMS (invoice_id, book_id, book_title, book_author, quantity, price)
+            SELECT 
+                @invoice_id, 
+                b.book_id, 
+                b.title, 
+                a.name, 
+                od.quantity, 
+                od.unit_price
+            FROM ORDER_DETAILS od
+            INNER JOIN BOOKS b ON od.book_id = b.book_id
+            INNER JOIN AUTHORS a ON b.author_id = a.author_id
+            WHERE od.order_id = @order_id
+            
+            FETCH NEXT FROM order_cursor INTO @order_id, @customer_id
+        END
+        
+        CLOSE order_cursor
+        DEALLOCATE order_cursor
+    END
+END;
+GO
 
 --===================================================--
 ---------------------- FUNTION ------------------------
@@ -1125,6 +1898,73 @@ END;
 GO
 
 -----------------------------------------------------
+DROP PROCEDURE IF EXISTS pr_GetBookRevenueByMonth
+GO	
+CREATE PROCEDURE pr_GetBookRevenueByMonth
+(
+    @StartDate DATETIME,
+    @EndDate DATETIME
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Tạo bảng tạm thời để lưu kết quả
+    CREATE TABLE #MonthlyRevenue
+    (
+        MonthYear NVARCHAR(7),
+        MonthStart DATE,
+        TotalRevenue DECIMAL(18, 2)
+    );
+    
+    -- Tạo CTE để tạo danh sách các tháng trong khoảng thời gian
+    WITH Months AS (
+        SELECT 
+            CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, @StartDate), 0) AS DATE) AS MonthStart
+        UNION ALL
+        SELECT 
+            CAST(DATEADD(MONTH, 1, MonthStart) AS DATE)
+        FROM Months
+        WHERE DATEADD(MONTH, 1, MonthStart) <= @EndDate
+    )
+    
+    -- Chèn các tháng vào bảng tạm với doanh thu bằng 0
+    INSERT INTO #MonthlyRevenue (MonthYear, MonthStart, TotalRevenue)
+    SELECT 
+        FORMAT(MonthStart, 'MM-yyyy') AS MonthYear,
+        MonthStart,
+        0 AS TotalRevenue
+    FROM Months
+    OPTION (MAXRECURSION 1000); -- Đề phòng khoảng thời gian dài
+    
+    -- Cập nhật doanh thu cho mỗi tháng
+    UPDATE mr
+    SET TotalRevenue = ISNULL(Revenue.MonthRevenue, 0)
+    FROM #MonthlyRevenue mr
+    LEFT JOIN (
+        SELECT 
+            CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, o.order_date), 0) AS DATE) AS MonthStart,
+            SUM(od.quantity * b.price * (1 - od.discount/100)) AS MonthRevenue
+        FROM ORDERS o
+        JOIN ORDER_DETAILS od ON o.order_id = od.order_id
+        JOIN BOOKS b ON od.book_id = b.book_id
+        WHERE o.order_date BETWEEN @StartDate AND @EndDate
+        GROUP BY CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, o.order_date), 0) AS DATE)
+    ) AS Revenue ON mr.MonthStart = Revenue.MonthStart;
+    
+    -- Trả về kết quả
+    SELECT 
+        MonthYear,
+        TotalRevenue
+    FROM #MonthlyRevenue
+    ORDER BY MonthStart;
+    
+    -- Xóa bảng tạm
+    DROP TABLE #MonthlyRevenue;
+END;
+GO	
+
+-----------------------------------------------------
 -- Stored Procedure để đăng nhập
 CREATE OR ALTER PROCEDURE pr_login
     @username NVARCHAR(50),
@@ -1283,6 +2123,24 @@ BEGIN
 END;
 GO
 
+
+-- Thực thi procedure để tính doanh thu từ tháng 1/2024 đến tháng 9/2024
+EXEC pr_GetBookRevenueByMonth '2024-01-01', '2024-12-31';
+GO
+
+-- Để kiểm tra đối chiếu, hãy tính trực tiếp doanh thu theo tháng từ dữ liệu gốc
+SELECT 
+    FORMAT(DATEADD(MONTH, DATEDIFF(MONTH, 0, o.order_date), 0), 'MM-yyyy') AS MonthYear,
+    SUM(od.quantity * b.price * (1 - od.discount/100)) AS TotalRevenue
+FROM ORDERS o
+JOIN ORDER_DETAILS od ON o.order_id = od.order_id
+JOIN BOOKS b ON od.book_id = b.book_id
+WHERE o.order_date BETWEEN '2024-01-01' AND '2024-09-30'
+GROUP BY FORMAT(DATEADD(MONTH, DATEDIFF(MONTH, 0, o.order_date), 0), 'MM-yyyy'),
+         DATEADD(MONTH, DATEDIFF(MONTH, 0, o.order_date), 0)
+ORDER BY DATEADD(MONTH, DATEDIFF(MONTH, 0, o.order_date), 0);
+GO	
+
 --================================================--
 -------------------- VIEW----------------------
 --================================================--
@@ -1384,7 +2242,7 @@ FROM
 JOIN 
     BOOKS b ON b.category_id = c.category_id
 GROUP BY 
-    c.category_id, 
+    c.category_id,
     c.name
 ORDER BY 
     c.category_id ASC;
@@ -1412,20 +2270,33 @@ ORDER BY
 GO	
 
 -------------------------------------
-SELECT * FROM dbo.CUSTOMERS
--------------------------------------
-SELECT * FROM dbo.ORDERS
--------------------------------------
 SELECT b.*, a.name AS authorName, c.name AS categoryName
 FROM dbo.BOOKS AS b
 JOIN dbo.AUTHORS AS a ON a.author_id = b.author_id
 JOIN dbo.CATEGORIES AS c ON c.category_id = b.category_id
+
+-------------------------------------
+SELECT * FROM dbo.AUTHORS
+-------------------------------------
+SELECT * FROM dbo.BOOKS
+-------------------------------------
+SELECT * FROM dbo.CUSTOMERS
+-------------------------------------
+SELECT * FROM dbo.ORDERS
+-------------------------------------
+SELECT * FROM dbo.ORDER_DETAILS
 -------------------------------------
 SELECT * FROM dbo.CATEGORIES
 -------------------------------------
 SELECT * FROM dbo.PUBLISHERS
 -------------------------------------
-SELECT * FROM dbo.AUTHORS
+SELECT * FROM dbo.INVOICES
+-------------------------------------
+SELECT * FROM dbo.INVOICE_ITEMS
+-------------------------------------
+SELECT * FROM dbo.CARTS
+-------------------------------------
+SELECT * FROM dbo.CART_ITEMS
 -------------------------------------
 SELECT * FROM dbo.ACCOUNTS
 -------------------------------------

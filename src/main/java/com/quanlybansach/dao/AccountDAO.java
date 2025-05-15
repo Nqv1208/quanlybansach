@@ -69,7 +69,7 @@ public class AccountDAO {
         String sql = "{call pr_register_account(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         
         try (Connection conn = DBConnection.getConnection();
-             CallableStatement cstmt = conn.prepareCall(sql)) {
+            CallableStatement cstmt = conn.prepareCall(sql)) {
             
             // Mã hóa mật khẩu
             String hashedPassword = PasswordHasher.hashPassword(account.getPasswordHash());
@@ -318,5 +318,53 @@ public class AccountDAO {
         // }
         String hashedPassword = PasswordHasher.hashPassword("123123");
         System.out.println("Hashed password: " + hashedPassword);
+    }
+
+    /**
+     * Kiểm tra xem username đã tồn tại trong hệ thống chưa
+     * @param username Tên đăng nhập cần kiểm tra
+     * @return true nếu username đã tồn tại, false nếu chưa
+     */
+    public boolean checkUsernameExists(String username) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = DBConnection.getConnection();
+            String sql = "SELECT COUNT(*) FROM ACCOUNTS WHERE username = ?";
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Kiểm tra xem email đã tồn tại trong hệ thống chưa
+     * @param email Email cần kiểm tra
+     * @return true nếu email đã tồn tại, false nếu chưa
+     */
+    public boolean checkEmailExists(String email) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = DBConnection.getConnection();
+            String sql = "SELECT COUNT(*) FROM ACCOUNTS WHERE email = ?";
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, email);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 } 

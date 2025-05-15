@@ -1,11 +1,14 @@
 package com.quanlybansach.controller.admin;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -23,46 +26,38 @@ import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfDocument;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import com.quanlybansach.dao.BookDAO;
-import com.quanlybansach.dao.CustomerDAO;
-import com.quanlybansach.dao.InvoiceDAO;
-import com.quanlybansach.dao.OrderDAO;
 import com.quanlybansach.model.Book;
 import com.quanlybansach.model.Customer;
-import com.quanlybansach.model.Invoice;
-import com.quanlybansach.model.InvoiceItem;
+import com.quanlybansach.service.BookService;
+import com.quanlybansach.service.CustomerService;
+import com.quanlybansach.service.OrderService;
+import com.quanlybansach.service.ReportService;
+import com.quanlybansach.util.PdfUtil;
 
 
 @WebServlet(urlPatterns = {"/admin/reports/*"})
 public class ReportServlet extends HttpServlet {
    private static final long serialVersionUID = 1L;
-   private InvoiceDAO invoiceDAO;
-   private BookDAO bookDAO;
-   private CustomerDAO customerDAO;
-   private OrderDAO orderDAO;
+   private ReportService reportService;
+   private BookService bookService;
+   private CustomerService customerService;
+   private OrderService orderService;
 
    @Override
    public void init() throws ServletException {
-      // Khởi tạo các đối tượng DAO
-      invoiceDAO = new InvoiceDAO();
-      bookDAO = new BookDAO();
-      customerDAO = new CustomerDAO();
-      orderDAO = new OrderDAO();
+      // Khởi tạo các đối tượng Service
+      reportService = new ReportService();
+      bookService = new BookService();
+      customerService = new CustomerService();
+      orderService = new OrderService();
    }
 
    @Override
    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      // Kiểm tra quyền admin
-      // HttpSession session = request.getSession();
-      // String role = (String) session.getAttribute("role");
-      
-      // if (!"admin".equals(role)) {
-      //    response.sendRedirect(request.getContextPath() + "/login");
-      //    return;
-      // }
       
       String pathInfo = request.getPathInfo();
       if (pathInfo == null) {
@@ -75,33 +70,93 @@ public class ReportServlet extends HttpServlet {
          case "/reports":
             showReport(request, response);
             break;
-         case "/dashboard":
-            showReportDashboard(request, response);
-            break;
-         case "/invoices":
-            showInvoiceReport(request, response);
-            break;
-         case "/books":
-            showBookReport(request, response);
-            break;
-         case "/customers":
-            showCustomerReport(request, response);
-            break;
-         case "/sales":
-            showSalesReport(request, response);
-            break;
-         case "/export-invoices":
-            exportInvoiceReport(request, response);
-            break;
-         case "/export-books":
-            exportBookReport(request, response);
-            break;
          case "/export":
             showExport(request, response);
+            break;
+         case "/download":
+            downloadReport(request, response);
+            break;
+         case "/preview":
+            previewReport(request, response);
             break;
          default:
             showReportDashboard(request, response);
             break;
+      }
+   }
+
+   private void showExport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+      // Lấy thông tin từ form
+      String reportType = request.getParameter("reportType");
+      String fileFormat = request.getParameter("fileFormat");
+      String startDateStr = request.getParameter("startDate");
+      String endDateStr = request.getParameter("endDate");
+
+      // Lưu thông tin vào session để sử dụng ở các trang khác
+      HttpSession session = request.getSession();
+      session.setAttribute("reportType", reportType);
+      session.setAttribute("fileFormat", fileFormat);
+      session.setAttribute("startDate", startDateStr);
+      session.setAttribute("endDate", endDateStr);
+
+      // Chuyển hướng đến trang xem trước
+      response.sendRedirect(request.getContextPath() + "/admin/reports/preview");
+   }
+
+   private void previewReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+      // Lấy thông tin từ session
+      HttpSession session = request.getSession();
+      String reportType = (String) session.getAttribute("reportType");
+      String fileFormat = (String) session.getAttribute("fileFormat");
+      String startDateStr = (String) session.getAttribute("startDate");
+      String endDateStr = (String) session.getAttribute("endDate");
+
+      // Thiết lập các thuộc tính để hiển thị ở trang xem trước
+      request.setAttribute("reportType", reportType);
+      request.setAttribute("fileFormat", fileFormat);
+      request.setAttribute("startDate", startDateStr);
+      request.setAttribute("endDate", endDateStr);
+
+      // Chuẩn bị dữ liệu cho báo cáo
+      if ("sales".equals(reportType)) {
+         prepareSalesReportData(request, response, startDateStr, endDateStr);
+      } else if ("customers".equals(reportType)) {
+         prepareCustomerReportData(request, response);
+      } else if ("inventory".equals(reportType)) {
+         prepareInventoryReportData(request, response);
+      }
+
+      // Hiển thị trang xem trước báo cáo
+      request.getRequestDispatcher("/WEB-INF/views/admin/preview.jsp").forward(request, response);
+   }
+
+   private void downloadReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+      // Lấy thông tin từ session
+      HttpSession session = request.getSession();
+      String reportType = (String) session.getAttribute("reportType");
+      String fileFormat = (String) session.getAttribute("fileFormat");
+      String startDateStr = (String) session.getAttribute("startDate");
+      String endDateStr = (String) session.getAttribute("endDate");
+
+      // Xuất báo cáo dựa trên loại báo cáo và định dạng file
+      if ("sales".equals(reportType)) {
+         if ("pdf".equals(fileFormat)) {
+            exportSalesPdfReport(request, response, startDateStr, endDateStr, true);
+         } else if ("excel".equals(fileFormat)) {
+            exportSalesExcelReport(request, response, startDateStr, endDateStr);
+         }
+      } else if ("customers".equals(reportType)) {
+         if ("pdf".equals(fileFormat)) {
+            exportCustomerPdfReport(request, response, true);
+         } else if ("excel".equals(fileFormat)) {
+            exportCustomerExcelReport(request, response);
+         }
+      } else if ("inventory".equals(reportType)) {
+         if ("pdf".equals(fileFormat)) {
+            exportInventoryPdfReport(request, response, true);
+         } else if ("excel".equals(fileFormat)) {
+            exportInventoryExcelReport(request, response);
+         }
       }
    }
 
@@ -116,13 +171,10 @@ public class ReportServlet extends HttpServlet {
 
    private void showReportDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
       // Tổng hợp dữ liệu cho trang dashboard báo cáo
-      int totalInvoices = invoiceDAO.getAllInvoices().size();
-      int totalBooks = bookDAO.getAllBooks().size();
-      int totalCustomers = customerDAO.getTotalCustomers();
-      // Sử dụng OrderDAO để lấy doanh thu nếu có
-      java.math.BigDecimal monthlyRevenue = orderDAO.getMonthlyRevenue();
+      int totalBooks = reportService.getTotalBooks();
+      int totalCustomers = reportService.getTotalCustomers();
+      BigDecimal monthlyRevenue = reportService.getMonthlyRevenue();
       
-      request.setAttribute("totalInvoices", totalInvoices);
       request.setAttribute("totalBooks", totalBooks);
       request.setAttribute("totalCustomers", totalCustomers);
       request.setAttribute("totalRevenue", monthlyRevenue);
@@ -130,35 +182,8 @@ public class ReportServlet extends HttpServlet {
       request.getRequestDispatcher("/WEB-INF/views/admin/reports/dashboard.jsp").forward(request, response);
    }
    
-   private void showInvoiceReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      // Lấy danh sách hóa đơn cho báo cáo
-      List<Invoice> invoices = invoiceDAO.getAllInvoices();
-      request.setAttribute("invoices", invoices);
-      
-      request.getRequestDispatcher("/WEB-INF/views/admin/reports/invoices.jsp").forward(request, response);
-   }
-   
-   private void showBookReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      // Lấy danh sách sách cho báo cáo
-      List<Book> books = bookDAO.getAllBooks();
-      request.setAttribute("books", books);
-      
-      request.getRequestDispatcher("/WEB-INF/views/admin/reports/books.jsp").forward(request, response);
-   }
-   
-   private void showCustomerReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      // Lấy danh sách khách hàng cho báo cáo
-      List<Customer> customers = customerDAO.getAllCustomers();
-      request.setAttribute("customers", customers);
-      
-      request.getRequestDispatcher("/WEB-INF/views/admin/reports/customers.jsp").forward(request, response);
-   }
-   
-   private void showSalesReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      // Lấy tham số ngày bắt đầu và kết thúc nếu có
-      String startDateStr = request.getParameter("startDate");
-      String endDateStr = request.getParameter("endDate");
-      
+   private void prepareSalesReportData(HttpServletRequest request, HttpServletResponse response, String startDateStr, String endDateStr) {
+      // Chuẩn bị dữ liệu cho báo cáo doanh thu
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
       Date startDate = null;
       Date endDate = null;
@@ -174,129 +199,201 @@ public class ReportServlet extends HttpServlet {
          e.printStackTrace();
       }
       
-      // Lấy dữ liệu báo cáo doanh số (dùng tất cả hóa đơn vì chưa có phương thức theo khoảng thời gian)
-      List<Invoice> salesData = invoiceDAO.getAllInvoices();
-      java.math.BigDecimal totalRevenue = orderDAO.getMonthlyRevenue();
+      // Lấy dữ liệu doanh thu
+      Map<String, BigDecimal> revenueMap = reportService.getRevenueByMonth(startDate, endDate);
       
-      request.setAttribute("salesData", salesData);
+      // Tính tổng doanh thu
+      BigDecimal totalRevenue = reportService.calculateTotalRevenue(revenueMap);
+      
+      // Đặt dữ liệu vào request để hiển thị ở trang xem trước
+      request.setAttribute("revenueMap", revenueMap);
       request.setAttribute("totalRevenue", totalRevenue);
-      request.setAttribute("startDate", startDateStr);
-      request.setAttribute("endDate", endDateStr);
-      
-      request.getRequestDispatcher("/WEB-INF/views/admin/reports/sales.jsp").forward(request, response);
    }
-   
-   private void exportInvoiceReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      // Xuất báo cáo danh sách hóa đơn ra PDF
-      List<Invoice> invoices = invoiceDAO.getAllInvoices();
+
+   private void prepareCustomerReportData(HttpServletRequest request, HttpServletResponse response) {
+      // Chuẩn bị dữ liệu cho báo cáo khách hàng
+      List<Customer> customers = reportService.getCustomerReport();
+      request.setAttribute("customers", customers);
+   }
+
+   private void prepareInventoryReportData(HttpServletRequest request, HttpServletResponse response) {
+      // Chuẩn bị dữ liệu cho báo cáo tồn kho
+      List<Book> books = reportService.getInventoryReport();
+      request.setAttribute("books", books);
+   }
+
+   private void exportSalesPdfReport(HttpServletRequest request, HttpServletResponse response, String startDateStr, String endDateStr, boolean isDownload) throws ServletException, IOException {
+      // Lấy tham số ngày bắt đầu và kết thúc
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      Date startDate = null;
+      Date endDate = null;
       
-      // Thiết lập header để trình duyệt hiểu đây là file PDF cần tải xuống
-      response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "attachment; filename=bao-cao-hoa-don.pdf");
+      try {
+         if (startDateStr != null && !startDateStr.isEmpty()) {
+            startDate = dateFormat.parse(startDateStr);
+         }
+         if (endDateStr != null && !endDateStr.isEmpty()) {
+            endDate = dateFormat.parse(endDateStr);
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
       
+      Map<String, BigDecimal> revenueMap = reportService.getRevenueByMonth(startDate, endDate);
+      
+      // Thiết lập header cho PDF
+      PdfUtil.configureResponse(response, isDownload, "bao-cao-doanh-thu.pdf");
+
       try {
          // Tạo document PDF
          Document document = new Document();
          PdfWriter.getInstance(document, response.getOutputStream());
-      document.open();
+         document.open();
          
-         // Thêm font chữ hỗ trợ tiếng Việt
-         BaseFont baseFont = BaseFont.createFont("WEB-INF/fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-         Font titleFont = new Font(baseFont, 18, Font.BOLD);
-         Font normalFont = new Font(baseFont, 12, Font.NORMAL);
-         Font headerFont = new Font(baseFont, 12, Font.BOLD, BaseColor.WHITE);
-
-      // Thêm tiêu đề
-         Paragraph title = new Paragraph("BÁO CÁO DANH SÁCH HÓA ĐƠN", titleFont);
-      title.setAlignment(Element.ALIGN_CENTER);
-         document.add(title);
+         // Lấy fonts
+         Font[] fonts = PdfUtil.getPdfFonts(request);
+         Font titleFont = fonts[0];
+         Font normalFont = fonts[1];
+         Font headerFont = fonts[2];
          
-         // Thêm ngày xuất báo cáo
-         Paragraph date = new Paragraph("Ngày xuất báo cáo: " + new SimpleDateFormat("dd/MM/yyyy").format(new Date()), normalFont);
-         date.setAlignment(Element.ALIGN_RIGHT);
-         document.add(date);
+         // Thêm phần header cho document
+         PdfUtil.addDocumentHeader(document, "BÁO CÁO DOANH THU", titleFont, normalFont);
          
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
-
-      // Thêm bảng hóa đơn
-         PdfPTable table = new PdfPTable(4); // 4 cột
-      table.setWidthPercentage(100);
-         table.setWidths(new float[] {1f, 2f, 2f, 2f});
-      
-      // Thêm tiêu đề bảng
-         PdfPCell headerCell = new PdfPCell();
-         headerCell.setBackgroundColor(new BaseColor(41, 128, 185));
-         headerCell.setPadding(5);
-         
-         headerCell.setPhrase(new Phrase("Mã hóa đơn", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Ngày lập", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Khách hàng", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Tổng tiền", headerFont));
-         table.addCell(headerCell);
-
-      // Thêm dữ liệu hóa đơn vào bảng
-      NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-         SimpleDateFormat invoiceDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-         
-         double totalAmount = 0;
-         
-      for (Invoice invoice : invoices) {
-            table.addCell(new Phrase(invoice.getInvoiceId(), normalFont));
-            table.addCell(new Phrase(invoiceDateFormat.format(invoice.getCreatedDate()), normalFont));
-            table.addCell(new Phrase(invoice.getCustomerName(), normalFont));
-            
-            double invTotal = invoice.getTotalAmount();
-            PdfPCell amountCell = new PdfPCell(new Phrase(currencyFormat.format(invTotal), normalFont));
-            amountCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(amountCell);
-            
-            totalAmount += invTotal;
+         // Thêm thông tin thời gian báo cáo
+         String reportPeriod = "Tất cả thời gian";
+         if (startDate != null && endDate != null) {
+            reportPeriod = "Từ " + dateFormat.format(startDate) + " đến " + dateFormat.format(endDate);
+         } else if (startDate != null) {
+            reportPeriod = "Từ " + dateFormat.format(startDate) + " đến nay";
+         } else if (endDate != null) {
+            reportPeriod = "Đến " + dateFormat.format(endDate);
          }
          
-         // Thêm tổng cộng
-         PdfPCell emptyCell = new PdfPCell(new Phrase(""));
-         emptyCell.setBorder(0);
+         Paragraph periodInfo = new Paragraph("Thời gian: " + reportPeriod, normalFont);
+         periodInfo.setAlignment(Element.ALIGN_CENTER);
+         document.add(periodInfo);
          
-         table.addCell(emptyCell);
-         table.addCell(emptyCell);
+         document.add(new Paragraph(" ")); // Thêm khoảng trống
          
-         PdfPCell totalLabelCell = new PdfPCell(new Phrase("Tổng cộng:", normalFont));
-         totalLabelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+         // Thêm bảng doanh thu
+         PdfPTable table = new PdfPTable(2); // 2 cột: tháng và doanh thu
+         table.setWidthPercentage(100);
+         table.setWidths(new float[] {1.5f, 2f});
+         
+         // Thêm tiêu đề bảng
+         table.addCell(PdfUtil.createHeaderCell("Tháng", headerFont));
+         table.addCell(PdfUtil.createHeaderCell("Doanh thu", headerFont));
+         
+         // Thêm dữ liệu doanh thu vào bảng
+         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+         BigDecimal totalRevenue = reportService.calculateTotalRevenue(revenueMap);
+         
+         for (Map.Entry<String, BigDecimal> entry : revenueMap.entrySet()) {
+            table.addCell(PdfUtil.createCell(entry.getKey(), normalFont));
+            table.addCell(PdfUtil.createRightAlignedCell(currencyFormat.format(entry.getValue()), normalFont));
+         }
+         
+         // Thêm dòng tổng doanh thu
+         PdfPCell totalLabelCell = new PdfPCell(new Phrase("TỔNG DOANH THU", headerFont));
+         totalLabelCell.setBackgroundColor(new BaseColor(41, 128, 185));
+         totalLabelCell.setPadding(5);
          table.addCell(totalLabelCell);
          
-         PdfPCell totalValueCell = new PdfPCell(new Phrase(currencyFormat.format(totalAmount), normalFont));
+         PdfPCell totalValueCell = new PdfPCell(new Phrase(currencyFormat.format(totalRevenue), headerFont));
+         totalValueCell.setBackgroundColor(new BaseColor(41, 128, 185));
          totalValueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+         totalValueCell.setPadding(5);
          table.addCell(totalValueCell);
          
          document.add(table);
          
-         // Chân trang
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
-         Paragraph footer = new Paragraph("© Hệ thống Quản lý Bán Sách - Báo cáo được tạo tự động", normalFont);
-         footer.setAlignment(Element.ALIGN_CENTER);
-         document.add(footer);
+         // Thêm phần footer
+         PdfUtil.addDocumentFooter(document, normalFont);
          
          document.close();
-      } catch (DocumentException e) {
-         throw new ServletException(e);
       } catch (Exception e) {
          throw new ServletException(e);
       }
    }
    
-   private void exportBookReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      // Xuất báo cáo danh sách sách ra PDF
-      List<Book> books = bookDAO.getAllBooks();
+   private void exportSalesExcelReport(HttpServletRequest request, HttpServletResponse response, String startDateStr, String endDateStr) {
+      // Implement Excel export for sales report here
+      // Thông báo tạm thời - sẽ triển khai sau
+      try {
+         response.setContentType("text/html");
+         response.getWriter().write("<h1>Xuất báo cáo doanh thu dạng Excel đang được phát triển</h1>");
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
+
+   private void exportCustomerPdfReport(HttpServletRequest request, HttpServletResponse response, boolean isDownload) throws ServletException, IOException {
+      List<Customer> customers = reportService.getCustomerReport();
       
-      // Thiết lập header để trình duyệt hiểu đây là file PDF cần tải xuống
-      response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "attachment; filename=bao-cao-sach.pdf");
+      // Thiết lập header cho PDF
+      PdfUtil.configureResponse(response, isDownload, "bao-cao-khach-hang.pdf");
+      
+      try {
+         // Create PDF document
+         Document document = new Document();
+         PdfWriter.getInstance(document, response.getOutputStream());
+         document.open();
+         
+         // Lấy fonts
+         Font[] fonts = PdfUtil.getPdfFonts(request);
+         Font titleFont = fonts[0];
+         Font normalFont = fonts[1];
+         Font headerFont = fonts[2];
+         
+         // Thêm phần header cho document
+         PdfUtil.addDocumentHeader(document, "BÁO CÁO KHÁCH HÀNG", titleFont, normalFont);
+         
+         // Add customer table
+         PdfPTable table = new PdfPTable(4); // 4 columns
+         table.setWidthPercentage(100);
+         table.setWidths(new float[] {0.7f, 2f, 2f, 2f});
+         
+         // Add table header
+         table.addCell(PdfUtil.createHeaderCell("ID", headerFont));
+         table.addCell(PdfUtil.createHeaderCell("Tên khách hàng", headerFont));
+         table.addCell(PdfUtil.createHeaderCell("Email", headerFont));
+         table.addCell(PdfUtil.createHeaderCell("Số điện thoại", headerFont));
+         
+         // Add customer data to table
+         for (Customer customer : customers) {
+            table.addCell(PdfUtil.createCell(String.valueOf(customer.getCustomerId()), normalFont));
+            table.addCell(PdfUtil.createCell(customer.getName(), normalFont));
+            table.addCell(PdfUtil.createCell(customer.getEmail(), normalFont));
+            table.addCell(PdfUtil.createCell(customer.getPhone(), normalFont));
+         }
+         
+         document.add(table);
+         
+         // Add footer
+         PdfUtil.addDocumentFooter(document, normalFont);
+         
+         document.close();
+      } catch (DocumentException e) {
+         throw new ServletException(e);
+      }
+   }
+
+   private void exportCustomerExcelReport(HttpServletRequest request, HttpServletResponse response) {
+      // Implement Excel export for customer report
+      try {
+         response.setContentType("text/html");
+         response.getWriter().write("<h1>Xuất báo cáo khách hàng dạng Excel đang được phát triển</h1>");
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
+
+   private void exportInventoryPdfReport(HttpServletRequest request, HttpServletResponse response, boolean isDownload) throws ServletException, IOException {
+      // Xuất báo cáo danh sách sách ra PDF
+      List<Book> books = reportService.getInventoryReport();
+      
+      // Thiết lập header cho PDF
+      PdfUtil.configureResponse(response, isDownload, "bao-cao-ton-kho.pdf");
       
       try {
          // Tạo document PDF
@@ -304,23 +401,14 @@ public class ReportServlet extends HttpServlet {
          PdfWriter.getInstance(document, response.getOutputStream());
          document.open();
          
-         // Thêm font chữ hỗ trợ tiếng Việt
-         BaseFont baseFont = BaseFont.createFont("WEB-INF/fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-         Font titleFont = new Font(baseFont, 18, Font.BOLD);
-         Font normalFont = new Font(baseFont, 12, Font.NORMAL);
-         Font headerFont = new Font(baseFont, 12, Font.BOLD, BaseColor.WHITE);
+         // Lấy fonts
+         Font[] fonts = PdfUtil.getPdfFonts(request);
+         Font titleFont = fonts[0];
+         Font normalFont = fonts[1];
+         Font headerFont = fonts[2];
          
-         // Thêm tiêu đề
-         Paragraph title = new Paragraph("BÁO CÁO DANH SÁCH SÁCH", titleFont);
-         title.setAlignment(Element.ALIGN_CENTER);
-         document.add(title);
-         
-         // Thêm ngày xuất báo cáo
-         Paragraph date = new Paragraph("Ngày xuất báo cáo: " + new SimpleDateFormat("dd/MM/yyyy").format(new Date()), normalFont);
-         date.setAlignment(Element.ALIGN_RIGHT);
-         document.add(date);
-         
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
+         // Thêm phần header cho document
+         PdfUtil.addDocumentHeader(document, "BÁO CÁO TỒN KHO", titleFont, normalFont);
          
          // Thêm bảng sách
          PdfPTable table = new PdfPTable(5); // 5 cột
@@ -328,31 +416,18 @@ public class ReportServlet extends HttpServlet {
          table.setWidths(new float[] {0.7f, 3f, 2f, 1f, 1.5f});
          
          // Thêm tiêu đề bảng
-         PdfPCell headerCell = new PdfPCell();
-         headerCell.setBackgroundColor(new BaseColor(41, 128, 185));
-         headerCell.setPadding(5);
-         
-         headerCell.setPhrase(new Phrase("Mã sách", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Tên sách", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Tác giả", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Số lượng", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Giá bán", headerFont));
-         table.addCell(headerCell);
+         table.addCell(PdfUtil.createHeaderCell("Mã sách", headerFont));
+         table.addCell(PdfUtil.createHeaderCell("Tên sách", headerFont));
+         table.addCell(PdfUtil.createHeaderCell("Tác giả", headerFont));
+         table.addCell(PdfUtil.createHeaderCell("Số lượng", headerFont));
+         table.addCell(PdfUtil.createHeaderCell("Giá bán", headerFont));
          
          // Thêm dữ liệu sách vào bảng
          NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
          
          for (Book book : books) {
-            table.addCell(new Phrase(String.valueOf(book.getBookId()), normalFont));
-            table.addCell(new Phrase(book.getTitle(), normalFont));
+            table.addCell(PdfUtil.createCell(String.valueOf(book.getBookId()), normalFont));
+            table.addCell(PdfUtil.createCell(book.getTitle(), normalFont));
             
             // Kiểm tra nếu có phương thức getAuthor, nếu không có thì dùng mặc định "Không có thông tin"
             String author = "Không có thông tin";
@@ -362,7 +437,7 @@ public class ReportServlet extends HttpServlet {
             } catch (Exception e) {
                // Không làm gì, giữ giá trị mặc định
             }
-            table.addCell(new Phrase(author, normalFont));
+            table.addCell(PdfUtil.createCell(author, normalFont));
             
             // Số lượng
             int quantity = 0;
@@ -372,9 +447,7 @@ public class ReportServlet extends HttpServlet {
             } catch (Exception e) {
                // Không làm gì, giữ giá trị mặc định
             }
-            PdfPCell quantityCell = new PdfPCell(new Phrase(String.valueOf(quantity), normalFont));
-            quantityCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(quantityCell);
+            table.addCell(PdfUtil.createRightAlignedCell(String.valueOf(quantity), normalFont));
             
             // Giá
             double price = 0.0;
@@ -384,18 +457,13 @@ public class ReportServlet extends HttpServlet {
             } catch (Exception e) {
                // Không làm gì, giữ giá trị mặc định
             }
-            PdfPCell priceCell = new PdfPCell(new Phrase(currencyFormat.format(price), normalFont));
-            priceCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(priceCell);
+            table.addCell(PdfUtil.createRightAlignedCell(currencyFormat.format(price), normalFont));
          }
          
          document.add(table);
          
-         // Chân trang
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
-         Paragraph footer = new Paragraph("© Hệ thống Quản lý Bán Sách - Báo cáo được tạo tự động", normalFont);
-         footer.setAlignment(Element.ALIGN_CENTER);
-         document.add(footer);
+         // Thêm footer
+         PdfUtil.addDocumentFooter(document, normalFont);
          
          document.close();
       } catch (DocumentException e) {
@@ -405,180 +473,13 @@ public class ReportServlet extends HttpServlet {
       }
    }
 
-   protected void showExport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      String invoiceId = request.getParameter("invoiceId");
-      
-      // Thiết lập header để trình duyệt hiểu đây là file PDF cần tải xuống
-      response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "attachment; filename=hoa-don-" + invoiceId + ".pdf");
-
+   private void exportInventoryExcelReport(HttpServletRequest request, HttpServletResponse response) {
+      // Implement Excel export for inventory report
       try {
-         // Lấy dữ liệu hóa đơn từ Database
-         InvoiceDAO invoiceDAO = new InvoiceDAO();
-         Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
-         
-         if (invoice == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy hóa đơn");
-            return;
-         }
-         
-         // Tạo document PDF
-         Document document = new Document();
-         PdfWriter.getInstance(document, response.getOutputStream());
-         document.open();
-         
-         // Thêm font chữ hỗ trợ tiếng Việt
-         BaseFont baseFont = BaseFont.createFont("WEB-INF/fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-         Font titleFont = new Font(baseFont, 18, Font.BOLD);
-         Font normalFont = new Font(baseFont, 12, Font.NORMAL);
-         Font smallFont = new Font(baseFont, 10, Font.NORMAL);
-         Font boldFont = new Font(baseFont, 12, Font.BOLD);
-         Font headerFont = new Font(baseFont, 12, Font.BOLD, BaseColor.WHITE);
-         
-         // Thông tin cửa hàng
-         Paragraph storeName = new Paragraph("NHÀ SÁCH TRỰC TUYẾN", titleFont);
-         storeName.setAlignment(Element.ALIGN_CENTER);
-         document.add(storeName);
-         
-         Paragraph storeAddress = new Paragraph("Địa chỉ: 123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh", normalFont);
-         storeAddress.setAlignment(Element.ALIGN_CENTER);
-         document.add(storeAddress);
-         
-         Paragraph storeContact = new Paragraph("Điện thoại: 028.1234.5678 - Email: contact@nhasach.com", normalFont);
-         storeContact.setAlignment(Element.ALIGN_CENTER);
-         document.add(storeContact);
-         
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
-         
-         // Tiêu đề hóa đơn
-         Paragraph invoiceTitle = new Paragraph("HÓA ĐƠN BÁN HÀNG", titleFont);
-         invoiceTitle.setAlignment(Element.ALIGN_CENTER);
-         document.add(invoiceTitle);
-         
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
-         
-         // Thông tin hóa đơn
-         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-         String dateStr = dateFormat.format(invoice.getCreatedDate());
-         
-         document.add(new Paragraph("Số hóa đơn: " + invoice.getInvoiceId(), normalFont));
-         document.add(new Paragraph("Ngày: " + dateStr, normalFont));
-         document.add(new Paragraph("Khách hàng: " + invoice.getCustomerName(), normalFont));
-         document.add(new Paragraph("Điện thoại: " + invoice.getCustomerPhone(), normalFont));
-         
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
-         
-         // Bảng chi tiết đơn hàng
-         PdfPTable table = new PdfPTable(6); // 6 cột
-         table.setWidthPercentage(100);
-         table.setWidths(new float[] {0.5f, 3f, 2f, 1f, 1.5f, 1.5f});
-         
-         // Header của bảng
-         PdfPCell headerCell = new PdfPCell();
-         headerCell.setBackgroundColor(new BaseColor(41, 128, 185));
-         headerCell.setPadding(5);
-         
-         headerCell.setPhrase(new Phrase("STT", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Tên sách", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Tác giả", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Số lượng", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Đơn giá", headerFont));
-         table.addCell(headerCell);
-         
-         headerCell.setPhrase(new Phrase("Thành tiền", headerFont));
-         table.addCell(headerCell);
-         
-         // Định dạng tiền tệ Việt Nam
-         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-         
-         // Dữ liệu bảng
-         double totalAmount = 0;
-         List<InvoiceItem> items = invoice.getItems();
-         for (int i = 0; i < items.size(); i++) {
-            InvoiceItem item = items.get(i);
-            
-            table.addCell(new Phrase(String.valueOf(i + 1), normalFont));
-            table.addCell(new Phrase(item.getBookTitle(), normalFont));
-            table.addCell(new Phrase(item.getBookAuthor(), normalFont));
-            table.addCell(new Phrase(String.valueOf(item.getQuantity()), normalFont));
-            
-            PdfPCell priceCell = new PdfPCell(new Phrase(currencyFormat.format(item.getPrice()), normalFont));
-            priceCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(priceCell);
-            
-            double lineTotal = item.getQuantity() * item.getPrice();
-            totalAmount += lineTotal;
-            
-            PdfPCell totalCell = new PdfPCell(new Phrase(currencyFormat.format(lineTotal), normalFont));
-            totalCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(totalCell);
-         }
-         
-         // Tổng cộng
-         PdfPCell emptyCell = new PdfPCell(new Phrase(""));
-         emptyCell.setBorder(0);
-         
-         table.addCell(emptyCell);
-         table.addCell(emptyCell);
-         table.addCell(emptyCell);
-         table.addCell(emptyCell);
-         
-         PdfPCell totalLabelCell = new PdfPCell(new Phrase("Tổng cộng:", boldFont));
-         totalLabelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-         table.addCell(totalLabelCell);
-         
-         PdfPCell totalValueCell = new PdfPCell(new Phrase(currencyFormat.format(totalAmount), boldFont));
-         totalValueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-         table.addCell(totalValueCell);
-         
-         document.add(table);
-         
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
-         document.add(new Paragraph(" "));
-         
-         // Chữ ký
-         PdfPTable signatureTable = new PdfPTable(2);
-         signatureTable.setWidthPercentage(100);
-         
-         PdfPCell buyerCell = new PdfPCell();
-         buyerCell.setBorder(0);
-         Paragraph buyerPara = new Paragraph("Người mua hàng\n(Ký, ghi rõ họ tên)", normalFont);
-         buyerPara.setAlignment(Element.ALIGN_CENTER);
-         buyerCell.addElement(buyerPara);
-         signatureTable.addCell(buyerCell);
-         
-         PdfPCell sellerCell = new PdfPCell();
-         sellerCell.setBorder(0);
-         Paragraph sellerPara = new Paragraph("Người bán hàng\n(Ký, ghi rõ họ tên)", normalFont);
-         sellerPara.setAlignment(Element.ALIGN_CENTER);
-         sellerCell.addElement(sellerPara);
-         signatureTable.addCell(sellerCell);
-         
-         document.add(signatureTable);
-         
-         document.add(new Paragraph(" ")); // Thêm khoảng trống
-         document.add(new Paragraph(" "));
-         document.add(new Paragraph(" "));
-         
-         // Lời cảm ơn
-         Paragraph thankYou = new Paragraph("Cảm ơn quý khách đã mua sắm tại nhà sách chúng tôi!", normalFont);
-         thankYou.setAlignment(Element.ALIGN_CENTER);
-         document.add(thankYou);
-         
-         document.close();
-            
-      } catch (DocumentException e) {
-         throw new ServletException(e);
-      } catch (Exception e) {
-         throw new ServletException(e);
+         response.setContentType("text/html");
+         response.getWriter().write("<h1>Xuất báo cáo tồn kho dạng Excel đang được phát triển</h1>");
+      } catch (IOException e) {
+         e.printStackTrace();
       }
    }
    

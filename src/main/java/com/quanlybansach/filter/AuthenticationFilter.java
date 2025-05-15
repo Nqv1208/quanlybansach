@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @WebFilter(urlPatterns = {
-    "/user/orders/*",
-    "/user/cart/*",
-    "/user/checkout/*",
-    "/user/account/*"
+    "/orders/*",
+    "/cart/*",
+    "/checkout/*",
+    "/account/*"
 })
 public class AuthenticationFilter implements Filter {
 
@@ -34,7 +34,7 @@ public class AuthenticationFilter implements Filter {
         HttpSession session = httpRequest.getSession(false);
         
         // Check if user is logged in
-        boolean isLoggedIn = (session != null && session.getAttribute("user") != null);
+        boolean isLoggedIn = (session != null && session.getAttribute("account") != null);
         
         if (isLoggedIn) {
             // User is authenticated, continue with the request
@@ -50,7 +50,7 @@ public class AuthenticationFilter implements Filter {
             session.setAttribute("loginRedirect", requestedUrl);
             
             // Redirect to home page with login modal
-            httpResponse.sendRedirect(httpRequest.getContextPath() + "/user/home?showLogin=true");
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/home?showLogin=true");
         }
     }
 

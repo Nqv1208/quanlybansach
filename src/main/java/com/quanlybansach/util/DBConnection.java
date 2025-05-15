@@ -9,22 +9,25 @@ public class DBConnection {
     private static final String USER = "NQV";
     private static final String PASS = "120805"; // Change this to your actual password
     
-    private static Connection connection = null;
-    
+    /**
+     * Tạo và trả về một kết nối mới đến cơ sở dữ liệu
+     * @return Kết nối đến cơ sở dữ liệu
+     */
     public static Connection getConnection() {
         try {
-            if (connection == null || connection.isClosed()) {
-                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-                connection = DriverManager.getConnection(DB_URL, USER, PASS);
-            }
-            return connection;
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            return DriverManager.getConnection(DB_URL, USER, PASS);
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
             return null;
         }
     }
     
-    public static void closeConnection() {
+    /**
+     * Đóng kết nối đến cơ sở dữ liệu
+     * @param connection Kết nối cần đóng
+     */
+    public static void closeConnection(Connection connection) {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();

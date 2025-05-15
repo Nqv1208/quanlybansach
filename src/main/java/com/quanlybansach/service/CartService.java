@@ -34,7 +34,7 @@ public class CartService {
      */
     public Cart getCart(HttpServletRequest request) {
         HttpSession session = request.getSession();
-        Integer customerId = (Integer) session.getAttribute("customer_id");
+        Integer customerId = (Integer) session.getAttribute("customerId");
         
         if (customerId != null) {
             // Người dùng đã đăng nhập, lấy giỏ hàng từ database
@@ -65,7 +65,7 @@ public class CartService {
         }
         
         HttpSession session = request.getSession();
-        Integer customerId = (Integer) session.getAttribute("customer_id");
+        Integer customerId = (Integer) session.getAttribute("customerId");
         
         // Lấy thông tin sách
         Book book = bookDAO.getBookById(bookId);
@@ -110,7 +110,7 @@ public class CartService {
         }
         
         HttpSession session = request.getSession();
-        Integer customerId = (Integer) session.getAttribute("customer_id");
+        Integer customerId = (Integer) session.getAttribute("customerId");
         
         // Lấy thông tin sách
         Book book = bookDAO.getBookById(bookId);
@@ -148,7 +148,7 @@ public class CartService {
      */
     public boolean removeFromCart(HttpServletRequest request, int bookId) {
         HttpSession session = request.getSession();
-        Integer customerId = (Integer) session.getAttribute("customer_id");
+        Integer customerId = (Integer) session.getAttribute("customerId");
         
         if (customerId != null) {
             // Người dùng đã đăng nhập, xóa từ database
@@ -179,7 +179,7 @@ public class CartService {
      */
     public boolean clearCart(HttpServletRequest request) {
         HttpSession session = request.getSession();
-        Integer customerId = (Integer) session.getAttribute("customer_id");
+        Integer customerId = (Integer) session.getAttribute("customerId");
         
         if (customerId != null) {
             // Người dùng đã đăng nhập, xóa từ database
