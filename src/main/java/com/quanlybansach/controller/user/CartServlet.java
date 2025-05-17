@@ -121,7 +121,7 @@ public class CartServlet extends HttpServlet {
         // Tính tổng cộng
         cartSummary.calculateTotal();
         
-        request.setAttribute("cart", cart.getItems());
+        request.setAttribute("cart", cart);
         request.setAttribute("cartSummary", cartSummary);
     }
     

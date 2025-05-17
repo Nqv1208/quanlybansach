@@ -215,9 +215,9 @@
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">${relatedBook.title}</h5>
-                                <p class="card-author">${relatedBook.author}</p>
+                                <p class="card-author">${relatedBook.authorName}</p>
                                 <p class="card-price"><fmt:formatNumber value="${relatedBook.price}" type="currency" currencySymbol="" /> ₫</p>
-                                <a href="${pageContext.request.contextPath}/book-detail?id=${relatedBook.id}" class="btn btn-primary w-100">Xem chi tiết</a>
+                                <a href="${pageContext.request.contextPath}/book-detail?id=${relatedBook.bookId}" class="btn btn-primary w-100">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>

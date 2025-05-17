@@ -228,7 +228,8 @@ END
 GO
 
 --===========================================================================--
---============================= INSERT INTO==================================--
+------------------------------- INSERT INTO------------------------------------
+--===========================================================================--
 -- Chèn dữ liệu mẫu cho AUTHORS
 IF NOT EXISTS (SELECT * FROM AUTHORS)
 BEGIN
@@ -241,7 +242,7 @@ BEGIN
         ('https://upload.wikimedia.org/wikipedia/vi/thumb/9/92/NgoTatTo.jpg/175px-NgoTatTo.jpg', N'Ngô Tất Tố', N'Nhà văn, nhà báo nổi tiếng với tác phẩm Tắt Đèn', 1894, N'Việt Nam'),
 		('https://upload.wikimedia.org/wikipedia/commons/1/1e/Paulo_Coelho_nrkbeta.jpg', N'Paulo Coelho', N'Nhà văn nổi tiếng người Brazil với tác phẩm Nhà Giả Kim', 1947, N'Brazil'),
 		('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Haruki_Murakami_2005.jpg/440px-Haruki_Murakami_2005.jpg', N'Haruki Murakami', N'Nhà văn Nhật Bản nổi tiếng thế giới', 1949, N'Nhật Bản'),
-		('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/J._D._Salinger_%28Catcher_in_the_Rye_portrait%29.jpg/440px-J._D._Salinger_%28Catcher_in_the_Rye_portrait%29.jpg', N'J.D. Salinger', N'Tác giả nổi tiếng với Bắt Trẻ Đồng Xanh', 1919, N'Mỹ'),
+		('https://upload.wikimedia.org/wikipedia/vi/thumb/b/b7/B%E1%BA%AFt_tr%E1%BA%BB_%C4%91%E1%BB%93ng_xanh%28s%C3%A1ch%29.jpg/250px-B%E1%BA%AFt_tr%E1%BA%BB_%C4%91%E1%BB%93ng_xanh%28s%C3%A1ch%29.jpg', N'J.D. Salinger', N'Tác giả nổi tiếng với Bắt Trẻ Đồng Xanh', 1919, N'Mỹ'),
 		('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/George_Orwell_press_photo.jpg/440px-George_Orwell_press_photo.jpg', N'George Orwell', N'Nhà văn, nhà báo người Anh nổi tiếng với 1984 và Animal Farm', 1903, N'Anh'),
 		('https://upload.wikimedia.org/wikipedia/vi/thumb/c/c2/Nam_Cao.jpg/440px-Nam_Cao.jpg', N'Nam Cao', N'Nhà văn hiện thực xuất sắc của Việt Nam', 1917, N'Việt Nam');
 END
@@ -288,26 +289,26 @@ IF NOT EXISTS (SELECT * FROM BOOKS)
 BEGIN
     INSERT INTO BOOKS (title, author_id, category_id, publisher_id, ISBN, price, stock_quantity, publication_date, description, image_url)
     VALUES 
-        (N'Tôi thấy hoa vàng trên cỏ xanh', 1, 1, 1, N'8935235226746', 88000, 6, '2018-01-01', N'Truyện kể về cuộc sống của những đứa trẻ ở vùng nông thôn nghèo', N'https://salt.tikicdn.com/ts/product/5e/18/24/2a6154ba08df6ce6161c13f4303fa19e.jpg'),
-        (N'Dế Mèn Phiêu Lưu Ký', 2, 3, 2, N'8934974170617', 75000, 120, '2019-06-15', N'Tác phẩm kể về những cuộc phiêu lưu của chú Dế Mèn', N'https://salt.tikicdn.com/ts/product/eb/62/6b/0e56b45bddc01b57277484865818ab9b.jpg'),
-        (N'Harry Potter và Hòn đá Phù thủy', 3, 2, 5, N'8935235203150', 195000, 85, '2020-03-10', N'Tập đầu tiên trong series Harry Potter', N'https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcShmnC05uJSeCT1MA3N2CIf6Taa9D1Y_qpCXO6W06kIFsjsOOZDUG_IxKRD2Q8M7fyNDfZCJnnqhhI6UYTveeD6LoulnTtiuDjv5Nw9IxJ6ScOoMN49uESkplciik8NVqOYu0Pl16wfI09A&usqp=CAc'),
-        (N'Đắc Nhân Tâm', 4, 4, 5, N'8935086854395', 86000, 10, '2021-01-20', N'Cuốn sách nổi tiếng về nghệ thuật đối nhân xử thế', N'https://nhanvietmedia.edu.vn/publics/files/sach-dac-nhan-tam.jpg'),
-        (N'Tắt Đèn', 5, 1, 3, N'8934974158066', 69000, 100, '2019-05-05', N'Tác phẩm phản ánh cuộc sống khổ cực của người nông dân Việt Nam', N'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSs0Zx7Dgs6a74lq623kmqHTS4nO30QSqbEEZ4jkzvXGaUWIxS0'),
-		(N'Nhà Giả Kim', 6, 2, 4, N'8935235228047', 79000, 150, '2020-05-10', N'Câu chuyện về hành trình theo đuổi giấc mơ của chàng chăn cừu Santiago', N'https://salt.tikicdn.com/ts/product/45/3b/fc/aa81d0a534b45706ae1eee1e344e80d9.jpg'),
-		(N'Rừng Na Uy', 7, 6, 4, N'8935235224278', 150000, 80, '2020-06-12', N'Tiểu thuyết tình cảm nổi tiếng của Haruki Murakami', N'https://salt.tikicdn.com/ts/product/e1/04/31/7763d9035acc32247059158b59ab5be2.jpg'),
-		(N'Kafka Bên Bờ Biển', 7, 6, 4, N'8935235221307', 160000, 70, '2020-07-15', N'Tiểu thuyết siêu thực đầy ẩn dụ của Haruki Murakami', N'https://salt.tikicdn.com/ts/product/15/c9/ec/9b3acb1fd7d5bd1588faa79c7ab8523d.jpg'),
-		(N'Bắt Trẻ Đồng Xanh', 8, 6, 4, N'8935235223127', 105000, 90, '2020-08-20', N'Tiểu thuyết kinh điển về sự nổi loạn của giới trẻ', N'https://salt.tikicdn.com/ts/product/8e/d1/98/ecb2c15d593fd31139bdf31916132092.jpg'),
-		(N'1984', 9, 6, 6, N'8935235229822', 120000, 100, '2020-09-25', N'Tiểu thuyết chính trị viễn tưởng nổi tiếng', N'https://salt.tikicdn.com/ts/product/be/cc/8a/8a940dab33333a0680a53e173b7c9e90.jpg'),
-		(N'Animal Farm (Chuyện Trại Súc Vật)', 9, 6, 6, N'8935235225371', 85000, 120, '2020-10-30', N'Truyện ngụ ngôn chính trị sâu sắc', N'https://salt.tikicdn.com/ts/product/7a/98/e1/8b180b8727bbf131a28e22abf9baf841.jpg'),
-		(N'Chí Phèo', 10, 1, 2, N'8934974159773', 60000, 110, '2019-11-05', N'Tác phẩm nổi tiếng của Nam Cao về bi kịch của một người nông dân', N'https://salt.tikicdn.com/ts/product/6a/c1/8d/ba6df2bfb560bf5db3019ef09e969dff.jpg'),
-		(N'Lão Hạc', 10, 1, 2, N'8934974159780', 55000, 130, '2019-12-10', N'Truyện ngắn cảm động về cuộc sống người nông dân nghèo khó', N'https://salt.tikicdn.com/ts/product/3c/16/75/3ce5527e2dd6535e57ff2c0e7420aa27.jpg'),
-		(N'Những Đứa Con Trong Gia Đình', 5, 1, 3, N'8934974160526', 78000, 95, '2021-01-15', N'Tác phẩm về tình yêu thương gia đình trong khói lửa chiến tranh', N'https://salt.tikicdn.com/ts/product/14/6d/4d/f6b517a3b4cd84f49da1be9bdee95f26.jpg'),
-		(N'Tuổi Thơ Dữ Dội', 2, 1, 2, N'8934974161233', 92000, 85, '2021-02-20', N'Truyện về những đứa trẻ trong thời chiến tranh', N'https://salt.tikicdn.com/ts/product/ab/09/5f/8a8ac0258d5f61c4a6da93bb026b72be.jpg'),
-		(N'Đắc Nhân Tâm (Bản mới)', 4, 7, 8, N'8935086854401', 115000, 200, '2021-03-25', N'Phiên bản cập nhật của cuốn sách kinh điển về nghệ thuật giao tiếp', N'https://salt.tikicdn.com/ts/product/14/76/62/0f9a28f655d62c170b67bc00fbfed7ba.jpg'),
-		(N'Điều Kỳ Diệu Của Tiệm Tạp Hóa Namiya', 7, 6, 4, N'8935235227057', 108000, 75, '2021-04-30', N'Câu chuyện về một tiệm tạp hóa có thể kết nối quá khứ và hiện tại', N'https://salt.tikicdn.com/ts/product/a0/88/89/4cb29a4e56847bfe4f47df2340187885.jpg'),
-		(N'Sapiens: Lược Sử Loài Người', 6, 8, 6, N'8935235228986', 189000, 65, '2021-05-05', N'Sách về lịch sử phát triển của loài người', N'https://salt.tikicdn.com/ts/product/c3/f7/08/37767cd954185bfb7d888463740ff8bf.jpg'),
-		(N'Homo Deus: Lược Sử Tương Lai', 6, 8, 6, N'8935235229235', 199000, 60, '2021-06-10', N'Sách dự đoán về tương lai của loài người', N'https://salt.tikicdn.com/ts/product/46/f4/52/7211ba953e0389f33f19c0420c2253a6.jpg'),
-		(N'Nghĩ Giàu Làm Giàu', 4, 7, 8, N'8935086855163', 125000, 180, '2021-07-15', N'Sách kinh điển về thành công và làm giàu', N'https://salt.tikicdn.com/ts/product/21/f6/fa/fc1ce1e9a9162d63b8a8b2e5870df93a.jpg');
+        (N'Tôi thấy hoa vàng trên cỏ xanh', 1, 1, 1, N'8935235226746', 88000, 6, '2018-01-01', N'Truyện kể về cuộc sống của những đứa trẻ ở vùng nông thôn nghèo', N'https://www.nxbtre.com.vn/Images/Book/NXBTreStoryFull_08352010_033550.jpg'),
+        (N'Dế Mèn Phiêu Lưu Ký', 2, 3, 2, N'8934974170617', 75000, 120, '2019-06-15', N'Tác phẩm kể về những cuộc phiêu lưu của chú Dế Mèn', N'https://quantri.pgdthanhxuan.edu.vn//UploadImages/thphandinhgiot/admin/2019_9/B%C3%ACa%20s%C3%A1ch/3595...nh.jpg'),
+        (N'Harry Potter và Hòn đá Phù thủy', 3, 2, 5, N'8935235203150', 195000, 85, '2020-03-10', N'Tập đầu tiên trong series Harry Potter', N'https://images-na.ssl-images-amazon.com/images/I/81YOuOGFCJL.jpg'),
+        (N'Đắc Nhân Tâm', 4, 4, 5, N'8935086854395', 86000, 10, '2021-01-20', N'Cuốn sách nổi tiếng về nghệ thuật đối nhân xử thế', N'https://firstnews.vn/upload/products/original/-1726817123.jpg'),
+        (N'Tắt Đèn', 5, 1, 3, N'8934974158066', 69000, 100, '2019-05-05', N'Tác phẩm phản ánh cuộc sống khổ cực của người nông dân Việt Nam', N'https://cdn1.fahasa.com/media/flashmagazine/images/page_images/tat_den_tai_ban_2022/2022_06_27_11_52_02...10.jpg'),
+        (N'Nhà Giả Kim', 6, 2, 4, N'8935235228047', 79000, 150, '2020-05-10', N'Câu chuyện về hành trình theo đuổi giấc mơ của chàng chăn cừu Santiago', N'https://salt.tikicdn.com/ts/product/45/3b/fc/aa81d0a534b45706ae1eee1e344e80d9.jpg'),
+        (N'Rừng Na Uy', 7, 6, 4, N'8935235224278', 150000, 80, '2020-06-12', N'Tiểu thuyết tình cảm nổi tiếng của Haruki Murakami', N'https://upload.wikimedia.org/wikipedia/vi/2/28/Norwegian-wood_poster.jpg'),
+        (N'Kafka Bên Bờ Biển', 7, 6, 4, N'8935235221307', 160000, 70, '2020-07-15', N'Tiểu thuyết siêu thực đầy ẩn dụ của Haruki Murakami', N'https://cdn1.fahasa.com/media/catalog/product/8/9/8935235242654.jpg'),
+        (N'Bắt Trẻ Đồng Xanh', 8, 6, 4, N'8935235223127', 105000, 90, '2020-08-20', N'Tiểu thuyết kinh điển về sự nổi loạn của giới trẻ', N'https://upload.wikimedia.org/wikipedia/vi/b/b7/B%E1%BA%AFt_tr%E1%BA%BB_%C4%91%E1%BB%93ng_xanh%28s%C3%A1...29.jpg'),
+        (N'1984', 9, 6, 6, N'8935235229822', 120000, 100, '2020-09-25', N'Tiểu thuyết chính trị viễn tưởng nổi tiếng', N'https://m.media-amazon.com/images/I/61NAx5pd6XL._AC_UF1000,1000_QL80_.jpg'),
+        (N'Animal Farm (Chuyện Trại Súc Vật)', 9, 6, 6, N'8935235225371', 85000, 120, '2020-10-30', N'Truyện ngụ ngôn chính trị sâu sắc', N'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk0L4QVcJ8eq1EtdRYIEA06F2lYpj4L-0eaQ&s'),
+		(N'Chí Phèo', 10, 1, 2, N'8934974159773', 60000, 110, '2019-11-05', N'Tác phẩm nổi tiếng của Nam Cao về bi kịch của một người nông dân', N'https://www.netabooks.vn/Data/Sites/1/Product/18268/1.jpg'),
+        (N'Lão Hạc', 10, 1, 2, N'8934974159780', 55000, 130, '2019-12-10', N'Truyện ngắn cảm động về cuộc sống người nông dân nghèo khó', N'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXxsSjPXOTwodiSUtSe-SPyR7ztwKtJS3OCg&s'),
+        (N'Những Đứa Con Trong Gia Đình', 5, 1, 3, N'8934974160526', 78000, 95, '2021-01-15', N'Tác phẩm về tình yêu thương gia đình trong khói lửa chiến tranh', N'https://st.download.vn/data/image/2021/03/16/Gia-dinh.jpg'),
+        (N'Tuổi Thơ Dữ Dội', 2, 1, 2, N'8934974161233', 92000, 85, '2021-02-20', N'Truyện về những đứa trẻ trong thời chiến tranh', N'https://static.ybox.vn/2019/7/6/1562391985682-Ghien-review-Tuoi-tho-du-doi-01.jpg'),
+        (N'Đắc Nhân Tâm (Bản mới)', 4, 7, 8, N'8935086854401', 115000, 200, '2021-03-25', N'Phiên bản cập nhật của cuốn sách kinh điển về nghệ thuật giao tiếp', N'https://static.oreka.vn/800-800_09ba6b77-c6a4-4633-a2c9-8650de865733.webp'),
+        (N'Điều Kỳ Diệu Của Tiệm Tạp Hóa Namiya', 7, 6, 4, N'8935235227057', 108000, 75, '2021-04-30', N'Câu chuyện về một tiệm tạp hóa có thể kết nối quá khứ và hiện tại', N'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1697672044i/122276352.jpg'),
+        (N'Sapiens: Lược Sử Loài Người', 6, 8, 6, N'8935235228986', 189000, 65, '2021-05-05', N'Sách về lịch sử phát triển của loài người', N'https://bizweb.dktcdn.net/100/197/269/products/sapiens-luoc-su-ve-loai-nguoi-outline-5-7-2017-02.jpg?v...5327270'),
+        (N'Homo Deus: Lược Sử Tương Lai', 6, 8, 6, N'8935235229235', 199000, 60, '2021-06-10', N'Sách dự đoán về tương lai của loài người', N'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTk4SJYTfoLz7gOH9OpoR68PQwAbCUupLDW-A&s'),
+        (N'Nghĩ Giàu Làm Giàu', 4, 7, 8, N'8935086855163', 125000, 180, '2021-07-15', N'Sách kinh điển về thành công và làm giàu', N'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfN4rXqxsHpuwsi96pxdxjevFlXuFcHvEX-g&s');
 END
 GO
 
@@ -2274,6 +2275,12 @@ SELECT b.*, a.name AS authorName, c.name AS categoryName
 FROM dbo.BOOKS AS b
 JOIN dbo.AUTHORS AS a ON a.author_id = b.author_id
 JOIN dbo.CATEGORIES AS c ON c.category_id = b.category_id
+
+-------------------------------------
+SELECT TOP (5) o.*, c.name FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.customer_id = 5
+ORDER BY o.order_date DESC
 
 -------------------------------------
 SELECT * FROM dbo.AUTHORS

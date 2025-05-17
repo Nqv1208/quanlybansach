@@ -36,7 +36,7 @@
                         <h2 class="mb-0">Chi tiết giỏ hàng</h2>
                     </div>
                     
-                    <c:if test="${empty cart || cart.size() == 0}">
+                    <c:if test="${empty cart || cart.getItems().size() == 0}">
                         <div class="empty-cart">
                             <i class="fas fa-shopping-cart empty-cart-icon"></i>
                             <h3>Giỏ hàng trống</h3>
@@ -45,9 +45,9 @@
                         </div>
                     </c:if>
                     
-                    <c:if test="${not empty cart && cart.size() > 0}">
+                    <c:if test="${not empty cart && cart.getItems().size() > 0}">
                         <div class="cart-items">
-                            <c:forEach var="item" items="${cart}">
+                            <c:forEach var="item" items="${cart.getItems()}">
                                 <div class="cart-item">
                                     <div class="item-select">
                                         <input type="checkbox" class="item-checkbox" data-id="${item.book.bookId}" data-price="${item.book.price}" data-quantity="${item.quantity}" checked>
@@ -126,7 +126,7 @@
                     </div>
                     
                     <c:choose>
-                        <c:when test="${empty cart || cart.size() == 0}">
+                        <c:when test="${empty cart || cart.getItems().size() == 0}">
                             <button class="btn btn-primary checkout-btn" disabled>
                                 Thanh toán
                             </button>

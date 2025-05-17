@@ -112,7 +112,7 @@
                         <a class="nav-link ${pageContext.request.servletPath.endsWith('/authors.jsp') ? 'active' : ''}" href="${pageContext.request.contextPath}/authors">Tác giả</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link ${pageContext.request.servletPath.endsWith('/contact.jsp') ? 'active' : ''}" href="${pageContext.request.contextPath}/contact">Liên hệ</a>
+                        <a class="nav-link ${pageContext.request.servletPath.endsWith('/contact.jsp') ? 'active' : ''}" href="#footer">Liên hệ</a>
                     </li>
                     
                 </ul>
@@ -162,7 +162,7 @@
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/profile">
                                     <i class="fas fa-user"></i> Thông tin tài khoản
                                 </a></li>
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/orders">
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/orders">
                                     <i class="fas fa-clipboard-list"></i> Đơn hàng của tôi
                                 </a></li>
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/wishlist">
