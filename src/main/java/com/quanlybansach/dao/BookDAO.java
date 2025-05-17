@@ -373,7 +373,7 @@ public class BookDAO {
 
     public List<Book> getRelatedBooks(int bookId, int categoryId, int limit) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT TOP(?) b.*, a.name as author_name, c.name as category_name, p.name as publisher_name, " +
+        String sql = "SELECT TOP ? b.*, a.name as author_name, c.name as category_name, p.name as publisher_name, " +
                      "COALESCE(AVG(CAST(r.rating AS FLOAT)), 0) AS avg_rating, " +
                      "COUNT(r.review_id) AS review_count " +
                      "FROM BOOKS b " +

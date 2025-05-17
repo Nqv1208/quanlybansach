@@ -36,18 +36,17 @@ public class OrderServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String pathInfo = request.getPathInfo();
-        String action = pathInfo != null ? pathInfo : "";
+        String action = request.getServletPath();
         
         try {
             switch (action) {
-                case "/detail":
+                case "/orders/detail":
                     showOrderDetail(request, response);
                     break;
-                case "/review":
+                case "/orders/review":
                     showReviewForm(request, response);
                     break;
-                case "/reorder":
+                case "/orders/reorder":
                     reorder(request, response);
                     break;
                 default:
@@ -60,15 +59,14 @@ public class OrderServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String pathInfo = request.getPathInfo();
-        String action = pathInfo != null ? pathInfo : "";
+        String action = request.getServletPath();
         
         try {
             switch (action) {
-                case "/cancel":
+                case "/orders/cancel":
                     cancelOrder(request, response);
                     break;
-                case "/review/submit":
+                case "/orders/review/submit":
                     submitReview(request, response);
                     break;
                 default:
@@ -118,7 +116,7 @@ public class OrderServlet extends HttpServlet {
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/orders.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/orders/index.jsp");
         dispatcher.forward(request, response);
     }
 
@@ -139,12 +137,12 @@ public class OrderServlet extends HttpServlet {
         
         // Verify the order belongs to the logged-in customer
         if (order.getCustomerId() != customer.getCustomerId()) {
-            response.sendRedirect(request.getContextPath() + "/user/orders");
+            response.sendRedirect(request.getContextPath() + "/orders");
             return;
         }
         
         request.setAttribute("order", order);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/orders/detail.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/orders/detail.jsp");
         dispatcher.forward(request, response);
     }
 
@@ -166,7 +164,7 @@ public class OrderServlet extends HttpServlet {
         
         // Verify the order belongs to the logged-in customer and is in pending status
         if (order.getCustomerId() != customer.getCustomerId() || !order.getStatus().equals("pending")) {
-            response.sendRedirect(request.getContextPath() + "/orders");
+            response.sendRedirect(request.getContextPath() + "/user/orders");
             return;
         }
         
@@ -178,7 +176,7 @@ public class OrderServlet extends HttpServlet {
         // In real implementation, use orderDAO.updateOrder(order);
         
         // Return to order details page
-        response.sendRedirect(request.getContextPath() + "/orders/detail?id=" + orderId);
+        response.sendRedirect(request.getContextPath() + "/user/orders/detail?id=" + orderId);
     }
 
     private void showReviewForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
@@ -199,7 +197,7 @@ public class OrderServlet extends HttpServlet {
         
         // Verify the order belongs to the logged-in customer and is delivered
         if (order.getCustomerId() != customer.getCustomerId() || !order.getStatus().equals("delivered")) {
-            response.sendRedirect(request.getContextPath() + "/orders");
+            response.sendRedirect(request.getContextPath() + "/user/orders");
             return;
         }
         
@@ -214,7 +212,7 @@ public class OrderServlet extends HttpServlet {
         // and save the reviews to the database
         
         // Redirect back to the order detail page
-        response.sendRedirect(request.getContextPath() + "/orders/detail?id=" + request.getParameter("orderId"));
+        response.sendRedirect(request.getContextPath() + "/user/orders/detail?id=" + request.getParameter("orderId"));
     }
 
     private void reorder(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
@@ -234,7 +232,7 @@ public class OrderServlet extends HttpServlet {
         
         // Verify the order belongs to the logged-in customer
         if (order.getCustomerId() != customer.getCustomerId()) {
-            response.sendRedirect(request.getContextPath() + "/orders");
+            response.sendRedirect(request.getContextPath() + "/user/orders");
             return;
         }
         
@@ -254,6 +252,6 @@ public class OrderServlet extends HttpServlet {
         }
         
         // Redirect to cart page
-        response.sendRedirect(request.getContextPath() + "/cart");
+        response.sendRedirect(request.getContextPath() + "/user/cart");
     }
 } 

@@ -4,9 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Đại diện cho lớp kết nối đến cơ sở dữ liệu
- */
 public class DBConnection {
     private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=BOOKSTORE_MANAGEMENT;encrypt=false;trustServerCertificate=false";
     private static final String USER = "NQV";
