@@ -124,10 +124,66 @@ public class OrderDAO {
       return order;
    }
    
+   /**
+    * Get recent orders by customer
+   * 
+   * @param customerId Customer ID
+   * @param limit Maximum number of orders to return
+   * @return List of recent orders
+   * @throws SQLException if database error occurs
+   */
+   public List<Order> getRecentOrdersByCustomer(int customerId, int limit) throws SQLException {
+      List<Order> orders = new ArrayList<>();
+      String sql = "SELECT TOP(?) o.*, c.name FROM orders o " +
+                  "JOIN customers c ON o.customer_id = c.customer_id " +
+                  "WHERE o.customer_id = ? " +
+                  "ORDER BY o.order_date DESC ";
+      
+      try (Connection conn = DBConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+         
+         stmt.setInt(1, customerId);
+         stmt.setInt(2, limit);
+         
+         try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                  Order order = mapResultSetToOrder(rs);
+                  orders.add(order);
+            }
+         }
+      }
+      
+      return orders;
+   }
+   
+   /**
+    * Get count of orders for a customer
+   * 
+   * @param customerId Customer ID
+   * @return Count of orders
+   * @throws SQLException if database error occurs
+   */
+   public int getOrderCountByCustomer(int customerId) throws SQLException {
+      String sql = "SELECT COUNT(*) FROM orders WHERE customer_id = ?";
+      
+      try (Connection conn = DBConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+         
+         stmt.setInt(1, customerId);
+         
+         try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                  return rs.getInt(1);
+            }
+         }
+      }
+      
+      return 0;
+   }
 
-   public static void main(String[] args) {
+   public static void main(String[] args) throws SQLException {
       OrderDAO orderDAO = new OrderDAO();
-      List <Order> orders = orderDAO.getAllOrders();
+      List<Order> orders = orderDAO.getRecentOrdersByCustomer(5, 5);
       for(Order order : orders) {
          System.out.println(order.toString());
       }

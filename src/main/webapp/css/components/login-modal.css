@@ -1,5 +1,5 @@
 /* Login modal styles */
-@import url('../../themes/variables.css');
+@import url('../themes/variables.css');
 
 .login-modal .modal-content {
     border-radius: var(--border-radius-l);

@@ -12,7 +12,6 @@
 /* Import component styles */
 @import url('components/header.css');
 @import url('components/footer.css');
-@import url('components/cards.css');
 @import url('components/login-modal.css');
 
 /* Import utility styles - uncomment as they're created */
@@ -68,7 +67,7 @@ body {
 }
 
 /* Navbar Styles */
-.navbar {
+/* .navbar {
     background-color: var(--white-color);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 0.75rem 0;
@@ -101,7 +100,7 @@ body {
 .nav-link.active {
     color: var(--primary-color);
     font-weight: 600;
-}
+} */
 
 /* Button Styles */
 .btn {
