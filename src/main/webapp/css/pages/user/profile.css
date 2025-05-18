@@ -1,0 +1,303 @@
+/* Profile page styles */
+@import url('../../themes/variables.css');
+
+/* General styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.page-title {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--white-color);
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0 0 10px 10px;
+}
+
+/* Profile Sidebar styles */
+.profile-sidebar {
+    background-color: var(--white-color);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.avatar-container {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--white-color);
+    text-transform: uppercase;
+}
+
+.user-name {
+    margin-top: 1rem;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--dark-text-color);
+}
+
+.user-email {
+    color: var(--light-text-color);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.profile-nav {
+    margin-top: 1.5rem;
+}
+
+.profile-nav .nav-link {
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    border-radius: 5px;
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+}
+
+.profile-nav .nav-link:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    color: var(--primary-color);
+}
+
+.profile-nav .nav-link.active {
+    background-color: rgba(var(--primary-color-rgb), 0.15);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.profile-nav .nav-link i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Profile Content styles */
+.profile-content {
+    background-color: var(--white-color);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-header h3 {
+    margin-bottom: 0;
+    color: var(--dark-text-color);
+    font-weight: 700;
+}
+
+/* Profile Information styles */
+.info-item {
+    margin-bottom: 1rem;
+}
+
+.info-label {
+    font-size: 0.9rem;
+    color: var(--light-text-color);
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    font-weight: 600;
+    color: var(--dark-text-color);
+}
+
+/* Account Stats styles */
+.account-stats {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.stats-title {
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-text-color);
+}
+
+.stat-card {
+    background-color: var(--background-color);
+    padding: 1.5rem 1rem;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.stat-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-text-color);
+}
+
+.stat-label {
+    color: var(--light-text-color);
+    font-size: 0.9rem;
+}
+
+/* Recent Orders styles */
+.recent-orders {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.section-title {
+    font-weight: 700;
+    color: var(--dark-text-color);
+    margin-bottom: 0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 20px;
+}
+
+.status-badge.pending {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.status-badge.processing {
+    background-color: rgba(13, 110, 253, 0.2);
+    color: #0d6efd;
+}
+
+.status-badge.shipped {
+    background-color: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+}
+
+.status-badge.delivered {
+    background-color: rgba(25, 135, 84, 0.2);
+    color: #198754;
+}
+
+.status-badge.cancelled {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+}
+
+/* Edit Profile Modal styles */
+.modal-content {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.modal-header {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.avatar-upload {
+    position: relative;
+}
+
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Responsive styles */
+@media (max-width: 991px) {
+    .profile-sidebar {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .profile-header button {
+        margin-top: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem 0.5rem;
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-count {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .profile-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .avatar-container {
+        width: 80px;
+        height: 80px;
+    }
+} 

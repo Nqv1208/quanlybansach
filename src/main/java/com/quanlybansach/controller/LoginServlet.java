@@ -66,7 +66,6 @@ public class LoginServlet extends HttpServlet {
          session.setAttribute("role", account.getRoleName());
 
          CartDAO cartDAO = new CartDAO();
-         session.setAttribute("cart", cartDAO.getCartByCustomerId(account.getCustomerId()));
          
          // Lưu thông tin khách hàng nếu có
          if (account.getCustomerId() != null) {

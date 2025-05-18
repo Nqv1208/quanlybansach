@@ -36,7 +36,7 @@
                         <h2 class="mb-0">Chi tiết giỏ hàng</h2>
                     </div>
                     
-                    <c:if test="${empty cart || cart.size() == 0}">
+                    <c:if test="${empty cart || cart.getItems().size() == 0}">
                         <div class="empty-cart">
                             <i class="fas fa-shopping-cart empty-cart-icon"></i>
                             <h3>Giỏ hàng trống</h3>
@@ -45,9 +45,9 @@
                         </div>
                     </c:if>
                     
-                    <c:if test="${not empty cart && cart.size() > 0}">
+                    <c:if test="${not empty cart && cart.getItems().size() > 0}">
                         <div class="cart-items">
-                            <c:forEach var="item" items="${cart}">
+                            <c:forEach var="item" items="${cart.getItems()}">
                                 <div class="cart-item">
                                     <div class="item-select">
                                         <input type="checkbox" class="item-checkbox" data-id="${item.book.bookId}" data-price="${item.book.price}" data-quantity="${item.quantity}" checked>
@@ -81,8 +81,8 @@
                                 <i class="fas fa-arrow-left me-2"></i> Tiếp tục mua sắm
                             </a>
                             <button type="button" id="clear-cart-btn" class="btn btn-outline-danger">
-                                <i class="fas fa-trash me-2"></i> Xóa giỏ hàng
-                            </button>
+                                    <i class="fas fa-trash me-2"></i> Xóa giỏ hàng
+                                </button>
                         </div>
                     </c:if>
                 </div>
@@ -126,7 +126,7 @@
                     </div>
                     
                     <c:choose>
-                        <c:when test="${empty cart || cart.size() == 0}">
+                        <c:when test="${empty cart || cart.getItems().size() == 0}">
                             <button class="btn btn-primary checkout-btn" disabled>
                                 Thanh toán
                             </button>
@@ -167,9 +167,9 @@
     <!-- Custom JS -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const decreaseBtns = document.querySelectorAll('.decrease-btn');
-            const increaseBtns = document.querySelectorAll('.increase-btn');
-            const quantityInputs = document.querySelectorAll('.quantity-input');
+        const decreaseBtns = document.querySelectorAll('.decrease-btn');
+        const increaseBtns = document.querySelectorAll('.increase-btn');
+        const quantityInputs = document.querySelectorAll('.quantity-input');
             const itemCheckboxes = document.querySelectorAll('.item-checkbox');
             const removeBtns = document.querySelectorAll('.remove-btn');
             const clearCartBtn = document.getElementById('clear-cart-btn');
@@ -273,7 +273,7 @@
                 }
                 
                 // Cập nhật giá trị hiển thị
-                input.value = value;
+                    input.value = value;
                 
                 // Cập nhật thuộc tính data-quantity của checkbox
                 const checkbox = document.querySelector(`.item-checkbox[data-id="${id}"]`);
@@ -504,22 +504,22 @@
             });
             
             // Thêm event listeners cho các nút tăng
-            increaseBtns.forEach(btn => {
+        increaseBtns.forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault(); // Ngăn chặn hành vi mặc định
-                    const id = this.getAttribute('data-id');
-                    const input = document.querySelector(`.quantity-input[data-id="${id}"]`);
-                    let value = parseInt(input.value, 10);
-                    const max = parseInt(input.getAttribute('max'), 10);
-                    if (value < max) {
+                const id = this.getAttribute('data-id');
+                const input = document.querySelector(`.quantity-input[data-id="${id}"]`);
+                let value = parseInt(input.value, 10);
+                const max = parseInt(input.getAttribute('max'), 10);
+                if (value < max) {
                         updateQuantity(id, value + 1);
-                    }
-                });
+                }
             });
-            
+        });
+        
             // Thêm event listeners cho các trường nhập số lượng
-            quantityInputs.forEach(input => {
-                input.addEventListener('change', function() {
+        quantityInputs.forEach(input => {
+            input.addEventListener('change', function() {
                     const id = this.getAttribute('data-id');
                     updateQuantity(id, this.value);
                 });

@@ -50,7 +50,7 @@
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="card">
                             <div class="card-img-container">
-                                <img src="${pageContext.request.contextPath}/assets/img/books/${book.image}" class="card-img-top" alt="${book.title}">
+                                <img src="${book.imageUrl}" class="card-img-top" alt="${book.title}">
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">${book.title}</h5>

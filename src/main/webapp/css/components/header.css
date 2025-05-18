@@ -10,24 +10,27 @@
 .navbar-brand {
     font-weight: 700;
     color: var(--primary-color);
-    font-size: var(--font-size-large);
+    display: flex;
+    align-items: center;
 }
 
 .navbar-brand i {
-    margin-right: var(--spacing-xs);
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
 }
 
 .nav-link {
-    font-weight: 500;
     color: var(--text-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
     transition: color var(--transition-fast);
-    padding: var(--spacing-s) var(--spacing-m);
 }
 
 .nav-link:hover, 
 .nav-link:focus, 
 .nav-link.active {
     color: var(--primary-color);
+    font-weight: 600;
 }
 
 .dropdown-menu {
@@ -82,16 +85,75 @@
     border-color: var(--secondary-color);
 }
 
-/* User dropdown */
-.user-dropdown .dropdown-toggle::after {
-    margin-left: var(--spacing-s);
+/* User dropdown styling */
+.user-dropdown {
+    margin-left: 1rem;
+}
+
+.user-dropdown .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #4267B2;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.user-dropdown .dropdown-menu {
+    padding: 0;
+}
+
+.user-dropdown .dropdown-item {
+    padding: 0.6rem 1rem;
 }
 
 .user-dropdown .dropdown-item i {
-    width: 1.2rem;
+    width: 20px;
+    margin-right: 8px;
     text-align: center;
-    margin-right: var(--spacing-s);
-    color: var(--primary-color);
+}
+
+.user-dropdown .dropdown-divider {
+    margin: 0;
+}
+
+.dropdown-header {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.role-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    margin-left: 0.5rem;
+    border-radius: 10px;
+}
+
+.role-admin {
+    background-color: #dc3545;
+    color: white;
+}
+
+.role-staff {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.role-user {
+    background-color: #0d6efd;
+    color: white;
 }
 
 /* Mobile navigation */
