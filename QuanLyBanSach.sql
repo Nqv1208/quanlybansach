@@ -1777,6 +1777,125 @@ EXEC dbo.pr_search_books @keyword = N'',  -- nvarchar(255)
                          @authorId = 0    -- int
 
 -----------------------------------------------------
+-- Enhanced book search with all filter options
+DROP PROCEDURE IF EXISTS pr_Enhanced_Book_Search
+GO
+CREATE PROCEDURE pr_Enhanced_Book_Search
+    @keyword NVARCHAR(255) = NULL,          -- Search keyword (title, author, etc.)
+    @categoryId INT = 0,                    -- Category filter (0 means all)
+    @minPrice DECIMAL(10,2) = 0,            -- Minimum price
+    @maxPrice DECIMAL(10,2) = 1000000,      -- Maximum price
+    @authorId INT = 0,                      -- Author filter (0 means all)
+    @minRating FLOAT = 0,                   -- Minimum rating
+    @sortBy VARCHAR(20) = 'newest'          -- Sorting options: newest, price-asc, price-desc, rating, bestseller
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Create a CTE to get book ratings
+    WITH BookRatings AS (
+        SELECT 
+            book_id,
+            COALESCE(AVG(CAST(rating AS FLOAT)), 0) AS avg_rating,
+            COUNT(review_id) AS review_count
+        FROM 
+            REVIEWS
+        GROUP BY 
+            book_id
+    )
+    
+    -- Main query
+    SELECT 
+        b.book_id,
+        b.image_url,
+        b.title,
+        b.stock_quantity,
+        b.price,
+        b.publication_date,
+        b.ISBN,
+        b.description,
+        c.name AS category_name,
+        c.category_id,
+        a.name AS author_name,
+        a.author_id,
+        p.name AS publisher_name,
+        p.publisher_id,
+        COALESCE(br.avg_rating, 0) AS avg_rating,
+        COALESCE(br.review_count, 0) AS review_count,
+        COALESCE(
+            (SELECT SUM(quantity) FROM INVOICE_ITEMS i 
+             JOIN INVOICES inv ON i.invoice_id = inv.invoice_id 
+             WHERE i.book_id = b.book_id
+             AND inv.created_date >= DATEADD(month, -3, GETDATE())), 0
+        ) AS total_sold  -- Sales in the last 3 months for bestseller sorting
+    FROM 
+        BOOKS b
+    LEFT JOIN 
+        CATEGORIES c ON b.category_id = c.category_id
+    LEFT JOIN 
+        AUTHORS a ON b.author_id = a.author_id
+    LEFT JOIN 
+        PUBLISHERS p ON b.publisher_id = p.publisher_id
+    LEFT JOIN 
+        BookRatings br ON b.book_id = br.book_id
+    WHERE 
+        -- Keyword search in title, author name, or publisher name
+        (@keyword IS NULL 
+         OR b.title LIKE '%' + @keyword + '%' 
+         OR a.name LIKE '%' + @keyword + '%'
+         OR p.name LIKE '%' + @keyword + '%'
+         OR b.ISBN LIKE '%' + @keyword + '%')
+        
+        -- Category filter
+        AND (@categoryId = 0 OR b.category_id = @categoryId)
+        
+        -- Price range filter
+        AND (b.price BETWEEN @minPrice AND @maxPrice)
+        
+        -- Author filter
+        AND (@authorId = 0 OR b.author_id = @authorId)
+        
+        -- Rating filter
+        AND (COALESCE(br.avg_rating, 0) >= @minRating)
+        
+    -- Sorting options
+    ORDER BY
+        CASE 
+            WHEN @sortBy = 'newest' THEN CAST(b.publication_date AS DATETIME)
+        END DESC,
+        CASE 
+            WHEN @sortBy = 'price-asc' THEN b.price
+        END ASC,
+        CASE 
+            WHEN @sortBy = 'price-desc' THEN b.price
+        END DESC,
+        CASE 
+            WHEN @sortBy = 'rating' THEN COALESCE(br.avg_rating, 0)
+        END DESC,
+        CASE 
+            WHEN @sortBy = 'bestseller' THEN 
+                (SELECT COALESCE(SUM(quantity), 0) FROM INVOICE_ITEMS i 
+                 JOIN INVOICES inv ON i.invoice_id = inv.invoice_id 
+                 WHERE i.book_id = b.book_id
+                 AND inv.created_date >= DATEADD(month, -3, GETDATE()))
+        END DESC;
+END;
+GO
+
+-- Example usage:
+-- Search books with keyword 'programming', in category 1, price between 100000 and 500000,
+-- rating 4 and above, in stock, sorted by bestseller
+EXEC pr_Enhanced_Book_Search 
+    @keyword = N'',
+    @categoryId = 0,
+    @minPrice = 0,
+    @maxPrice = 1000000,
+    @authorId = 0,
+    @minRating = 5,
+    @sortBy = 'bestseller';
+GO
+
+-----------------------------------------------------
 -- Tìm kiếm thông tin tác giả từ form
 DROP PROCEDURE IF EXISTS pr_Search_Authors
 GO	

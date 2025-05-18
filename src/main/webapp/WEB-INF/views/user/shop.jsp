@@ -189,7 +189,7 @@
                 </div>
                 
                 <!-- Products Grid -->
-                <div class="row">
+                <div class="products-list row">
                     <c:forEach var="book" items="${books}">
                         <div class="col-lg-4 col-md-6 mb-4">
                             <div class="card h-100">
@@ -236,11 +236,11 @@
                                     <p class="card-price"><fmt:formatNumber value="${book.price}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
                                     <div class="d-flex gap-2">
                                         <a href="${pageContext.request.contextPath}/book-detail?id=${book.bookId}" class="btn btn-outline-primary flex-grow-1">Chi tiết</a>
-                                        <c:if test="${book.stockQuantity > 0}">
+                                        <!-- <c:if test="${book.stockQuantity > 0}">
                                             <button type="button" class="btn btn-primary btn-add-to-cart" data-book-id="${book.bookId}" data-quantity="1">
                                                 <i class="fas fa-cart-plus"></i>
                                             </button>
-                                        </c:if>
+                                        </c:if> -->
                                     </div>
                                 </div>
                             </div>
@@ -284,43 +284,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JavaScript -->
-    <script>
-        // Handle category filter checkboxes
-        document.querySelectorAll('.category-filter').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                // Uncheck other category filters
-                document.querySelectorAll('.category-filter').forEach(cb => {
-                    if (cb !== this) cb.checked = false;
-                });
-                
-                // Redirect to the same page with the selected category
-                if (this.checked) {
-                    window.location.href = '${pageContext.request.contextPath}/shop?category=' + this.value;
-                } else {
-                    window.location.href = '${pageContext.request.contextPath}/shop';
-                }
-            });
-        });
-        
-        // Handle sort select dropdown
-        document.querySelector('.sort-select').addEventListener('change', function() {
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('sort', this.value);
-            window.location.href = currentUrl.toString();
-        });
-        
-        // Handle price range
-        const priceRange = document.getElementById('priceRange');
-        const minPrice = document.getElementById('minPrice');
-        const maxPrice = document.getElementById('maxPrice');
-        
-        if (priceRange) {
-            priceRange.addEventListener('input', function() {
-                const value = this.value;
-                minPrice.textContent = '0₫';
-                maxPrice.textContent = new Intl.NumberFormat('vi-VN').format(value) + '₫';
-            });
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/js/user/shop.js"></script>
 </body>
 </html> 

@@ -40,7 +40,7 @@ public class BookDAO {
         return books;
     }
 
-    public List<Book> getBookByParemeters(String keywork, Integer cateloryId, Integer authorId) {
+    public List<Book> getBookByParemeters(String keywork, Integer cateloryId, Integer authorId, Integer priceRance, Integer review, Integer sort) {
         List<Book> books = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection()) {
 
@@ -399,6 +399,82 @@ public class BookDAO {
                     Book book = mapResultSetToBook(rs);
                     books.add(book);
                 }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return books;
+    }
+
+    /**
+     * Enhanced book search using all available filter options
+     * @param keyword Search keyword for title, author, publisher, or ISBN
+     * @param categoryId Category ID filter (0 for all)
+     * @param minPrice Minimum price filter
+     * @param maxPrice Maximum price filter
+     * @param authorId Author ID filter (0 for all)
+     * @param minRating Minimum rating filter (0-5)
+     * @param stockStatus Stock status filter (0: all, 1: in stock, 2: low stock, 3: out of stock)
+     * @param sortBy Sorting option (newest, price-asc, price-desc, rating, bestseller)
+     * @return List of books matching the search criteria
+     */
+    public List<Book> getEnhancedSearchBooks(
+            String keyword, 
+            int categoryId, 
+            BigDecimal minPrice, 
+            BigDecimal maxPrice,
+            int authorId, 
+            float minRating, 
+            String sortBy) {
+        
+        List<Book> books = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection()) {
+            CallableStatement cstm = conn.prepareCall("{call pr_Enhanced_Book_Search(?, ?, ?, ?, ?, ?, ?)}");
+            
+            // Set parameters
+            cstm.setString(1, keyword);
+            cstm.setInt(2, categoryId);
+            cstm.setBigDecimal(3, minPrice);
+            cstm.setBigDecimal(4, maxPrice);
+            cstm.setInt(5, authorId);
+            cstm.setFloat(6, minRating);
+            cstm.setString(7, sortBy);
+            
+            ResultSet rs = cstm.executeQuery();
+            
+            while (rs.next()) {
+                Book book = new Book();
+                book.setBookId(rs.getInt("book_id"));
+                book.setTitle(rs.getString("title"));
+                book.setImageUrl(rs.getString("image_url"));
+                book.setPrice(rs.getBigDecimal("price"));
+                book.setStockQuantity(rs.getInt("stock_quantity"));
+                book.setDescription(rs.getString("description"));
+                book.setPublicationDate(rs.getDate("publication_date"));
+                book.setIsbn(rs.getString("ISBN"));
+                
+                // Category information
+                book.setCategoryId(rs.getInt("category_id"));
+                book.setCategoryName(rs.getString("category_name"));
+                
+                // Author information
+                book.setAuthorId(rs.getInt("author_id"));
+                book.setAuthorName(rs.getString("author_name"));
+                
+                // Publisher information
+                book.setPublisherId(rs.getInt("publisher_id"));
+                book.setPublisherName(rs.getString("publisher_name"));
+                
+                // Rating information
+                book.setAvgRating(rs.getFloat("avg_rating"));
+                book.setReviewCount(rs.getInt("review_count"));
+                
+                // Sales information
+                book.setTotalSold(rs.getInt("total_sold"));
+                
+                books.add(book);
             }
         } catch (SQLException e) {
             e.printStackTrace();

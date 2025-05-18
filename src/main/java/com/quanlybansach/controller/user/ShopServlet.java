@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -47,16 +48,77 @@ public class ShopServlet extends HttpServlet {
          case "/list":
             listBooks(request, response);
             break;
-         case "/detail":
-            // showBookDetail(request, response);
-            break;
-         case "/review":
-            // showReviewPage(request, response);
+         case "/search":
+            searchBooks(request, response);
             break;
          default:
             listBooks(request, response);
             break;
       }
+   }
+
+   private void searchBooks(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+      // Get all filter parameters
+      String keyword = request.getParameter("keyword");
+      if (keyword == null) {
+         keyword = "";
+      }
+   
+      // Category filter
+      String categoryParam = request.getParameter("category");
+      int categoryId = 0;
+      if (categoryParam != null && !categoryParam.isEmpty()) {
+         try {
+            categoryId = Integer.parseInt(categoryParam);
+         } catch (NumberFormatException e) {
+            categoryId = 0;
+         }
+      }
+      
+      // Price range filter
+      String minPriceParam = request.getParameter("minPrice");
+      String maxPriceParam = request.getParameter("maxPrice");
+      BigDecimal minPrice = new BigDecimal(0);
+      BigDecimal maxPrice = new BigDecimal(1000000);
+      
+      if (minPriceParam != null && !minPriceParam.isEmpty()) {
+         try {
+            minPrice = new BigDecimal(minPriceParam);
+         } catch (NumberFormatException e) {
+            // Keep default
+         }
+      }
+      
+      if (maxPriceParam != null && !maxPriceParam.isEmpty()) {
+         try {
+            maxPrice = new BigDecimal(maxPriceParam);
+         } catch (NumberFormatException e) {
+            // Keep default
+         }
+      }
+      
+      // Author filter
+      String authorParam = request.getParameter("author");
+      int authorId = 0;
+      if (authorParam != null && !authorParam.isEmpty()) {
+         try {
+            authorId = Integer.parseInt(authorParam);
+         } catch (NumberFormatException e) {
+            authorId = 0;
+         }
+      }
+      
+      // Rating filter
+      String ratingParam = request.getParameter("rating");
+      float minRating = 0;
+      if (ratingParam != null && !ratingParam.isEmpty()) {
+         try {
+            minRating = Float.parseFloat(ratingParam);
+         } catch (NumberFormatException e) {
+            minRating = 0;
+         }
+      }
+      
    }
 
    private void listBooks(HttpServletRequest request, HttpServletResponse response) {
