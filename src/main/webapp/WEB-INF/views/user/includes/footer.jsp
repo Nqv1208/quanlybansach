@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<footer class="footer mt-5">
+<footer class="footer mt-5" id="footer">
     <div class="container">
         <div class="row">
             <div class="col-lg-3 col-md-6 mb-4 mb-md-0">

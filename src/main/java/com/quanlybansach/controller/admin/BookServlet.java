@@ -287,7 +287,7 @@ public class BookServlet extends HttpServlet {
             authorId = Integer.parseInt(author);
         }
     
-        List<Book> books = bookDAO.getBookByParemeters(keyword, categoryId, authorId);
+        List<Book> books = bookDAO.getBookByParemeters(keyword, categoryId, authorId, null, null, null);
         List<Author> authors = authorDAO.getAllAuthors();
         List<Category> categories = categoryDAO.getAllCategories();
     

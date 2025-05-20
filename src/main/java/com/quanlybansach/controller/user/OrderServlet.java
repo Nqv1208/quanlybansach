@@ -139,12 +139,12 @@ public class OrderServlet extends HttpServlet {
         
         // Verify the order belongs to the logged-in customer
         if (order.getCustomerId() != customer.getCustomerId()) {
-            response.sendRedirect(request.getContextPath() + "/user/orders");
+            response.sendRedirect(request.getContextPath() + "/orders");
             return;
         }
         
         request.setAttribute("order", order);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/orders/detail.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/orders/detail.jsp");
         dispatcher.forward(request, response);
     }
 

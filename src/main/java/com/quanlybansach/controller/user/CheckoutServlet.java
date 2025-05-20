@@ -39,11 +39,11 @@ public class CheckoutServlet extends HttpServlet {
         
         try {
             switch (action) {
-                case "/user/checkout":
+                case "/checkout":
                     showCheckoutPage(request, response);
                     break;
                 default:
-                    response.sendRedirect(request.getContextPath() + "/user/cart");
+                    response.sendRedirect(request.getContextPath() + "/cart");
                     break;
             }
         } catch (SQLException ex) {
@@ -56,11 +56,11 @@ public class CheckoutServlet extends HttpServlet {
         
         try {
             switch (action) {
-                case "/user/checkout/place-order":
+                case "/checkout/place-order":
                     placeOrder(request, response);
                     break;
                 default:
-                    response.sendRedirect(request.getContextPath() + "/user/cart");
+                    response.sendRedirect(request.getContextPath() + "/cart");
                     break;
             }
         } catch (SQLException ex) {
@@ -70,7 +70,7 @@ public class CheckoutServlet extends HttpServlet {
 
     private void showCheckoutPage(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("user");
+        Customer customer = (Customer) session.getAttribute("customerId");
         
         if (customer == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -79,7 +79,7 @@ public class CheckoutServlet extends HttpServlet {
         
         List<CartItem> cart = SessionUtil.getCart(session);
         if (cart == null || cart.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/user/cart");
+            response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }
         
@@ -93,7 +93,7 @@ public class CheckoutServlet extends HttpServlet {
         request.setAttribute("cart", cart);
         request.setAttribute("cartSummary", cartSummary);
         
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/checkout/index.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/checkout.jsp");
         dispatcher.forward(request, response);
     }
 
@@ -108,7 +108,7 @@ public class CheckoutServlet extends HttpServlet {
         
         List<CartItem> cart = SessionUtil.getCart(session);
         if (cart == null || cart.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/user/cart");
+            response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }
         

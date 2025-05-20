@@ -12,6 +12,7 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
+    <link href="${pageContext.request.contextPath}/css/main.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/pages/user/book-detail.css" rel="stylesheet">
 </head>
 <body>
@@ -33,36 +34,51 @@
     </section>
 
     <!-- Book Detail Section -->
-    <section class="container mb-5">
+    <section class="container my-5">
         <div class="book-detail-card">
             <div class="row g-0">
-                <div class="col-md-4">
+                <div class="col-md-4 flex flex-column">
                     <div class="book-image-container">
                         <img src="${book.imageUrl}" alt="${book.title}" class="book-image">
+                    </div>
+                    <div class="book-actions flex flex-row">
+                        <div class="social-sharing flex items-center">
+                            <span class="me-2">Chia sẻ:</span>
+                            <a href="#" class="btn btn-sm btn-outline-primary me-2"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="btn btn-sm btn-outline-info me-2"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="btn btn-sm btn-outline-danger me-2"><i class="fab fa-pinterest"></i></a>
+                        </div>
+                        <div class="wishlist flex items-center">
+                            <a href="${pageContext.request.contextPath}/account/wishlist/add?bookId=${book.bookId}" class="wishlist-btn btn btn-sm ms-2">
+                                <i class="far fa-heart"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-8">
                     <div class="book-info">
                         <h1 class="book-title">${book.title}</h1>
-                        <p class="book-author">Tác giả: <span class="fw-semibold">${book.authorName}</span></p>
-                        <p class="book-price"><fmt:formatNumber value="${book.price}" type="currency" currencySymbol="" /> ₫</p>
+                        <p class="book-author">Tác giả: <a href="${pageContext.request.contextPath}/shop?author=${book.authorId}" class="fw-semibold">${book.authorName}</a></p>
+                        <h2 class="book-price"><fmt:formatNumber value="${book.price}" type="currency" currencySymbol="" /> ₫</h2>
                         
-                        <c:choose>
-                            <c:when test="${book.stockQuantity > 10}">
-                                <div class="stock-status in-stock"><i class="fas fa-check-circle me-2"></i> Còn hàng</div>
-                            </c:when>
-                            <c:when test="${book.stockQuantity > 0 && book.stockQuantity <= 10}">
-                                <div class="stock-status low-stock"><i class="fas fa-exclamation-circle me-2"></i> Chỉ còn ${book.stockQuantity} sản phẩm</div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="stock-status out-of-stock"><i class="fas fa-times-circle me-2"></i> Hết hàng</div>
-                            </c:otherwise>
-                        </c:choose>
+                        <div class="stock-info">
+                            <c:choose>
+                                <c:when test="${book.stockQuantity > 10}">
+                                    <div class="stock-status in-stock"><i class="fas fa-check-circle me-2"></i> Còn hàng</div>
+                                </c:when>
+                                <c:when test="${book.stockQuantity > 0 && book.stockQuantity <= 10}">
+                                    <div class="book-badge badge-warning"><i class="fas fa-exclamation-circle me-1"></i> Chỉ còn ${book.stockQuantity} sản phẩm</div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="stock-status out-of-stock"><i class="fas fa-times-circle me-2"></i> Hết hàng</div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
                         
-                        <div class="book-details">
+                        <div class="book-details mb-4">
                             <div class="book-detail-item">
                                 <div class="book-detail-label">Danh mục:</div>
-                                <div class="book-detail-value">${book.categoryName}</div>
+                                <div class="book-detail-value"><a href="${pageContext.request.contextPath}/shop?category=${book.categoryId}">${book.categoryName}</a></div>
                             </div>
                             <div class="book-detail-item">
                                 <div class="book-detail-label">Năm xuất bản:</div>
@@ -70,7 +86,7 @@
                             </div>
                             <div class="book-detail-item">
                                 <div class="book-detail-label">Nhà xuất bản:</div>
-                                <div class="book-detail-value">${book.publisherName}</div>
+                                <div class="book-detail-value"><a href="${pageContext.request.contextPath}/shop?publisher=${book.publisherId}">${book.publisherName}</a></div>
                             </div>
                             <div class="book-detail-item">
                                 <div class="book-detail-label">ISBN:</div>
@@ -79,37 +95,39 @@
                         </div>
                         
                         <c:if test="${book.stockQuantity > 0}">
-                            <form action="${pageContext.request.contextPath}/cart/add" method="post">
-                                <input type="hidden" name="bookId" value="${book.bookId}">
+                            <div class="quantity-control">
+                                <button type="button" class="quantity-btn decrease-btn">-</button>
+                                <input type="number" id="quantity" min="1" max="${book.stockQuantity}" value="1" class="quantity-input">
+                                <button type="button" class="quantity-btn increase-btn">+</button>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <form id="addToCartForm" action="${pageContext.request.contextPath}/cart/add" method="post" class="d-inline-block me-2">
+                                    <input type="hidden" name="bookId" value="${book.bookId}">
+                                    <input type="hidden" name="quantity" id="cartQuantity" value="1">
+                                    <button type="submit" class="btn btn-outline-primary btn-add-to-cart">
+                                        <i class="fas fa-cart-plus me-2"></i> Thêm vào giỏ hàng
+                                    </button>
+                                </form>
                                 
-                                <div class="quantity-control">
-                                    <button type="button" class="quantity-btn decrease-btn">-</button>
-                                    <input type="number" name="quantity" min="1" max="${book.stockQuantity}" value="1" class="quantity-input">
-                                    <button type="button" class="quantity-btn increase-btn">+</button>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary btn-add-to-cart">
-                                    <i class="fas fa-cart-plus me-2"></i> Thêm vào giỏ hàng
-                                </button>
-                            </form>
+                                <form id="buyNowForm" action="${pageContext.request.contextPath}/cart/add" method="post" class="d-inline-block">
+                                    <input type="hidden" name="bookId" value="${book.bookId}">
+                                    <input type="hidden" name="quantity" id="buyQuantity" value="1">
+                                    <input type="hidden" name="redirect" value="checkout">
+                                    <button type="submit" class="btn btn-buy-now">
+                                        <i class="fas fa-bolt me-2"></i> Mua ngay
+                                    </button>
+                                </form>
+                            </div>
                         </c:if>
                         
                         <c:if test="${book.stockQuantity == 0}">
-                            <button type="button" class="btn btn-secondary btn-add-to-cart" disabled>
-                                <i class="fas fa-cart-plus me-2"></i> Hết hàng
-                            </button>
+                            <div class="action-buttons">
+                                <button type="button" class="btn btn-secondary btn-add-to-cart" disabled>
+                                    <i class="fas fa-cart-plus me-2"></i> Hết hàng
+                                </button>
+                            </div>
                         </c:if>
-                        
-                        <a href="#" class="wishlist-btn">
-                            <i class="far fa-heart"></i> Thêm vào danh sách yêu thích
-                        </a>
-                        
-                        <div class="social-sharing">
-                            <span class="me-2">Chia sẻ:</span>
-                            <a href="#" class="btn btn-sm btn-outline-primary me-1"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="btn btn-sm btn-outline-info me-1"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="btn btn-sm btn-outline-danger"><i class="fab fa-pinterest"></i></a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -215,9 +233,9 @@
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">${relatedBook.title}</h5>
-                                <p class="card-author">${relatedBook.author}</p>
+                                <p class="card-author">${relatedBook.authorName}</p>
                                 <p class="card-price"><fmt:formatNumber value="${relatedBook.price}" type="currency" currencySymbol="" /> ₫</p>
-                                <a href="${pageContext.request.contextPath}/book-detail?id=${relatedBook.id}" class="btn btn-primary w-100">Xem chi tiết</a>
+                                <a href="${pageContext.request.contextPath}/book-detail?id=${relatedBook.bookId}" class="btn btn-primary w-100">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -225,6 +243,18 @@
             </c:forEach>
         </div>
     </section>
+
+    <!-- Toast thông báo -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
+        <div id="cartToast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Sản phẩm đã được thêm vào giỏ hàng
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <jsp:include page="/WEB-INF/views/user/includes/footer.jsp" />
@@ -234,42 +264,67 @@
     
     <!-- Custom JS -->
     <script>
-        // Quantity control
-        const decreaseBtn = document.querySelector('.decrease-btn');
-        const increaseBtn = document.querySelector('.increase-btn');
-        const quantityInput = document.querySelector('.quantity-input');
-        
-        if (decreaseBtn && increaseBtn && quantityInput) {
-            decreaseBtn.addEventListener('click', function() {
-                let value = parseInt(quantityInput.value, 10);
-                value = isNaN(value) ? 1 : value;
-                if (value > 1) {
-                    value--;
-                    quantityInput.value = value;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo toast
+            const cartToast = document.getElementById('cartToast');
+            if (cartToast) {
+                const toast = new bootstrap.Toast(cartToast);
+                
+                // Hiển thị toast khi form được submit
+                const addToCartForm = document.getElementById('addToCartForm');
+                if (addToCartForm) {
+                    addToCartForm.addEventListener('submit', function() {
+                        // Cập nhật số lượng từ input
+                        document.getElementById('cartQuantity').value = document.querySelector('.quantity-input').value;
+                    });
                 }
-            });
+                
+                const buyNowForm = document.getElementById('buyNowForm');
+                if (buyNowForm) {
+                    buyNowForm.addEventListener('submit', function() {
+                        // Cập nhật số lượng từ input
+                        document.getElementById('buyQuantity').value = document.querySelector('.quantity-input').value;
+                    });
+                }
+            }
             
-            increaseBtn.addEventListener('click', function() {
-                let value = parseInt(quantityInput.value, 10);
-                value = isNaN(value) ? 1 : value;
-                const max = parseInt(quantityInput.getAttribute('max'), 10);
-                if (value < max) {
-                    value++;
-                    quantityInput.value = value;
-                }
-            });
+            // Quantity control
+            const decreaseBtn = document.querySelector('.decrease-btn');
+            const increaseBtn = document.querySelector('.increase-btn');
+            const quantityInput = document.querySelector('.quantity-input');
             
-            quantityInput.addEventListener('change', function() {
-                let value = parseInt(this.value, 10);
-                const max = parseInt(this.getAttribute('max'), 10);
-                value = isNaN(value) ? 1 : value;
-                if (value < 1) {
-                    this.value = 1;
-                } else if (value > max) {
-                    this.value = max;
-                }
-            });
-        }
+            if (decreaseBtn && increaseBtn && quantityInput) {
+                decreaseBtn.addEventListener('click', function() {
+                    let value = parseInt(quantityInput.value, 10);
+                    value = isNaN(value) ? 1 : value;
+                    if (value > 1) {
+                        value--;
+                        quantityInput.value = value;
+                    }
+                });
+                
+                increaseBtn.addEventListener('click', function() {
+                    let value = parseInt(quantityInput.value, 10);
+                    value = isNaN(value) ? 1 : value;
+                    const max = parseInt(quantityInput.getAttribute('max'), 10);
+                    if (value < max) {
+                        value++;
+                        quantityInput.value = value;
+                    }
+                });
+                
+                quantityInput.addEventListener('change', function() {
+                    let value = parseInt(this.value, 10);
+                    const max = parseInt(this.getAttribute('max'), 10);
+                    value = isNaN(value) ? 1 : value;
+                    if (value < 1) {
+                        this.value = 1;
+                    } else if (value > max) {
+                        this.value = max;
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

@@ -1,11 +1,13 @@
 package com.quanlybansach.controller.user;
 
+import com.google.gson.Gson;
 import com.quanlybansach.dao.BookDAO;
 import com.quanlybansach.model.Cart;
 import com.quanlybansach.model.CartSummary;
 import com.quanlybansach.service.CartService;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +17,8 @@ import java.io.IOException;
 /**
  * Servlet xử lý các thao tác liên quan đến giỏ hàng
  */
-@WebServlet("/cart/*")
+@WebServlet(urlPatterns = "/cart/*")
+@MultipartConfig
 public class CartServlet extends HttpServlet {
     private CartService cartService;
     private BookDAO bookDAO;
@@ -31,7 +34,9 @@ public class CartServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         
-        System.out.println("Action: " + pathInfo);
+        System.out.println("Servlet path: " + request.getServletPath());
+        System.out.println("Path info: " + request.getPathInfo());
+        System.out.println("Request URI: " + request.getRequestURI());
         
         if (pathInfo == null) {
             pathInfo = "/";
@@ -49,7 +54,9 @@ public class CartServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
-        System.out.println("Action: " + pathInfo);
+        System.out.println("Servlet path: " + request.getServletPath());
+        System.out.println("Path info: " + request.getPathInfo());
+        System.out.println("Request URI: " + request.getRequestURI());
         
         if (pathInfo == null) {
             pathInfo = "/";
@@ -149,7 +156,14 @@ public class CartServlet extends HttpServlet {
             int quantity = quantityParam != null ? Integer.parseInt(quantityParam) : 1;
             
             boolean success = cartService.addToCart(request, bookId, quantity);
-            System.out.println("AddToCart - success: " + success);
+            if(success) {
+                // Cập nhật lại giỏ hàng trong session để header hiển thị đúng số lượng
+                request.getSession().setAttribute("cart", cartService.getCart(request));
+                System.out.println("AddToCart - success: " + success);
+            }
+            else {
+                throw new Exception("Thêm sản phẩm vào giỏ hàng thất bại");
+            }
             
             // Debug giỏ hàng sau khi thêm
             Cart cart = cartService.getCart(request);
@@ -164,6 +178,9 @@ public class CartServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             System.out.println("AddToCart - Error: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/shop");
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
     
@@ -171,36 +188,74 @@ public class CartServlet extends HttpServlet {
      * Cập nhật số lượng sản phẩm trong giỏ hàng
      */
     private void updateCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        java.util.Map<String, Object> jsonResponse = new java.util.HashMap<>();
+        
         String bookIdParam = request.getParameter("bookId");
         String quantityParam = request.getParameter("quantity");
+        // Debug xem bookId và quantity có hợp lệ không
+        System.out.println("UpdateCart - bookId: " + bookIdParam + ", quantity: " + quantityParam);
         
         try {
             int bookId = Integer.parseInt(bookIdParam);
             int quantity = Integer.parseInt(quantityParam);
             
-            cartService.updateCartItem(request, bookId, quantity);
-            
-            response.sendRedirect(request.getContextPath() + "/cart");
+            boolean updated = cartService.updateCartItem(request, bookId, quantity);
+            if(updated) {
+                // Cập nhật lại giỏ hàng trong session để header hiển thị đúng số lượng
+                request.getSession().setAttribute("cart", cartService.getCart(request));
+                jsonResponse.put("success", true);
+                jsonResponse.put("message", "Cập nhật số lượng thành công");
+            } else {
+                jsonResponse.put("success", false);
+                jsonResponse.put("message", "Cập nhật số lượng thất bại");
+            }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/cart");
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "Mã sản phẩm hoặc số lượng không hợp lệ");
+        } catch (Exception e) {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "Đã xảy ra lỗi: " + e.getMessage());
         }
+
+        String json = new Gson().toJson(jsonResponse);
+        response.getWriter().write(json);
     }
     
     /**
      * Xóa sản phẩm khỏi giỏ hàng
      */
     private void removeFromCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        java.util.Map<String, Object> jsonResponse = new java.util.HashMap<>();
+        
         String bookIdParam = request.getParameter("bookId");
+        System.out.println("RemoveFromCart - bookId: " + bookIdParam);
         
         try {
             int bookId = Integer.parseInt(bookIdParam);
             
-            cartService.removeFromCart(request, bookId);
-            
-            response.sendRedirect(request.getContextPath() + "/cart");
+            boolean removed = cartService.removeFromCart(request, bookId);
+            if (removed) {
+                // Cập nhật lại giỏ hàng trong session để header hiển thị đúng số lượng
+                request.getSession().setAttribute("cart", cartService.getCart(request));
+                jsonResponse.put("success", true);
+                jsonResponse.put("message", "Sản phẩm đã được xóa khỏi giỏ hàng");
+            } else {
+                jsonResponse.put("success", false);
+                jsonResponse.put("message", "Sản phẩm không tồn tại trong giỏ hàng");
+            }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/cart");
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "Mã sản phẩm không hợp lệ");
         }
+
+        String json = new Gson().toJson(jsonResponse);
+        response.getWriter().write(json);
     }
     
     /**

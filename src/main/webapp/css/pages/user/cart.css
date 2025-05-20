@@ -34,6 +34,27 @@ body {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 1rem;
     margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.select-all-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.select-all-container input[type="checkbox"] {
+    transform: scale(1.25);
+    margin-right: 10px;
+}
+
+.select-all-container label {
+    cursor: pointer;
+    font-weight: 500;
 }
 
 .cart-item {
@@ -43,21 +64,14 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
-.item-select {
-    margin-right: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.cart-item:last-child {
+    border-bottom: none;
 }
 
 .item-checkbox {
-    width: 20px;
-    height: 20px;
+    transform: scale(1.25);
+    margin-right: 1rem;
     cursor: pointer;
-}
-
-.cart-item:last-child {
-    border-bottom: none;
 }
 
 .item-image {
@@ -163,6 +177,7 @@ body {
     display: flex;
     justify-content: space-between;
     margin-bottom: 1rem;
+    transition: opacity 0.3s ease;
 }
 
 .summary-item.total {
@@ -183,11 +198,12 @@ body {
     font-weight: 600;
     font-size: 1.1rem;
     margin-top: 1rem;
+    transition: all 0.3s ease;
 }
 
 .checkout-btn.disabled {
+    pointer-events: none;
     opacity: 0.6;
-    cursor: not-allowed;
 }
 
 .empty-cart {
@@ -201,6 +217,11 @@ body {
     margin-bottom: 1rem;
 }
 
+.coupon-section {
+    margin-top: 1rem;
+    transition: opacity 0.3s ease, pointer-events 0.3s ease;
+}
+
 .coupon-form {
     display: flex;
     margin-top: 1rem;
@@ -211,29 +232,18 @@ body {
     margin-right: 0.5rem;
 }
 
-/* Loading overlay for AJAX requests */
+/* Loading overlay */
 .loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-}
-
-/* Toast notification styling */
-.toast {
-    background-color: var(--white-color);
-    border-left: 4px solid var(--primary-color);
-}
-
-.toast-header {
-    background-color: rgba(var(--primary-color-rgb), 0.1);
-    color: var(--primary-color);
 }
 
 /* Responsive styles */
@@ -242,11 +252,6 @@ body {
         flex-direction: column;
         align-items: flex-start;
         padding: 1.5rem 0;
-    }
-    
-    .item-select {
-        margin-bottom: 0.5rem;
-        align-self: flex-start;
     }
     
     .item-image {

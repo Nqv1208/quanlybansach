@@ -68,11 +68,15 @@ public class LoginServlet extends HttpServlet {
          CartDAO cartDAO = new CartDAO();
          
          // Lưu thông tin khách hàng nếu có
-         if (account.getCustomerId() != null) {
+         if (account.getCustomerId() != null && "User".equals(account.getRoleName())) {
             session.setAttribute("customerId", account.getCustomerId());
             session.setAttribute("customerName", account.getCustomerName());
             // Lưu thông tin giỏ hàng vào session
             session.setAttribute("cart", cartDAO.getCartByCustomerId(account.getCustomerId()));
+         } else {
+            // Nếu không phải là người dùng, chỉ lưu thông tin tài khoản
+            session.setAttribute("customerId", account.getCustomerId());
+            session.setAttribute("customerName", account.getCustomerName());
          }
          
          // Handle "Remember me" functionality
