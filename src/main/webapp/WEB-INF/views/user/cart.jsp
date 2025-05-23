@@ -31,7 +31,7 @@
     <section class="container mb-5">
         <div class="row">
             <div class="col-lg-8">
-                <div class="cart-container">
+                <div class="cart-container" data-cart-id="${cart.cartId}">
                     <div class="cart-header">
                         <h2 class="mb-0">Chi tiết giỏ hàng</h2>
                     </div>
@@ -83,8 +83,8 @@
                                 <i class="fas fa-arrow-left me-2"></i> Tiếp tục mua sắm
                             </a>
                             <button type="button" id="clear-cart-btn" class="btn btn-outline-danger">
-                                    <i class="fas fa-trash me-2"></i> Xóa giỏ hàng
-                                </button>
+                                <i class="fas fa-trash me-2"></i> Xóa giỏ hàng
+                            </button>
                         </div>
                     </c:if>
                 </div>

@@ -264,7 +264,34 @@ public class CartServlet extends HttpServlet {
     private void clearCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
         cartService.clearCart(request);
         
-        response.sendRedirect(request.getContextPath() + "/cart");
+        response.setContentType("application/json");
+
+        java.util.Map<String, Object> jsonResponse = new java.util.HashMap<>();
+
+        String cartIdParam = request.getParameter("cartId");
+        System.out.println("ClearCart - cartId: " + cartIdParam);
+
+        try {
+            boolean cleared = cartService.clearCart(request);
+            if (cleared) {
+                // Cập nhật lại giỏ hàng trong session để header hiển thị đúng số lượng
+                request.getSession().setAttribute("cart", cartService.getCart(request));
+                jsonResponse.put("success", true);
+                jsonResponse.put("message", "Giỏ hàng đã được xóa");
+            } else {
+                jsonResponse.put("success", false);
+                jsonResponse.put("message", "Giỏ hàng không tồn tại");
+            }
+        } catch (NumberFormatException e) {
+            jsonResponse.put("success", false);
+            jsonResponse.put("message", "Mã giỏ hàng không hợp lệ");
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        // Chuyển đổi đối tượng jsonResponse thành chuỗi JSON
+        String json = new Gson().toJson(jsonResponse);
+        response.getWriter().write(json);
+
     }
     
     /**
@@ -277,4 +304,5 @@ public class CartServlet extends HttpServlet {
         
         response.sendRedirect(request.getContextPath() + "/cart");
     }
+    
 } 
