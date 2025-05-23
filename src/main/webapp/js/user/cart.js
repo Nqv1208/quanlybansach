@@ -311,10 +311,15 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Lấy context path từ URL hiện tại
       const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf('/cart'));
-      
+      const cartId = document.querySelector('.cart-container').dataset.cartid;
+      const formData = new FormData();
+
+      formData.append("cartId", cartId);
+
       // Gửi yêu cầu AJAX
       fetch(contextPath + '/cart/clear', {
-         method: 'POST'
+         method: 'POST',
+         body: formData
       })
       .then(response => {
          if (!response.ok) {
@@ -325,15 +330,36 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
          // Xóa hiệu ứng loading
          document.body.removeChild(loadingOverlay);
-         
-         // Tải lại trang
-         location.reload();
+
+         if (data.success) {
+            const cartContainer = document.querySelector('.cart-container');
+            const cartItems = document.querySelector('.cart_items');
+            const emptyCart = document.createElement('div');
+
+            emptyCart.classList.add('empty-cart');
+            emptyCart.innerHTML = `<i class="fas fa-shopping-cart empty-cart-icon"></i>
+                                 <h3>Giỏ hàng trống</h3>
+                                 <p>Bạn chưa có sản phẩm nào trong giỏ hàng.</p>
+                                 <a href="${contextPath}/shop" class="btn btn-primary mt-3">Tiếp tục mua sắm</a>
+                                 `;
+            
+            cartContainer.innerHTML = '';
+            cartContainer.appendChild(emptyCart);
+
+            // Hiển thị thông báo thành công
+            document.querySelector('.toast-body').textContent = 'Đã xóa thành công giỏ hàng';
+            toast.show();
+         }
+         else {
+            throw new Error("Lỗi khi xóa giỏ hàng!!!");
+         }
       })
       .catch(error => {
          console.error('Lỗi:', error);
          // Xóa hiệu ứng loading
-         document.body.removeChild(loadingOverlay);
-         
+         if(loadingOverlay && loadingOverlay.parentNode) {
+            document.body.removeChild(loadingOverlay);
+         }
          // Hiển thị thông báo lỗi
          document.querySelector('.toast-body').textContent = 'Có lỗi xảy ra khi xóa giỏ hàng';
          toast.show();
