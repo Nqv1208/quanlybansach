@@ -290,14 +290,14 @@ BEGIN
     INSERT INTO BOOKS (title, author_id, category_id, publisher_id, ISBN, price, stock_quantity, publication_date, description, image_url)
     VALUES 
         (N'Tôi thấy hoa vàng trên cỏ xanh', 1, 1, 1, N'8935235226746', 88000, 6, '2018-01-01', N'Truyện kể về cuộc sống của những đứa trẻ ở vùng nông thôn nghèo', N'https://www.nxbtre.com.vn/Images/Book/NXBTreStoryFull_08352010_033550.jpg'),
-        (N'Dế Mèn Phiêu Lưu Ký', 2, 3, 2, N'8934974170617', 75000, 120, '2019-06-15', N'Tác phẩm kể về những cuộc phiêu lưu của chú Dế Mèn', N'https://quantri.pgdthanhxuan.edu.vn//UploadImages/thphandinhgiot/admin/2019_9/B%C3%ACa%20s%C3%A1ch/3595...nh.jpg'),
+        (N'Dế Mèn Phiêu Lưu Ký', 2, 3, 2, N'8934974170617', 75000, 120, '2019-06-15', N'Tác phẩm kể về những cuộc phiêu lưu của chú Dế Mèn', N'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRf0RO4TGkihqmY-5qCLeGR7UnR9nrvlcx4IFKIqfukV6OlID5J'),
         (N'Harry Potter và Hòn đá Phù thủy', 3, 2, 5, N'8935235203150', 195000, 85, '2020-03-10', N'Tập đầu tiên trong series Harry Potter', N'https://images-na.ssl-images-amazon.com/images/I/81YOuOGFCJL.jpg'),
         (N'Đắc Nhân Tâm', 4, 4, 5, N'8935086854395', 86000, 10, '2021-01-20', N'Cuốn sách nổi tiếng về nghệ thuật đối nhân xử thế', N'https://firstnews.vn/upload/products/original/-1726817123.jpg'),
-        (N'Tắt Đèn', 5, 1, 3, N'8934974158066', 69000, 100, '2019-05-05', N'Tác phẩm phản ánh cuộc sống khổ cực của người nông dân Việt Nam', N'https://cdn1.fahasa.com/media/flashmagazine/images/page_images/tat_den_tai_ban_2022/2022_06_27_11_52_02...10.jpg'),
+        (N'Tắt Đèn', 5, 1, 3, N'8934974158066', 69000, 100, '2019-05-05', N'Tác phẩm phản ánh cuộc sống khổ cực của người nông dân Việt Nam', N'https://upload.wikimedia.org/wikipedia/vi/thumb/b/b1/T%E1%BA%AFt_%C4%91%C3%A8n-Nh%C3%A3_Nam.jpeg/250px-T%E1%BA%AFt_%C4%91%C3%A8n-Nh%C3%A3_Nam.jpeg'),
         (N'Nhà Giả Kim', 6, 2, 4, N'8935235228047', 79000, 150, '2020-05-10', N'Câu chuyện về hành trình theo đuổi giấc mơ của chàng chăn cừu Santiago', N'https://salt.tikicdn.com/ts/product/45/3b/fc/aa81d0a534b45706ae1eee1e344e80d9.jpg'),
         (N'Rừng Na Uy', 7, 6, 4, N'8935235224278', 150000, 80, '2020-06-12', N'Tiểu thuyết tình cảm nổi tiếng của Haruki Murakami', N'https://upload.wikimedia.org/wikipedia/vi/2/28/Norwegian-wood_poster.jpg'),
         (N'Kafka Bên Bờ Biển', 7, 6, 4, N'8935235221307', 160000, 70, '2020-07-15', N'Tiểu thuyết siêu thực đầy ẩn dụ của Haruki Murakami', N'https://cdn1.fahasa.com/media/catalog/product/8/9/8935235242654.jpg'),
-        (N'Bắt Trẻ Đồng Xanh', 8, 6, 4, N'8935235223127', 105000, 90, '2020-08-20', N'Tiểu thuyết kinh điển về sự nổi loạn của giới trẻ', N'https://upload.wikimedia.org/wikipedia/vi/b/b7/B%E1%BA%AFt_tr%E1%BA%BB_%C4%91%E1%BB%93ng_xanh%28s%C3%A1...29.jpg'),
+        (N'Bắt Trẻ Đồng Xanh', 8, 6, 4, N'8935235223127', 105000, 90, '2020-08-20', N'Tiểu thuyết kinh điển về sự nổi loạn của giới trẻ', N'https://upload.wikimedia.org/wikipedia/vi/thumb/b/b7/B%E1%BA%AFt_tr%E1%BA%BB_%C4%91%E1%BB%93ng_xanh%28s%C3%A1ch%29.jpg/250px-B%E1%BA%AFt_tr%E1%BA%BB_%C4%91%E1%BB%93ng_xanh%28s%C3%A1ch%29.jpg'),
         (N'1984', 9, 6, 6, N'8935235229822', 120000, 100, '2020-09-25', N'Tiểu thuyết chính trị viễn tưởng nổi tiếng', N'https://m.media-amazon.com/images/I/61NAx5pd6XL._AC_UF1000,1000_QL80_.jpg'),
         (N'Animal Farm (Chuyện Trại Súc Vật)', 9, 6, 6, N'8935235225371', 85000, 120, '2020-10-30', N'Truyện ngụ ngôn chính trị sâu sắc', N'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk0L4QVcJ8eq1EtdRYIEA06F2lYpj4L-0eaQ&s'),
 		(N'Chí Phèo', 10, 1, 2, N'8934974159773', 60000, 110, '2019-11-05', N'Tác phẩm nổi tiếng của Nam Cao về bi kịch của một người nông dân', N'https://www.netabooks.vn/Data/Sites/1/Product/18268/1.jpg'),
@@ -326,7 +326,12 @@ BEGIN
 		(N'Đặng Văn Giáp', N'giap.dang@email.com', N'0967890123', N'404 Nguyễn Công Trứ, Quận 1, TP.HCM', '2025-04-20'),
 		(N'Lý Thị Hồng', N'hong.ly@email.com', N'0978901234', N'505 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', '2025-04-22'),
 		(N'Trương Văn Khải', N'khai.truong@email.com', N'0989012345', N'606 Lê Văn Sỹ, Quận Phú Nhuận, TP.HCM', '2025-04-25'),
-		(N'Ngô Thị Lan', N'lan.ngo@email.com', N'0990123456', N'707 Lý Thường Kiệt, Quận 10, TP.HCM', '2025-04-28');
+		(N'Ngô Thị Lan', N'lan.ngo@email.com', N'0990123456', N'707 Lý Thường Kiệt, Quận 10, TP.HCM', '2025-04-28'),
+		(N'Nguyễn Quang Vinh', N'qvinhkl10@gmail.com', N'0123123123', N'48 Cao Thắng', '2025-04-28'),
+		(N'Phạm Lê Thiệu Quang', N'quangf5@gmail.com', N'0123123123', N'48 Cao Thắng', '2025-04-28'),
+		(N'Nguyễn Minh Vỹ', N'mvyyf5@gmail.com', N'0123123123', N'48 Cao Thắng', '2025-04-28'),
+		(N'Lê Thị Mỹ', N'mylef5@gmail.com', N'0123123123', N'48 Cao Thắng', '2025-04-28'),
+		(N'Nguyễn Thị Thúy Huyền', N'ntthuyenf5@gmail.com', N'0123123123', N'48 Cao Thắng', '2025-04-28');
 END
 GO
 
@@ -537,12 +542,17 @@ IF NOT EXISTS (SELECT * FROM ACCOUNTS)
 BEGIN
     INSERT INTO ACCOUNTS (username, password_hash, email, role_id, customer_id, is_active, created_date, last_login)
     VALUES 
-        ('admin', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'admin@bookstore.com', 1, NULL, 1, '2025-01-01', '2025-04-15'),
+        ('admin', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'admin@bookstore.com', 1, NULL, 1, '2025-01-01', '2025-04-15'),
         ('staff1', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'staff@bookstore.com', 2, NULL, 1, '2025-01-10', '2025-04-10'),
         ('user1', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'an.nguyen@email.com', 3, 1, 1, '2025-01-15', '2025-04-01'),
         ('user2', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'binh.tran@email.com', 3, 2, 1, '2025-02-20', '2025-04-05'),
         ('user3', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'cuong.le@email.com', 3, 3, 1, '2025-03-10', NULL),
-        ('admin2', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'admin2@gmail.com', 1, NULL, 1, '2025-03-10', '2025-04-15');
+        ('admin2', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'admin2@gmail.com', 1, NULL, 1, '2025-03-10', '2025-04-15'),
+		('nqv1208', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'qvinhkl10@gmail.com', 3, 12, 1, '2025-03-10', '2025-04-15'),
+		('quangf5', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'quangf5@gmail.com', 3, 12, 1, '2025-03-10', '2025-04-15'),
+		('vyf5', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'mvyyf5@gmail.com', 3, 13, 1, '2025-03-10', '2025-04-15'),
+		('myf5', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'mylef5@gmail.com', 3, 14, 1, '2025-03-10', '2025-04-15'),
+		('huyenf5', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'ntthuyenf5@gmail.com', 3, 15, 1, '2025-03-10', '2025-04-15');
 END
 GO
 
