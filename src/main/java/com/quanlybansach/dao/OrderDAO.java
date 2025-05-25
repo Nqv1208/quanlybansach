@@ -143,8 +143,8 @@ public class OrderDAO {
       try (Connection conn = DBConnection.getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql)) {
          
-         stmt.setInt(1, customerId);
-         stmt.setInt(2, limit);
+         stmt.setInt(1, limit);
+         stmt.setInt(2, customerId);
          
          try (ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {

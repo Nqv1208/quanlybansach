@@ -212,6 +212,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ACCOUNTS')
 BEGIN
     CREATE TABLE ACCOUNTS (
         account_id INT IDENTITY(1,1) PRIMARY KEY,
+		avatarUrl VARCHAR(100) DEFAULT 'assets/img/profile/avatar-default.svg',
         username NVARCHAR(50) NOT NULL UNIQUE,
         password_hash NVARCHAR(255) NOT NULL,
         email NVARCHAR(100) NOT NULL UNIQUE,
@@ -548,7 +549,7 @@ BEGIN
         ('user2', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'binh.tran@email.com', 3, 2, 1, '2025-02-20', '2025-04-05'),
         ('user3', 'e8dc057d92fefc56b5387de13a747a5fb38d8318df4b66c197b773340302aca0', 'cuong.le@email.com', 3, 3, 1, '2025-03-10', NULL),
         ('admin2', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'admin2@gmail.com', 1, NULL, 1, '2025-03-10', '2025-04-15'),
-		('nqv1208', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'qvinhkl10@gmail.com', 3, 12, 1, '2025-03-10', '2025-04-15'),
+		('nqv1208', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'qvinhkl10@gmail.com', 3, 11, 1, '2025-03-10', '2025-04-15'),
 		('quangf5', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'quangf5@gmail.com', 3, 12, 1, '2025-03-10', '2025-04-15'),
 		('vyf5', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'mvyyf5@gmail.com', 3, 13, 1, '2025-03-10', '2025-04-15'),
 		('myf5', '96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e', 'mylef5@gmail.com', 3, 14, 1, '2025-03-10', '2025-04-15'),
@@ -2275,6 +2276,7 @@ CREATE OR ALTER VIEW vw_account_details
 AS
     SELECT 
         a.account_id,
+		a.avatarUrl,
         a.username,
         a.email,
         r.role_name,

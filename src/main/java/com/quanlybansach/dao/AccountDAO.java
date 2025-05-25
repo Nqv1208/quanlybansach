@@ -264,6 +264,7 @@ public class AccountDAO {
     private Account mapResultSetToAccount(ResultSet rs) throws SQLException {
         Account account = new Account();
         account.setAccountId(rs.getInt("account_id"));
+        account.setAvatarUrl(rs.getString("avatarUrl")); // Optional, có thể null
         account.setUsername(rs.getString("username"));
         account.setEmail(rs.getString("email"));
         account.setRoleId(rs.getInt("role_id"));

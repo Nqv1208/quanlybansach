@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class Account {
     private int accountId;
+    private String avatarUrl; // Optional, có thể dùng để lưu đường dẫn đến ảnh đại diện
     private String username;
     private String passwordHash;
     private String email;
@@ -16,6 +17,9 @@ public class Account {
     // For display purpose (join queries)
     private String roleName;
     private String customerName;
+    private String phoneNumber; // Optional, có thể dùng để lưu số điện thoại của khách hàng
+    private String address; // Optional, có thể dùng để lưu địa chỉ của khách hàng
+
     
     public Account() {
     }
@@ -39,6 +43,13 @@ public class Account {
 
     public void setAccountId(int accountId) {
         this.accountId = accountId;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public String getUsername() {
@@ -121,10 +132,27 @@ public class Account {
         this.customerName = customerName;
     }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+    
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     @Override
     public String toString() {
         return "Account{" +
                 "accountId=" + accountId +
+                ", avatarUrl='" + avatarUrl + '\'' +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", roleId=" + roleId +
@@ -134,6 +162,8 @@ public class Account {
                 ", isActive=" + isActive +
                 ", createdDate=" + createdDate +
                 ", lastLogin=" + lastLogin +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", address='" + address + '\'' +
                 '}';
     }
 } 

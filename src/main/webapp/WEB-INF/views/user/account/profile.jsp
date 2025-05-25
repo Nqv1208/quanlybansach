@@ -38,18 +38,18 @@
                     <div class="user-info text-center mb-4">
                         <div class="avatar-container mb-3">
                             <c:choose>
-                                <c:when test="${not empty user.avatarUrl}">
-                                    <img src="${user.avatarUrl}" alt="${user.name}" class="avatar-image">
+                                <c:when test="${not empty sessionScope.account.avatarUrl}">
+                                    <img src="${pageContext.request.contextPath}/${sessionScope.account.avatarUrl}" alt="${sessionScope.account.username}" class="avatar-image">
                                 </c:when>
                                 <c:otherwise>
                                     <div class="avatar-placeholder">
-                                        <span>${fn:substring(user.name, 0, 1)}</span>
+                                        <span>${fn:substring(sessionScope.account.username, 0, 1)}</span>
                                     </div>
                                 </c:otherwise>
                             </c:choose>
                         </div>
-                        <h4 class="user-name">${user.name}</h4>
-                        <p class="user-email">${user.email}</p>
+                        <h4 class="user-name">${sessionScope.account.username}</h4>
+                        <p class="user-email">${sessionScope.account.email}</p>
                     </div>
                     
                     <nav class="profile-nav">
@@ -62,11 +62,6 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="${pageContext.request.contextPath}/orders">
                                     <i class="fas fa-box me-2"></i> Đơn hàng của tôi
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="${pageContext.request.contextPath}/account/addresses">
-                                    <i class="fas fa-map-marker-alt me-2"></i> Sổ địa chỉ
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -110,13 +105,13 @@
                             <div class="col-md-6">
                                 <div class="info-item">
                                     <div class="info-label">Họ và tên</div>
-                                    <div class="info-value">${user.name}</div>
+                                    <div class="info-value">${sessionScope.customer.name}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-item">
                                     <div class="info-label">Email</div>
-                                    <div class="info-value">${user.email}</div>
+                                    <div class="info-value">${sessionScope.customer.email}</div>
                                 </div>
                             </div>
                         </div>
@@ -125,13 +120,13 @@
                             <div class="col-md-6">
                                 <div class="info-item">
                                     <div class="info-label">Số điện thoại</div>
-                                    <div class="info-value">${user.phone}</div>
+                                    <div class="info-value">${sessionScope.customer.phone}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-item">
                                     <div class="info-label">Địa chỉ</div>
-                                    <div class="info-value">${user.address}</div>
+                                    <div class="info-value">${sessionScope.customer.address}</div>
                                 </div>
                             </div>
                         </div>
@@ -141,8 +136,8 @@
                                 <div class="info-item">
                                     <div class="info-label">Ngày đăng ký</div>
                                     <div class="info-value">
-                                        <c:if test="${not empty user.registrationDate}">
-                                            <fmt:formatDate value="${user.registrationDate}" pattern="dd/MM/yyyy" />
+                                        <c:if test="${not empty sessionScope.account.createdDate}">
+                                            <fmt:formatDate value="${sessionScope.account.createdDate}" pattern="dd/MM/yyyy" />
                                         </c:if>
                                     </div>
                                 </div>
@@ -163,7 +158,7 @@
                                     <div class="stat-label">Đơn hàng</div>
                                 </div>
                             </div>
-                            <div class="col-md-3 col-6">
+                            <!-- <div class="col-md-3 col-6">
                                 <div class="stat-card">
                                     <div class="stat-icon">
                                         <i class="fas fa-heart"></i>
@@ -171,7 +166,7 @@
                                     <div class="stat-count">${wishlistCount}</div>
                                     <div class="stat-label">Yêu thích</div>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="col-md-3 col-6">
                                 <div class="stat-card">
                                     <div class="stat-icon">
@@ -181,7 +176,7 @@
                                     <div class="stat-label">Đánh giá</div>
                                 </div>
                             </div>
-                            <div class="col-md-3 col-6">
+                            <!-- <div class="col-md-3 col-6">
                                 <div class="stat-card">
                                     <div class="stat-icon">
                                         <i class="fas fa-map-marker-alt"></i>
@@ -189,7 +184,7 @@
                                     <div class="stat-count">${addressCount}</div>
                                     <div class="stat-label">Địa chỉ</div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     
@@ -267,22 +262,22 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="fullName" class="form-label">Họ và tên</label>
-                                <input type="text" class="form-control" id="fullName" name="fullName" value="${user.name}" required>
+                                <input type="text" class="form-control" id="fullName" name="fullName" value="${sessionScope.customer.name}" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="${user.email}" required>
+                                <input type="email" class="form-control" id="email" name="email" value="${sessionScope.customer.email}" required>
                             </div>
                         </div>
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="phone" class="form-label">Số điện thoại</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" value="${user.phone}">
+                                <input type="tel" class="form-control" id="phone" name="phone" value="${sessionScope.customer.phone}">
                             </div>
                             <div class="col-md-6">
                                 <label for="address" class="form-label">Địa chỉ</label>
-                                <input type="text" class="form-control" id="address" name="address" value="${user.address}">
+                                <input type="text" class="form-control" id="address" name="address" value="${sessionScope.customer.address}">
                             </div>
                         </div>
                         

@@ -55,7 +55,8 @@ public class AccountServlet extends HttpServlet {
             // Kiểm tra người dùng đã đăng nhập chưa
             HttpSession session = request.getSession();
             Account account = (Account) session.getAttribute("account");
-            Customer customer = customerDAO.getCustomerById(account.getAccountId());
+            Customer customer = customerDAO.getCustomerById(account.getCustomerId());
+            System.out.println("Customer: " + customer.toString());
             
             session.setAttribute("customer", customer);
             
@@ -97,7 +98,7 @@ public class AccountServlet extends HttpServlet {
             // Kiểm tra người dùng đã đăng nhập chưa
             HttpSession session = request.getSession();
             Account account = (Account) session.getAttribute("account");
-            Customer customer = customerDAO.getCustomerById(account.getAccountId());
+            Customer customer = customerDAO.getCustomerById(account.getCustomerId());
             
             if (customer == null) {
                 response.sendRedirect(request.getContextPath() + "/login?redirect=" + request.getRequestURI());
@@ -138,6 +139,8 @@ public class AccountServlet extends HttpServlet {
     private void showProfile(HttpServletRequest request, HttpServletResponse response, Customer customer) throws SQLException, ServletException, IOException {
         // Lấy danh sách đơn hàng gần đây
         List<Order> recentOrders = orderDAO.getRecentOrdersByCustomer(customer.getCustomerId(), 5);
+        System.out.println("\ncustomerId: " + customer.getCustomerId());
+        System.out.println("Recent Orders: " + recentOrders.size());
         
         // Lấy thống kê tài khoản
         int orderCount = orderDAO.getOrderCountByCustomer(customer.getCustomerId());
@@ -146,7 +149,6 @@ public class AccountServlet extends HttpServlet {
         // int addressCount = addressDAO.getAddressCountByCustomer(customer.getCustomerId());
         
         // Đặt thuộc tính vào request
-        request.setAttribute("user", customer);
         request.setAttribute("recentOrders", recentOrders);
         request.setAttribute("orderCount", orderCount);
         // request.setAttribute("wishlistCount", wishlistCount);
