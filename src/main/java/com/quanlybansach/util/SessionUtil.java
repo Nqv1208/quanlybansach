@@ -1,6 +1,7 @@
 package com.quanlybansach.util;
 
 import com.quanlybansach.model.Book;
+import com.quanlybansach.model.Cart;
 import com.quanlybansach.model.CartItem;
 import com.quanlybansach.model.CartSummary;
 
@@ -17,10 +18,10 @@ public class SessionUtil {
      * Get the cart from session or create a new one if it doesn't exist
      */
     @SuppressWarnings("unchecked")
-    public static List<CartItem> getCart(HttpSession session) {
-        List<CartItem> cart = (List<CartItem>) session.getAttribute(CART_SESSION_KEY);
+    public static Cart getCart(HttpSession session) {
+        Cart cart = (Cart) session.getAttribute(CART_SESSION_KEY);
         if (cart == null) {
-            cart = new ArrayList<>();
+            cart = new Cart();
             session.setAttribute(CART_SESSION_KEY, cart);
         }
         return cart;
@@ -30,11 +31,11 @@ public class SessionUtil {
      * Add a book to the cart
      */
     public static void addToCart(HttpSession session, Book book, int quantity) {
-        List<CartItem> cart = getCart(session);
+        Cart cart = getCart(session);
         
         // Check if the book is already in the cart
         boolean bookExists = false;
-        for (CartItem item : cart) {
+        for (CartItem item : cart.getItems()) {
             if (item.getBook().getBookId() == book.getBookId()) {
                 item.setQuantity(item.getQuantity() + quantity);
                 bookExists = true;
@@ -46,7 +47,7 @@ public class SessionUtil {
         if (!bookExists) {
             CartItem item = new CartItem(book.getBookId(), quantity);
             item.setBook(book);
-            cart.add(item);
+            cart.getItems().add(item);
         }
         
         // Update the cart in the session
@@ -57,7 +58,7 @@ public class SessionUtil {
      * Update the quantity of a book in the cart
      */
     public static void updateCartItem(HttpSession session, int bookId, int quantity) {
-        List<CartItem> cart = getCart(session);
+        Cart cart = getCart(session);
         
         if (quantity <= 0) {
             // If the quantity is 0 or negative, remove the item
@@ -66,7 +67,7 @@ public class SessionUtil {
         }
         
         // Update the quantity
-        for (CartItem item : cart) {
+        for (CartItem item : cart.getItems()) {
             if (item.getBook().getBookId() == bookId) {
                 item.setQuantity(quantity);
                 break;
@@ -81,10 +82,10 @@ public class SessionUtil {
      * Remove a book from the cart
      */
     public static void removeFromCart(HttpSession session, int bookId) {
-        List<CartItem> cart = getCart(session);
+        Cart cart = getCart(session);
         
         // Remove the item from the cart
-        cart.removeIf(item -> item.getBook().getBookId() == bookId);
+        cart.getItems().removeIf(item -> item.getBook().getBookId() == bookId);
         
         // Update the cart in the session
         session.setAttribute(CART_SESSION_KEY, cart);
@@ -101,13 +102,13 @@ public class SessionUtil {
      * Calculate the cart summary
      */
     public static CartSummary getCartSummary(HttpSession session) {
-        List<CartItem> cart = getCart(session);
+        Cart cart = getCart(session);
         CartSummary summary = new CartSummary();
         
         BigDecimal subtotal = BigDecimal.ZERO;
         int itemCount = 0;
         
-        for (CartItem item : cart) {
+        for (CartItem item : cart.getItems()) {
             subtotal = subtotal.add(item.getSubtotal());
             itemCount += item.getQuantity();
         }

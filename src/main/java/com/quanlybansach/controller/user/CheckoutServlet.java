@@ -3,10 +3,13 @@ package com.quanlybansach.controller.user;
 import com.quanlybansach.dao.OrderDAO;
 import com.quanlybansach.model.Customer;
 import com.quanlybansach.model.Order;
-import com.quanlybansach.model.OrderItem;
+import com.quanlybansach.model.OrderDetail;
 import com.quanlybansach.model.ShippingAddress;
+import com.quanlybansach.model.Account;
+import com.quanlybansach.model.Cart;
 import com.quanlybansach.model.CartItem;
 import com.quanlybansach.model.CartSummary;
+import com.quanlybansach.service.OrderService;
 import com.quanlybansach.util.SessionUtil;
 
 import javax.servlet.RequestDispatcher;
@@ -29,22 +32,26 @@ import java.text.SimpleDateFormat;
 @WebServlet("/checkout/*")
 public class CheckoutServlet extends HttpServlet {
     private OrderDAO orderDAO;
+    private OrderService orderService;
 
     public void init() {
         orderDAO = new OrderDAO();
+        orderService = new OrderService();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getServletPath();
+        String pathInfo = request.getPathInfo();
+
+        System.out.println("\nCheckoutServlet - Action: " + action);
+        System.out.println("CheckoutServlet - Path Info: " + pathInfo);
         
         try {
-            switch (action) {
-                case "/checkout":
+            // Main checkout page (no path info or root path)
+            if (pathInfo == null || pathInfo.equals("/")) {
                     showCheckoutPage(request, response);
-                    break;
-                default:
+            } else {
                     response.sendRedirect(request.getContextPath() + "/cart");
-                    break;
             }
         } catch (SQLException ex) {
             throw new ServletException(ex);
@@ -53,15 +60,17 @@ public class CheckoutServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getServletPath();
+        String pathInfo = request.getPathInfo();
+        
+        System.out.println("\nCheckoutServlet - POST Action: " + action);
+        System.out.println("CheckoutServlet - Path Info: " + pathInfo);
         
         try {
-            switch (action) {
-                case "/checkout/place-order":
-                    placeOrder(request, response);
-                    break;
-                default:
-                    response.sendRedirect(request.getContextPath() + "/cart");
-                    break;
+            // Use pathInfo to determine the action
+            if (pathInfo != null && pathInfo.equals("/place-order")) {
+                placeOrder(request, response);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/cart");
             }
         } catch (SQLException ex) {
             throw new ServletException(ex);
@@ -70,27 +79,67 @@ public class CheckoutServlet extends HttpServlet {
 
     private void showCheckoutPage(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("customerId");
-        
-        if (customer == null) {
+        Account account = (Account) session.getAttribute("account");
+        String itemsParam = request.getParameter("items");
+
+        if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        List<CartItem> cart = SessionUtil.getCart(session);
-        if (cart == null || cart.isEmpty()) {
+        Cart cart = SessionUtil.getCart(session);
+        if (cart == null || cart.getItems().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }
+
+        System.out.println("CheckoutServlet - Cart: " + cart.toString());
         
-        // Calculate cart summary
-        CartSummary cartSummary = SessionUtil.getCartSummary(session);
+        session.removeAttribute("checkoutCart");
+        // Create a new cart for checkout with selected items only
+        Cart checkoutCart = new Cart();
         
-        // Generate order code for reference in bank transfer
-        String orderCode = generateOrderCode();
-        session.setAttribute("orderCode", orderCode);
+        if (itemsParam != null && !itemsParam.isEmpty()) {
+            try {
+                // Parse the items parameter (comma-separated list of book IDs)
+                String[] itemsArray = itemsParam.split(",");
+                
+                for (String itemIdStr : itemsArray) {
+                    Integer itemId = Integer.parseInt(itemIdStr.trim());
+                    
+                    // Find matching cart item
+                    for (CartItem item : cart.getItems()) {
+                        if (item.getBook() != null && itemId.equals(item.getBook().getBookId())) {
+                            // Create a new cart item and add to checkout cart
+                            CartItem checkoutItem = new CartItem(item.getBook().getBookId(), item.getQuantity());
+                            checkoutItem.setBook(item.getBook());
+                            checkoutCart.getItems().add(checkoutItem);
+                            break;
+                        }
+                    }
+                }
+                
+                if (checkoutCart.getItems().isEmpty()) {
+                    // If no items were added (invalid IDs), redirect back to cart
+                    response.sendRedirect(request.getContextPath() + "/cart");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Error parsing item IDs: " + e.getMessage());
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
+        } else {
+            // If no items parameter, use entire cart
+            checkoutCart = cart;
+        }
         
-        request.setAttribute("cart", cart);
+        // Calculate cart summary for selected items
+        CartSummary cartSummary = calculateCartSummary(checkoutCart);
+        
+        session.setAttribute("checkoutCart", checkoutCart);
+        
+        request.setAttribute("cart", checkoutCart);
         request.setAttribute("cartSummary", cartSummary);
         
         RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/checkout.jsp");
@@ -99,18 +148,27 @@ public class CheckoutServlet extends HttpServlet {
 
     private void placeOrder(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("user");
+        Account account = (Account) session.getAttribute("account");
         
-        if (customer == null) {
+        if (account == null) {
+            System.out.println("CheckoutServlet - placeOrder: Account is null, redirecting to login");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        List<CartItem> cart = SessionUtil.getCart(session);
-        if (cart == null || cart.isEmpty()) {
+        // Get the checkout cart from session
+        Cart checkoutCart = (Cart) session.getAttribute("checkoutCart");
+        System.out.println("CheckoutServlet - placeOrder: checkoutCart = " + (checkoutCart != null ? 
+            "Items: " + checkoutCart.getItems().size() : "null"));
+        
+        if (checkoutCart == null || checkoutCart.getItems().isEmpty()) {
+            System.out.println("CheckoutServlet - placeOrder: checkoutCart is null or empty, redirecting to cart");
             response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }
+        
+        Customer customer = new Customer();
+        customer.setCustomerId(account.getAccountId());
         
         // Get form data
         String fullName = request.getParameter("fullName");
@@ -122,6 +180,12 @@ public class CheckoutServlet extends HttpServlet {
         String ward = request.getParameter("ward");
         String shippingMethod = request.getParameter("shippingMethod");
         String paymentMethod = request.getParameter("paymentMethod");
+        
+        // Cập nhật thông tin customer từ form
+        customer.setName(fullName);
+        customer.setPhone(phone);
+        customer.setEmail(email);
+        customer.setAddress(address);
         
         // Create shipping address
         ShippingAddress shippingAddress = new ShippingAddress();
@@ -156,11 +220,14 @@ public class CheckoutServlet extends HttpServlet {
         
         // Create order - Using existing Order class
         Order order = new Order();
-        order.setCustomerId(customer.getCustomerId());
+        if (account.getCustomerId() != null) {
+            order.setCustomerId(account.getCustomerId());
+        } else {
+            order.setCustomerId(account.getAccountId());
+        }
         order.setOrderDate(new Date());
-        order.setStatus("pending");
+        order.setStatus("Chờ xử lý");
         
-        // The following lines need to be commented out if the Order class doesn't have these methods
         // Handle shipping address - in real implementation, convert the object to formatted string
         String shippingAddressStr = String.format("%s, %s, %s, %s - %s", 
             shippingAddress.getAddress(),
@@ -182,54 +249,119 @@ public class CheckoutServlet extends HttpServlet {
         }
         
         // Calculate total amount
-        CartSummary cartSummary = SessionUtil.getCartSummary(session);
+        CartSummary cartSummary = calculateCartSummary(checkoutCart);
         BigDecimal subtotal = BigDecimal.valueOf(cartSummary.getSubtotal());
         BigDecimal discount = BigDecimal.valueOf(cartSummary.getDiscount());
         BigDecimal totalAmount = subtotal.add(BigDecimal.valueOf(shippingFee)).subtract(discount);
         
         order.setTotalAmount(totalAmount);
         
-        // In a real implementation, order details would be saved to the database
-        // For now, we'll create a sample order
-        
-        // Clear cart after successful order
-        SessionUtil.clearCart(session);
-        
-        // Add tracking code for display
-        String trackingCode = generateTrackingCode();
-        
-        // Set estimated delivery date based on shipping method
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        if ("standard".equals(shippingMethod)) {
-            calendar.add(Calendar.DAY_OF_MONTH, 3);
-        } else if ("fast".equals(shippingMethod)) {
-            calendar.add(Calendar.DAY_OF_MONTH, 2);
-        } else if ("express".equals(shippingMethod)) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        // Create order details from cart items
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for (CartItem item : checkoutCart.getItems()) {
+            if (item.getBook() != null) {
+                OrderDetail detail = new OrderDetail();
+                detail.setBookId(item.getBook().getBookId());
+                detail.setQuantity(item.getQuantity());
+                detail.setBookTitle(item.getBook().getTitle());
+                detail.setImageUrl(item.getBook().getImageUrl());
+                
+                // Handle different types for price
+                Object price = item.getBook().getPrice();
+                if (price instanceof BigDecimal) {
+                    detail.setUnitPrice((BigDecimal) price);
+                } else if (price instanceof Number) {
+                    detail.setUnitPrice(BigDecimal.valueOf(((Number) price).doubleValue()));
+                } else {
+                    // Fallback if the price is not a number type
+                    detail.setUnitPrice(BigDecimal.ZERO);
+                }
+                
+                detail.setDiscount(BigDecimal.ZERO); // Set discount if applicable
+                orderDetails.add(detail);
+            }
         }
-        Date estimatedDeliveryDate = calendar.getTime();
+
+        order.setOrderDetails(orderDetails);
         
-        // Set these additional properties through request attributes
-        request.setAttribute("order", order);
-        request.setAttribute("trackingCode", trackingCode);
-        request.setAttribute("estimatedDeliveryDate", estimatedDeliveryDate);
-        request.setAttribute("shippingAddress", shippingAddress);
+        // Save order to database
+        System.out.println("CheckoutServlet - Saving order to database with customer ID: " + order.getCustomerId());
+        System.out.println("CheckoutServlet - Order details count: " + orderDetails.size());
         
-        // Forward to confirmation page
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/checkout/confirmation.jsp");
-        dispatcher.forward(request, response);
+        try {
+            int orderId = orderService.createOrder(order, orderDetails);
+            
+            if (orderId == -1) {
+                System.err.println("CheckoutServlet - Failed to create order");
+                request.setAttribute("errorMessage", "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/checkout.jsp");
+                dispatcher.forward(request, response);
+                return;
+            }
+            
+            System.out.println("CheckoutServlet - Order created successfully with ID: " + orderId);
+            order.setOrderId(orderId);
+        
+            // // Clear cart after successful order
+            // SessionUtil.clearCart(session);
+                
+            // Remove the checkout cart from session
+            session.removeAttribute("checkoutCart");
+            
+            // Set estimated delivery date based on shipping method
+            // Calendar calendar = Calendar.getInstance();
+            // calendar.setTime(new Date());
+            // if ("standard".equals(shippingMethod)) {
+            //     calendar.add(Calendar.DAY_OF_MONTH, 3);
+            // } else if ("fast".equals(shippingMethod)) {
+            //     calendar.add(Calendar.DAY_OF_MONTH, 2);
+            // } else if ("express".equals(shippingMethod)) {
+            //     calendar.add(Calendar.DAY_OF_MONTH, 1);
+            // }
+            // Date estimatedDeliveryDate = calendar.getTime();
+            
+            // Set these additional properties through request attributes
+            request.setAttribute("order", order);
+            // request.setAttribute("estimatedDeliveryDate", estimatedDeliveryDate);
+            request.setAttribute("shippingAddress", shippingAddress);
+            
+            // Forward to confirmation page
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/checkout/confirmation.jsp");
+            dispatcher.forward(request, response);
+        } catch (Exception e) {
+            System.err.println("CheckoutServlet - Error creating order: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/checkout.jsp");
+            dispatcher.forward(request, response);
+        }
     }
     
-    private String generateOrderCode() {
-        // Generate a random order code with format: ORD-YYYYMMDD-XXXX
-        String dateString = new SimpleDateFormat("yyyyMMdd").format(new Date());
-        String randomPart = String.format("%04d", (int) (Math.random() * 10000));
-        return "ORD-" + dateString + "-" + randomPart;
-    }
-    
-    private String generateTrackingCode() {
-        // Generate a random tracking code
-        return "TRK" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
+    // Helper method to calculate cart summary for selected items
+    private CartSummary calculateCartSummary(Cart cart) {
+        CartSummary summary = new CartSummary();
+        double subtotal = 0;
+        
+        for (CartItem item : cart.getItems()) {
+            if (item.getBook() != null) {
+                // Check if price is BigDecimal or double
+                if (item.getBook().getPrice() instanceof BigDecimal) {
+                    BigDecimal price = (BigDecimal) item.getBook().getPrice();
+                    BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
+                    BigDecimal itemTotal = price.multiply(quantity);
+                    subtotal += itemTotal.doubleValue();
+                } else {
+                    double itemPrice = ((Number)item.getBook().getPrice()).doubleValue() * item.getQuantity();
+                    subtotal += itemPrice;
+                }
+            }
+        }
+        
+        summary.setSubtotal(subtotal);
+        summary.setShippingFee(30000); // Default shipping fee
+        summary.setDiscount(0); // Set discount if applicable
+        summary.setTotal(subtotal + summary.getShippingFee() - summary.getDiscount());
+        
+        return summary;
     }
 } 

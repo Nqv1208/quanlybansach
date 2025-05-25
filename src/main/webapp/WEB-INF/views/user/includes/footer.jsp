@@ -25,7 +25,7 @@
                 </ul>
             </div>
 
-            <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+            <!-- <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
                 <h5 class="footer-title">Danh Mục</h5>
                 <ul class="footer-links list-unstyled">
                     <li><a href="${pageContext.request.contextPath}/shop?category=1">Văn Học Việt Nam</a></li>
@@ -33,7 +33,7 @@
                     <li><a href="${pageContext.request.contextPath}/shop?category=3">Sách Thiếu Nhi</a></li>
                     <li><a href="${pageContext.request.contextPath}/shop?category=4">Kỹ Năng Sống</a></li>
                 </ul>
-            </div>
+            </div> -->
 
             <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
                 <h5 class="footer-title">Liên Hệ</h5>
@@ -43,6 +43,11 @@
                     <li><i class="fas fa-envelope me-2"></i> contact@nhasachonline.com</li>
                     <li><i class="fas fa-clock me-2"></i> 08:00 - 22:00, Thứ 2 - Chủ Nhật</li>
                 </ul>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3833.7795476776864!2d108.21102737396784!3d16.07692563923416!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421847f125d0a9%3A0x936779884318eeca!2zNDggQ2FvIFRo4bqvbmcsIFRoYW5oIELDrG5oLCBI4bqjaSBDaMOidSwgxJDDoCBO4bq1bmcgNTUwMDAwLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1748100900440!5m2!1svi!2s" 
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
             </div>
         </div>
 

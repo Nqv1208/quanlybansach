@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -179,6 +180,139 @@ public class OrderDAO {
       }
       
       return 0;
+   }
+
+   /**
+    * Create a new order in the database
+    * 
+    * @param order The order to create
+    * @return The order ID of the newly created order
+    * @throws SQLException if database error occurs
+    */
+   // Sử dụng Statement.RETURN_GENERATED_KEYS:
+   public int createOrder(Order order) throws SQLException {
+      String sql = "INSERT INTO orders (customer_id, order_date, total_amount, status, shipping_address, payment_method) " +
+                  "VALUES (?, ?, ?, ?, ?, ?)";
+      
+      try (Connection conn = DBConnection.getConnection()) {
+         conn.setAutoCommit(false);
+         
+         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+               stmt.setInt(1, order.getCustomerId());
+               stmt.setDate(2, new java.sql.Date(order.getOrderDate().getTime()));
+               stmt.setBigDecimal(3, order.getTotalAmount());
+               stmt.setString(4, order.getStatus());
+               stmt.setString(5, order.getShippingAddress());
+               stmt.setString(6, order.getPaymentMethod());
+               
+               int rowsAffected = stmt.executeUpdate();
+               if (rowsAffected == 0) {
+                  throw new SQLException("Failed to insert order, no rows affected");
+               }
+               
+               // Get the generated key
+               int orderId = -1;
+               try (ResultSet rs = stmt.getGeneratedKeys()) {
+                  if (rs.next()) {
+                     orderId = rs.getInt(1);
+                     System.out.println("Order created with ID: " + orderId);
+                  } else {
+                     throw new SQLException("Failed to retrieve order ID, no generated key obtained");
+                  }
+               }
+               
+               conn.commit();
+               return orderId;
+               
+         } catch (SQLException e) {
+               conn.rollback();
+               System.err.println("Error creating order: " + e.getMessage());
+               throw e;
+         } finally {
+               conn.setAutoCommit(true);
+         }
+      }
+   }
+   
+   /**
+    * Create an order detail in the database
+    * 
+    * @param orderId The order ID
+    * @param bookId The book ID
+    * @param quantity The quantity
+    * @param unitPrice The unit price
+    * @param discount The discount
+    * @return True if successful, false otherwise
+    * @throws SQLException if database error occurs
+    */
+   public boolean createOrderDetail(int orderId, int bookId, int quantity, BigDecimal unitPrice, BigDecimal discount) throws SQLException {
+      String sql = "INSERT INTO order_details (order_id, book_id, quantity, unit_price, discount) " +
+                  "VALUES (?, ?, ?, ?, ?)";
+      
+      try (Connection conn = DBConnection.getConnection()) {
+         // Validate orderId exists first to avoid foreign key constraint errors
+         if (!orderExists(conn, orderId)) {
+            System.err.println("Error: Cannot create order detail for non-existent order ID: " + orderId);
+            return false;
+         }
+         
+         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            stmt.setInt(2, bookId);
+            stmt.setInt(3, quantity);
+            stmt.setBigDecimal(4, unitPrice);
+            stmt.setBigDecimal(5, discount);
+            
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Order detail created for order ID: " + orderId + ", book ID: " + bookId);
+            return rowsAffected > 0;
+         } catch (SQLException e) {
+            System.err.println("Error creating order detail: " + e.getMessage());
+            throw e;
+         }
+      }
+   }
+   
+   /**
+    * Check if an order exists in the database
+    * 
+    * @param conn Database connection
+    * @param orderId Order ID to check
+    * @return True if order exists, false otherwise
+    * @throws SQLException if database error occurs
+    */
+   private boolean orderExists(Connection conn, int orderId) throws SQLException {
+      String sql = "SELECT 1 FROM orders WHERE order_id = ?";
+      
+      try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+         stmt.setInt(1, orderId);
+         
+         try (ResultSet rs = stmt.executeQuery()) {
+            return rs.next(); // True if order exists, false otherwise
+         }
+      }
+   }
+   
+   /**
+    * Update the status of an order
+   * 
+   * @param orderId The order ID
+   * @param status The new status
+   * @return True if successful, false otherwise
+   * @throws SQLException if database error occurs
+   */
+   public boolean updateOrderStatus(int orderId, String status) throws SQLException {
+      String sql = "UPDATE orders SET status = ? WHERE order_id = ?";
+      
+      try (Connection conn = DBConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+         
+         stmt.setString(1, status);
+         stmt.setInt(2, orderId);
+         
+         int rowsAffected = stmt.executeUpdate();
+         return rowsAffected > 0;
+      }
    }
 
    public static void main(String[] args) throws SQLException {

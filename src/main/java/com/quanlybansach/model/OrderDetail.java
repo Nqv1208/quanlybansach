@@ -12,6 +12,7 @@ public class OrderDetail {
     
     // For display purpose
     private String bookTitle;
+    private String imageUrl;
     
     public OrderDetail() {
     }
@@ -85,6 +86,14 @@ public class OrderDetail {
         BigDecimal discountAmount = unitPrice.multiply(discount).divide(new BigDecimal(100));
         BigDecimal discountedPrice = unitPrice.subtract(discountAmount);
         return discountedPrice.multiply(new BigDecimal(quantity));
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     @Override

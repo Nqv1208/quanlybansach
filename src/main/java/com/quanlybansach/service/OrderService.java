@@ -147,9 +147,9 @@ public class OrderService {
     /**
      * Tạo mã vận đơn
      */
-    public String generateTrackingCode() {
-        return "TRK" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
-    }
+    // public String generateTrackingCode() {
+    //     return "TRK" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
+    // }
     
     /**
      * Lấy danh sách tất cả đơn hàng
@@ -201,5 +201,59 @@ public class OrderService {
         }
         
         return false;
+    }
+
+    /**
+     * Create a new order with order details
+     * 
+     * @param order The order to create
+     * @param orderDetails The order details
+     * @return The order ID of the newly created order, or -1 if an error occurred
+     */
+    public int createOrder(Order order, List<OrderDetail> orderDetails) {
+        try {
+            // Create the order
+            System.out.println("OrderService - Creating order: " + order.toString());
+            int orderId = orderDAO.createOrder(order);
+            
+            if (orderId == -1) {
+                System.err.println("OrderService - Failed to create order");
+                return -1;
+            }
+            
+            System.out.println("OrderService - Order created with ID: " + orderId);
+            
+            // Create the order details
+            boolean allDetailsCreated = true;
+            for (OrderDetail detail : orderDetails) {
+                detail.setOrderId(orderId);
+                boolean success = orderDAO.createOrderDetail(
+                    orderId, 
+                    detail.getBookId(), 
+                    detail.getQuantity(), 
+                    detail.getUnitPrice(), 
+                    detail.getDiscount()
+                );
+                
+                if (!success) {
+                    System.err.println("OrderService - Failed to create order detail: " + detail.toString());
+                    allDetailsCreated = false;
+                    break;
+                }
+            }
+            
+            if (!allDetailsCreated) {
+                // If any detail failed to create, consider the entire order failed
+                System.err.println("OrderService - Not all order details were created successfully");
+                return -1;
+            }
+            
+            System.out.println("OrderService - Order and all details created successfully");
+            return orderId;
+        } catch (SQLException e) {
+            System.err.println("OrderService - Error creating order: " + e.getMessage());
+            e.printStackTrace();
+            return -1;
+        }
     }
 } 
