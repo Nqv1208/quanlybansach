@@ -1048,28 +1048,12 @@ END;
 GO
 
 -----------------------------------------------------------------
--- Trigger để tự động hủy đơn hàng nếu không được xử lý sau một khoảng thời gian
-CREATE OR ALTER TRIGGER trg_auto_cancel_pending_orders
-ON ORDERS
-AFTER INSERT, UPDATE
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Tự động hủy các đơn hàng đã ở trạng thái "Chờ xử lý" quá 7 ngày
-    UPDATE o
-    SET status = N'Đã hủy'
-    FROM ORDERS o
-    WHERE o.status = N'Chờ xử lý'
-      AND DATEDIFF(DAY, o.order_date, GETDATE()) > 7;
-END;
-GO
-
------------------------------------------------------------------
 -- Trigger để kiểm tra tính hợp lệ của đơn hàng trước khi thêm
+DROP TRIGGER IF EXISTS trg_validate_order
+GO	
 CREATE OR ALTER TRIGGER trg_validate_order
 ON ORDERS
-INSTEAD OF INSERT
+AFTER INSERT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -1107,16 +1091,6 @@ BEGIN
         RAISERROR('Phương thức thanh toán không được để trống.', 16, 1)
         RETURN
     END
-    
-    -- Nếu hợp lệ, thêm đơn hàng
-    INSERT INTO ORDERS (customer_id, order_date, total_amount, status, shipping_address, payment_method)
-    SELECT customer_id, 
-           ISNULL(order_date, GETDATE()), 
-           total_amount, 
-           ISNULL(status, N'Chờ xử lý'), 
-           shipping_address, 
-           payment_method
-    FROM inserted;
 END;
 GO
 
@@ -2437,4 +2411,4 @@ SELECT * FROM dbo.CART_ITEMS
 SELECT * FROM dbo.ACCOUNTS
 -------------------------------------
 SELECT * FROM dbo.ROLES
--------------------------------------
+------------------------------------
