@@ -3,10 +3,12 @@ package com.quanlybansach.controller.user;
 import com.quanlybansach.dao.BookDAO;
 import com.quanlybansach.dao.CustomerDAO;
 import com.quanlybansach.dao.OrderDAO;
+import com.quanlybansach.model.Account;
 import com.quanlybansach.model.Book;
 import com.quanlybansach.model.Customer;
 import com.quanlybansach.model.Order;
 import com.quanlybansach.model.OrderDetail;
+import com.quanlybansach.service.OrderService;
 import com.quanlybansach.util.SessionUtil;
 
 import javax.servlet.RequestDispatcher;
@@ -21,23 +23,30 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 @WebServlet("/orders/*")
 public class OrderServlet extends HttpServlet {
     private OrderDAO orderDAO;
     private CustomerDAO customerDAO;
     private BookDAO bookDAO;
+    private OrderService orderService;
 
     public void init() {
         orderDAO = new OrderDAO();
         customerDAO = new CustomerDAO();
         bookDAO = new BookDAO();
+        orderService = new OrderService();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         String action = pathInfo != null ? pathInfo : "";
+
+        System.out.println("Path info: " + action);
         
         try {
             switch (action) {
@@ -82,13 +91,14 @@ public class OrderServlet extends HttpServlet {
 
     private void listOrders(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException, ParseException {
         HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("user");
+        Account account = (Account) session.getAttribute("account");
+        Integer customerId = (Integer) session.getAttribute("customerId");
         
-        if (customer == null) {
+        if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        
+                
         int page = 1;
         if (request.getParameter("page") != null) {
             page = Integer.parseInt(request.getParameter("page"));
@@ -110,8 +120,26 @@ public class OrderServlet extends HttpServlet {
             endDate = dateFormat.parse(request.getParameter("endDate"));
         }
         
-        List<Order> orders = orderDAO.getAllOrders(); // Simplified for now, replace with proper implementation
-        int totalOrders = orders.size();
+        // Use OrderService to get orders by customer
+        List<Order> orders = orderService.getOrdersByCustomer(
+            customerId, 
+            status, 
+            keyword, 
+            startDate, 
+            endDate, 
+            page, 
+            recordsPerPage
+        );
+        
+        // Get total count for pagination
+        int totalOrders = orderService.countOrdersByCustomer(
+            customerId, 
+            status, 
+            keyword, 
+            startDate, 
+            endDate
+        );
+        
         int totalPages = (int) Math.ceil((double) totalOrders / recordsPerPage);
         
         request.setAttribute("orders", orders);
@@ -124,81 +152,87 @@ public class OrderServlet extends HttpServlet {
 
     private void showOrderDetail(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("user");
+        Account account = (Account) session.getAttribute("account");
+        Integer customerId = (Integer) session.getAttribute("customerId");
         
-        if (customer == null) {
+        if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        
+            
         int orderId = Integer.parseInt(request.getParameter("id"));
-        // Replace with appropriate implementation - for now use sample data
-        Order order = new Order(); // In real implementation, use orderDAO.getOrderById(orderId);
-        order.setOrderId(orderId);
-        order.setCustomerId(customer.getCustomerId());
+        Order order = orderService.getOrderById(orderId);
         
-        // Verify the order belongs to the logged-in customer
-        if (order.getCustomerId() != customer.getCustomerId()) {
+        // Xác minh đơn hàng thuộc về khách hàng đã đăng nhập
+        if (order == null || order.getCustomerId() != customerId) {
             response.sendRedirect(request.getContextPath() + "/orders");
             return;
         }
         
         request.setAttribute("order", order);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/orders/detail.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/user/orders/detail.jsp");
         dispatcher.forward(request, response);
     }
 
     private void cancelOrder(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("user");
-        
-        if (customer == null) {
+        Account account = (Account) session.getAttribute("account");
+        Integer customerId = (Integer) session.getAttribute("customerId");
+
+        System.out.println("\nCancel order request received");
+        System.out.println("Customer ID: " + customerId);
+        System.out.println("Account: " + (account != null ? account.getUsername() : "null"));       
+
+        if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        int orderId = Integer.parseInt(request.getParameter("orderId"));
-        // Replace with appropriate implementation
-        Order order = new Order(); // In real implementation, use orderDAO.getOrderById(orderId);
-        order.setOrderId(orderId);
-        order.setCustomerId(customer.getCustomerId());
-        order.setStatus("pending");
-        
-        // Verify the order belongs to the logged-in customer and is in pending status
-        if (order.getCustomerId() != customer.getCustomerId() || !order.getStatus().equals("pending")) {
+        if (customerId == null) {
             response.sendRedirect(request.getContextPath() + "/orders");
             return;
         }
         
-        order.setStatus("cancelled");
-        // In a real implementation, add methods to Order class to handle cancellation details
-        // order.setCancelledDate(new Date());
-        // order.setCancelReason("Hủy bởi khách hàng");
+        int orderId = Integer.parseInt(request.getParameter("orderId"));
+        Order order = orderService.getOrderById(orderId);
         
-        // In real implementation, use orderDAO.updateOrder(order);
+        if (order == null || order.getCustomerId() != customerId || !order.getStatus().equals("Chờ xử lý")) {
+            response.sendRedirect(request.getContextPath() + "/orders");
+            return;
+        }
         
-        // Return to order details page
-        response.sendRedirect(request.getContextPath() + "/orders/detail?id=" + orderId);
+        // Cancel the order
+        boolean success = orderService.cancelOrder(order);
+
+        if (success) {
+            System.out.println("Order " + orderId + " cancelled successfully.");
+            response.sendRedirect(request.getContextPath() + "/orders");
+        } else {
+            // Return to order details page
+            response.sendRedirect(request.getContextPath() + "/orders/detail?id=" + orderId);
+        }
     }
 
     private void showReviewForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("user");
+        Account account = (Account) session.getAttribute("account");
         
-        if (customer == null) {
+        if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
+        Customer customer = (Customer) session.getAttribute("customer");
+        if (customer == null) {
+            response.sendRedirect(request.getContextPath() + "/orders");
+            return;
+        }
+        
         int orderId = Integer.parseInt(request.getParameter("id"));
-        // Replace with appropriate implementation
-        Order order = new Order(); // In real implementation, use orderDAO.getOrderById(orderId);
-        order.setOrderId(orderId);
-        order.setCustomerId(customer.getCustomerId());
-        order.setStatus("delivered");
+        Order order = orderService.getOrderById(orderId);
         
         // Verify the order belongs to the logged-in customer and is delivered
-        if (order.getCustomerId() != customer.getCustomerId() || !order.getStatus().equals("delivered")) {
+        if (order == null || order.getCustomerId() != customer.getCustomerId() || !order.getStatus().equals("delivered")) {
             response.sendRedirect(request.getContextPath() + "/orders");
             return;
         }
@@ -219,41 +253,41 @@ public class OrderServlet extends HttpServlet {
 
     private void reorder(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("user");
+        Account account = (Account) session.getAttribute("account");
+        Integer customerId = (Integer) session.getAttribute("customerId");
         
-        if (customer == null) {
+        if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        int orderId = Integer.parseInt(request.getParameter("id"));
-        // Replace with appropriate implementation
-        Order order = new Order(); // In real implementation, use orderDAO.getOrderById(orderId);
-        order.setOrderId(orderId);
-        order.setCustomerId(customer.getCustomerId());
         
-        // Verify the order belongs to the logged-in customer
-        if (order.getCustomerId() != customer.getCustomerId()) {
+        if (customerId == null) {
             response.sendRedirect(request.getContextPath() + "/orders");
             return;
         }
         
-        // Add items from the order back to the cart - simplified implementation
-        // In a real implementation, you'd get the actual order details
-        List<OrderDetail> items = order.getOrderDetails();
-        if (items != null) {
-            SessionUtil.clearCart(session);
-            
-            for (OrderDetail item : items) {
-                // This would need to be implemented correctly in OrderDetail
-                Book book = bookDAO.getBookById(item.getBookId());
-                if (book != null) {
-                    SessionUtil.addToCart(session, book, item.getQuantity());
-                }
-            }
+        int orderId = Integer.parseInt(request.getParameter("orderId"));
+        Order order = orderService.getOrderById(orderId);
+        
+        // Xác nhận có người dùng
+        if (order == null || order.getCustomerId() != customerId) {
+            response.sendRedirect(request.getContextPath() + "/orders");
+            return;
+        }
+
+        // Cancel the order
+        boolean success = orderService.cancelOrder(order);
+
+        if (success) {
+            System.out.println("Reorder successfully!!!");
+            response.sendRedirect(request.getContextPath() + "/orders");
+        } else {
+            // Return to order details page
+            response.sendRedirect(request.getContextPath() + "/orders/detail?id=" + orderId);
         }
         
         // Redirect to cart page
-        response.sendRedirect(request.getContextPath() + "/cart");
+        response.sendRedirect(request.getContextPath() + "/orders");
     }
 } 

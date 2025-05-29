@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,9 +34,8 @@ public class OrderService {
      */
     public List<Order> getOrdersByCustomer(int customerId, String status, String keyword, 
                                          Date startDate, Date endDate, int page, int recordsPerPage) throws SQLException {
-        // Trong thực tế, bạn sẽ gọi hàm tương ứng từ OrderDAO
-        // và có thể thực hiện thêm logic nghiệp vụ ở đây
-        List<Order> orders = orderDAO.getAllOrders();
+        
+        List<Order> orders = orderDAO.getOrdersByCustomerId(customerId);
         
         // Lọc theo customerId và các điều kiện khác
         List<Order> filteredOrders = new ArrayList<>();
@@ -127,12 +127,23 @@ public class OrderService {
      * Hủy đơn hàng
      */
     public boolean cancelOrder(Order order) throws SQLException {
-        order.setStatus("cancelled");
-        // Trong OrderDAO cần thêm các trường cancelledDate và cancelReason 
-        // hoặc lưu thông tin cancel vào một bảng riêng
+        order.setStatus("Đã hủy");
         
-        // orderDAO.updateOrder(order);
-        return true;
+        boolean  success = orderDAO.updateOrderStatus(order.getOrderId(), order.getStatus());
+        
+        return success;
+    }
+
+    /**
+     * Đặt lại đơn hàng
+     */
+    public boolean reOrder(Order order) throws SQLException {
+        order.setStatus("Đang xử lý");
+        order.setOrderDate(new Date());
+
+        boolean  success = orderDAO.updateOrderStatus(order.getOrderId(), order.getStatus());
+
+        return success;
     }
     
     /**

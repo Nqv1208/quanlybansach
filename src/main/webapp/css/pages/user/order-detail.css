@@ -1,0 +1,238 @@
+/* Order Detail Page Styles */
+@import url('../../themes/variables.css');
+
+.order-detail-container {
+    background-color: var(--white-color);
+    border-radius: var(--border-radius-l);
+    box-shadow: var(--shadow-medium);
+    padding: var(--spacing-xl);
+    margin-top: var(--spacing-l);
+}
+
+/* Order Header */
+.order-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-m);
+    margin-bottom: var(--spacing-l);
+}
+
+/* Order Status */
+.order-status {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-m);
+    border-radius: var(--border-radius-s);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: var(--font-size-small);
+}
+
+.order-status.Chờ {
+    background-color: #FFF3CD;
+    color: #856404;
+}
+
+.order-status.Đã {
+    background-color: var(--success-color);
+    color: var(--white-color);
+}
+
+.order-status.Đang {
+    background-color: var(--info-color);
+    color: var(--white-color);
+}
+
+/* Order Progress */
+.order-progress {
+    margin: var(--spacing-xl) 0;
+}
+
+.progress-track {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 0 var(--spacing-xxl);
+}
+
+.progress-track:before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--border-color);
+    z-index: 0;
+}
+
+.progress-step {
+    position: relative;
+    text-align: center;
+    width: 25%;
+}
+
+.progress-step.active .progress-icon {
+    background-color: var(--success-color);
+    color: var(--white-color);
+    border-color: var(--success-color);
+}
+
+.progress-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--border-radius-circle);
+    background: var(--white-color);
+    border: 3px solid var(--border-color);
+    color: var(--border-color);
+    line-height: 45px;
+    font-size: var(--font-size-large);
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+    margin-bottom: var(--spacing-s);
+}
+
+.progress-text {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-color);
+}
+
+.progress-date {
+    font-size: var(--font-size-small);
+    color: var(--light-text-color);
+}
+
+/* Info Cards */
+.info-card {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius-m);
+    padding: var(--spacing-m);
+    margin-bottom: var(--spacing-l);
+}
+
+.info-title {
+    font-size: var(--font-size-medium);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-s);
+    margin-bottom: var(--spacing-m);
+    color: var(--primary-color);
+}
+
+/* Order Items */
+.order-items {
+    margin: var(--spacing-xl) 0;
+}
+
+.items-title {
+    margin-bottom: var(--spacing-m);
+    color: var(--primary-color);
+}
+
+.item-image {
+    width: 60px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: var(--spacing-m);
+    border-radius: var(--border-radius-s);
+}
+
+.item-info {
+    max-width: 300px;
+}
+
+.item-title {
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-base);
+    color: var(--text-color);
+}
+
+.item-author {
+    color: var(--light-text-color);
+    margin-bottom: 0;
+    font-size: var(--font-size-small);
+}
+
+/* Order Summary */
+.order-summary {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius-m);
+    padding: var(--spacing-m);
+    margin-top: var(--spacing-l);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-s);
+    color: var(--text-color);
+}
+
+.summary-row.total {
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-s);
+    margin-top: var(--spacing-s);
+    font-weight: 700;
+    font-size: var(--font-size-medium);
+    color: var(--primary-color);
+}
+
+/* Order Actions */
+.order-actions {
+    margin-top: var(--spacing-xl);
+    display: flex;
+    justify-content: space-between;
+}
+
+.order-actions .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.order-actions .btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.order-actions .btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+.order-actions .btn-outline-secondary {
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.order-actions .btn-outline-secondary:hover {
+    background-color: var(--secondary-color);
+    color: var(--white-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .progress-track {
+        margin: 0 var(--spacing-l);
+    }
+    
+    .progress-icon {
+        width: 40px;
+        height: 40px;
+        line-height: 35px;
+        font-size: var(--font-size-base);
+    }
+    
+    .progress-text {
+        font-size: var(--font-size-small);
+    }
+    
+    .order-actions {
+        flex-direction: column;
+        gap: var(--spacing-m);
+    }
+    
+    .order-actions > div {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-s);
+    }
+} 

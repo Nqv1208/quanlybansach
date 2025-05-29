@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -24,7 +25,7 @@
     <section class="page-title">
         <div class="container">
             <h1 class="text-center">Chi tiết đơn hàng</h1>
-            <p class="text-center mb-0">Thông tin chi tiết đơn hàng #${order.code}</p>
+            <p class="text-center mb-0">Thông tin chi tiết đơn hàng #${order.orderId}</p>
         </div>
     </section>
 
@@ -35,23 +36,16 @@
             <div class="order-header">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <h3 class="order-id">Đơn hàng #${order.code}</h3>
+                        <h3 class="order-id">Đơn hàng #${order.orderId}</h3>
                         <p class="order-date">Đặt ngày: <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" /></p>
                     </div>
                     <div class="col-md-6 text-md-end">
-                        <div class="order-status ${order.status}">
-                            <c:choose>
-                                <c:when test="${order.status == 'pending'}">Chờ xác nhận</c:when>
-                                <c:when test="${order.status == 'processing'}">Đang xử lý</c:when>
-                                <c:when test="${order.status == 'shipped'}">Đang giao hàng</c:when>
-                                <c:when test="${order.status == 'delivered'}">Đã giao hàng</c:when>
-                                <c:when test="${order.status == 'cancelled'}">Đã hủy</c:when>
-                                <c:otherwise>${order.status}</c:otherwise>
-                            </c:choose>
+                        <div class="order-status ${fn:split(order.status, ' ')[0]}">
+                            ${order.status}
                         </div>
-                        <c:if test="${order.status == 'pending'}">
+                        <c:if test="${order.status == 'Chờ xử lý'}">
                             <form action="${pageContext.request.contextPath}/orders/cancel" method="post" class="d-inline mt-2">
-                                <input type="hidden" name="orderId" value="${order.id}">
+                                <input type="hidden" name="orderId" value="${order.orderId}">
                                 <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')">
                                     <i class="fas fa-times me-1"></i> Hủy đơn hàng
                                 </button>
@@ -62,42 +56,33 @@
             </div>
 
             <!-- Order Progress -->
-            <c:if test="${order.status != 'cancelled'}">
+            <c:if test="${order.status != 'Đã hủy'}">
                 <div class="order-progress">
                     <div class="progress-track">
-                        <div class="progress-step ${order.status == 'pending' || order.status == 'processing' || order.status == 'shipped' || order.status == 'delivered' ? 'active' : ''}">
+                        <div class="progress-step active">
                             <span class="progress-icon">
                                 <i class="fas fa-check-circle"></i>
                             </span>
                             <div class="progress-text">Đã đặt hàng</div>
                             <div class="progress-date"><fmt:formatDate value="${order.orderDate}" pattern="dd/MM" /></div>
                         </div>
-                        <div class="progress-step ${order.status == 'processing' || order.status == 'shipped' || order.status == 'delivered' ? 'active' : ''}">
+                        <div class="progress-step ${order.status == 'Đã xác nhận' || order.status == 'Đang giao hàng' || order.status == 'Đã giao hàng' ? 'active' : ''}">
                             <span class="progress-icon">
                                 <i class="fas fa-box"></i>
                             </span>
-                            <div class="progress-text">Đang xử lý</div>
-                            <c:if test="${not empty order.processingDate}">
-                                <div class="progress-date"><fmt:formatDate value="${order.processingDate}" pattern="dd/MM" /></div>
-                            </c:if>
+                            <div class="progress-text">Đã xác nhận</div>
                         </div>
-                        <div class="progress-step ${order.status == 'shipped' || order.status == 'delivered' ? 'active' : ''}">
+                        <div class="progress-step ${order.status == 'Đang giao hàng' || order.status == 'Đã giao hàng' ? 'active' : ''}">
                             <span class="progress-icon">
                                 <i class="fas fa-truck"></i>
                             </span>
                             <div class="progress-text">Đang giao hàng</div>
-                            <c:if test="${not empty order.shippedDate}">
-                                <div class="progress-date"><fmt:formatDate value="${order.shippedDate}" pattern="dd/MM" /></div>
-                            </c:if>
                         </div>
-                        <div class="progress-step ${order.status == 'delivered' ? 'active' : ''}">
+                        <div class="progress-step ${order.status == 'Đã giao hàng' ? 'active' : ''}">
                             <span class="progress-icon">
                                 <i class="fas fa-home"></i>
                             </span>
                             <div class="progress-text">Đã giao hàng</div>
-                            <c:if test="${not empty order.deliveredDate}">
-                                <div class="progress-date"><fmt:formatDate value="${order.deliveredDate}" pattern="dd/MM" /></div>
-                            </c:if>
                         </div>
                     </div>
                 </div>
@@ -109,24 +94,21 @@
                     <div class="col-md-6">
                         <div class="info-card">
                             <h5 class="info-title">Thông tin giao hàng</h5>
-                            <p><strong>Người nhận:</strong> ${order.recipientName}</p>
-                            <p><strong>Số điện thoại:</strong> ${order.recipientPhone}</p>
+                            <p><strong>Người nhận:</strong> ${order.customerName}</p>
                             <p><strong>Địa chỉ:</strong> ${order.shippingAddress}</p>
-                            <p><strong>Email:</strong> ${order.recipientEmail}</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="info-card">
                             <h5 class="info-title">Thông tin thanh toán</h5>
                             <p><strong>Phương thức thanh toán:</strong> ${order.paymentMethod}</p>
-                            <p><strong>Trạng thái thanh toán:</strong> ${order.paymentStatus}</p>
-                            <c:if test="${not empty order.paymentDate}">
-                                <p><strong>Ngày thanh toán:</strong> <fmt:formatDate value="${order.paymentDate}" pattern="dd/MM/yyyy" /></p>
-                            </c:if>
-                            <c:if test="${order.status == 'shipped'}">
-                                <p><strong>Mã vận đơn:</strong> ${order.trackingCode}</p>
-                                <p><strong>Đơn vị vận chuyển:</strong> ${order.shippingProvider}</p>
-                            </c:if>
+                            <p><strong>Trạng thái thanh toán:</strong> 
+                                <c:choose>
+                                    <c:when test="${order.status == 'Đã giao hàng'}">Đã thanh toán</c:when>
+                                    <c:when test="${order.status == 'Đã hủy'}">Đã hủy</c:when>
+                                    <c:otherwise>Chờ thanh toán</c:otherwise>
+                                </c:choose>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -142,24 +124,25 @@
                                 <th>Sản phẩm</th>
                                 <th>Giá</th>
                                 <th>Số lượng</th>
+                                <th>Giảm giá</th>
                                 <th class="text-end">Thành tiền</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <c:forEach var="item" items="${order.orderItems}">
+                            <c:forEach var="item" items="${order.orderDetails}">
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="${item.book.imageUrl}" alt="${item.book.title}" class="item-image">
+                                            <img src="${item.imageUrl}" alt="${item.bookTitle}" class="item-image">
                                             <div class="item-info">
-                                                <h6 class="item-title">${item.book.title}</h6>
-                                                <p class="item-author">${item.book.authorName}</p>
+                                                <h6 class="item-title">${item.bookTitle}</h6>
                                             </div>
                                         </div>
                                     </td>
-                                    <td><fmt:formatNumber value="${item.price}" type="currency" currencySymbol="" /> ₫</td>
+                                    <td><fmt:formatNumber value="${item.unitPrice}" type="currency" currencySymbol="" /> ₫</td>
                                     <td>${item.quantity}</td>
-                                    <td class="text-end"><fmt:formatNumber value="${item.price * item.quantity}" type="currency" currencySymbol="" /> ₫</td>
+                                    <td>${item.discount}%</td>
+                                    <td class="text-end"><fmt:formatNumber value="${item.subtotal}" type="currency" currencySymbol="" /> ₫</td>
                                 </tr>
                             </c:forEach>
                         </tbody>
@@ -171,18 +154,12 @@
             <div class="order-summary">
                 <div class="summary-row">
                     <span>Tạm tính:</span>
-                    <span><fmt:formatNumber value="${order.subtotal}" type="currency" currencySymbol="" /> ₫</span>
+                    <span><fmt:formatNumber value="${order.totalAmount}" type="currency" currencySymbol="" /> ₫</span>
                 </div>
                 <div class="summary-row">
                     <span>Phí vận chuyển:</span>
-                    <span><fmt:formatNumber value="${order.shippingFee}" type="currency" currencySymbol="" /> ₫</span>
+                    <span>0 ₫</span>
                 </div>
-                <c:if test="${order.discount > 0}">
-                    <div class="summary-row">
-                        <span>Giảm giá:</span>
-                        <span>-<fmt:formatNumber value="${order.discount}" type="currency" currencySymbol="" /> ₫</span>
-                    </div>
-                </c:if>
                 <div class="summary-row total">
                     <span>Tổng cộng:</span>
                     <span><fmt:formatNumber value="${order.totalAmount}" type="currency" currencySymbol="" /> ₫</span>
@@ -196,14 +173,14 @@
                 </a>
                 
                 <div>
-                    <c:if test="${order.status == 'delivered'}">
-                        <a href="${pageContext.request.contextPath}/orders/review?id=${order.id}" class="btn btn-outline-secondary">
+                    <c:if test="${order.status == 'Đã giao hàng'}">
+                        <a href="${pageContext.request.contextPath}/orders/review?orderId=${order.orderId}" class="btn btn-outline-secondary">
                             <i class="fas fa-star me-2"></i> Đánh giá sản phẩm
                         </a>
                     </c:if>
                     
-                    <c:if test="${order.status == 'delivered' || order.status == 'cancelled'}">
-                        <a href="${pageContext.request.contextPath}/orders/reorder?id=${order.id}" class="btn btn-primary">
+                    <c:if test="${order.status == 'Đã giao hàng' || order.status == 'Đã hủy'}">
+                        <a href="${pageContext.request.contextPath}/orders/reorder?orderId=${order.orderId}" class="btn btn-primary">
                             <i class="fas fa-redo me-2"></i> Đặt lại đơn hàng
                         </a>
                     </c:if>

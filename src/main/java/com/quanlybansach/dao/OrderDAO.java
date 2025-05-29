@@ -5,6 +5,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.quanlybansach.model.Order;
+import com.quanlybansach.model.OrderDetail;
 import com.quanlybansach.util.DBConnection;
 
 public class OrderDAO {
@@ -105,9 +107,22 @@ public class OrderDAO {
       order.setPaymentMethod(rs.getString("payment_method"));
       
       // Join fields
-      order.setCustomerName(rs.getString("name"));
+      if (hasColumn(rs, "name")) {
+         order.setCustomerName(rs.getString("name"));
+      }
       
       return order;
+   }
+
+   private boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
+      ResultSetMetaData metaData = rs.getMetaData();
+      int columnCount = metaData.getColumnCount();
+      for (int i = 1; i <= columnCount; i++) {
+         if (columnName.equalsIgnoreCase(metaData.getColumnLabel(i))) {
+               return true;
+         }
+      }
+      return false;
    }
 
    public Order getOrderById(int orderId) throws SQLException {
@@ -120,9 +135,41 @@ public class OrderDAO {
 
          if (rs.next()) {
             order = mapResultSetToOrder(rs);
+            // Load order details
+            order.setOrderDetails(getOrderDetailsByOrderId(orderId));
          }
       }
       return order;
+   }
+
+   public List<Order> getOrdersByCustomerId(int customerId) throws SQLException {
+      List<Order> orders = new ArrayList<>();
+      String sql = "SELECT * FROM orders WHERE customer_id = ? ORDER BY order_date DESC";
+      
+      try (Connection conn = DBConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+         
+         stmt.setInt(1, customerId);
+         
+         try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+               Order order = new Order();
+               order.setOrderId(rs.getInt("order_id"));
+               order.setCustomerId(rs.getInt("customer_id"));
+               order.setOrderDate(rs.getDate("order_date"));
+               order.setTotalAmount(rs.getBigDecimal("total_amount"));
+               order.setStatus(rs.getString("status"));
+               order.setShippingAddress(rs.getString("shipping_address"));
+               order.setPaymentMethod(rs.getString("payment_method"));
+
+               order.setOrderDetails(getOrderDetailsByOrderId(order.getOrderId()));
+
+               orders.add(order);
+            }
+         }
+      }
+      
+      return orders;
    }
    
    /**
@@ -313,6 +360,76 @@ public class OrderDAO {
          int rowsAffected = stmt.executeUpdate();
          return rowsAffected > 0;
       }
+   }
+
+   /**
+    * Get all order details for a specific order
+    * 
+    * @param orderId The order ID
+    * @return List of order details with book information
+    * @throws SQLException if database error occurs
+    */
+   public List<OrderDetail> getOrderDetailsByOrderId(int orderId) throws SQLException {
+      List<OrderDetail> orderDetails = new ArrayList<>();
+      String sql = "SELECT od.*, b.title, b.image_url FROM ORDER_DETAILS od " +
+                   "JOIN BOOKS b ON od.book_id = b.book_id " +
+                   "WHERE od.order_id = ?";
+      
+      try (Connection conn = DBConnection.getConnection();
+           PreparedStatement stmt = conn.prepareStatement(sql)) {
+         
+         stmt.setInt(1, orderId);
+         
+         try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+               OrderDetail orderDetail = new OrderDetail();
+               orderDetail.setOrderDetailId(rs.getInt("order_detail_id"));
+               orderDetail.setOrderId(rs.getInt("order_id"));
+               orderDetail.setBookId(rs.getInt("book_id"));
+               orderDetail.setQuantity(rs.getInt("quantity"));
+               orderDetail.setUnitPrice(rs.getBigDecimal("unit_price"));
+               orderDetail.setDiscount(rs.getBigDecimal("discount"));
+               
+               // Set book information
+               orderDetail.setBookTitle(rs.getString("title"));
+               orderDetail.setImageUrl(rs.getString("image_url"));
+               
+               orderDetails.add(orderDetail);
+            }
+         }
+      }
+      
+      return orderDetails;
+   }
+
+   /**
+    * Calculate the total amount for an order
+    * 
+    * @param orderId The order ID
+    * @return The total amount
+    * @throws SQLException if database error occurs
+    */
+   public BigDecimal calculateOrderTotal(int orderId) throws SQLException {
+      BigDecimal total = BigDecimal.ZERO;
+      String sql = "SELECT SUM(quantity * unit_price * (1 - discount/100)) AS total " +
+                   "FROM ORDER_DETAILS WHERE order_id = ?";
+      
+      try (Connection conn = DBConnection.getConnection();
+           PreparedStatement stmt = conn.prepareStatement(sql)) {
+         
+         stmt.setInt(1, orderId);
+         
+         try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+               total = rs.getBigDecimal("total");
+               if (total == null) {
+                  total = BigDecimal.ZERO;
+               }
+            }
+         }
+      }
+      
+      return total;
    }
 
    public static void main(String[] args) throws SQLException {
