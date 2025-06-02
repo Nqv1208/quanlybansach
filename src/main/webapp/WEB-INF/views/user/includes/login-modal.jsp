@@ -20,12 +20,12 @@
                 
                 <form action="${pageContext.request.contextPath}/login" method="post">
                     <!-- Role toggle (for UI only, server determines actual role) -->
-                    <div class="role-toggle">
+                    <!-- <div class="role-toggle">
                         <input type="radio" id="userRole" name="roleUI" value="user" checked>
                         <label for="userRole">Người dùng</label>
                         <input type="radio" id="adminRole" name="roleUI" value="admin">
                         <label for="adminRole">Quản trị viên</label>
-                    </div>  
+                    </div>   -->
 
                     <!-- Username input -->
                     <div class="mb-3">

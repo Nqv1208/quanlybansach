@@ -9,6 +9,7 @@ import com.quanlybansach.model.Account;
 import com.quanlybansach.model.Cart;
 import com.quanlybansach.model.CartItem;
 import com.quanlybansach.model.CartSummary;
+import com.quanlybansach.service.CartService;
 import com.quanlybansach.service.OrderService;
 import com.quanlybansach.util.SessionUtil;
 
@@ -240,11 +241,7 @@ public class CheckoutServlet extends HttpServlet {
         
         // Create order - Using existing Order class
         Order order = new Order();
-        if (account.getCustomerId() != null) {
-            order.setCustomerId(account.getCustomerId());
-        } else {
-            order.setCustomerId(account.getAccountId());
-        }
+        order.setCustomerId(account.getCustomerId());
         order.setOrderDate(new Date());
         order.setStatus("Chờ xử lý");
         
@@ -303,6 +300,7 @@ public class CheckoutServlet extends HttpServlet {
         }
 
         order.setOrderDetails(orderDetails);
+        System.out.println(order.toString());
         
         // Save order to database
         System.out.println("CheckoutServlet - Saving order to database with customer ID: " + order.getCustomerId());
@@ -321,24 +319,18 @@ public class CheckoutServlet extends HttpServlet {
             
             System.out.println("CheckoutServlet - Order created successfully with ID: " + orderId);
             order.setOrderId(orderId);
+
+            // Xóa các mục trong giỏ hàng sau khi đặt hàng thành công
+            CartService cartService = new CartService();
+            for (OrderDetail item : order.getOrderDetails()) {
+                cartService.removeFromCart(request, item.getBookId());
+            }
         
-            // // Clear cart after successful order
-            // SessionUtil.clearCart(session);
+            // Update cart after successful order
+            session.setAttribute("cart", cartService.getCart(request));
                 
             // Remove the checkout cart from session
             session.removeAttribute("checkoutCart");
-            
-            // Set estimated delivery date based on shipping method
-            // Calendar calendar = Calendar.getInstance();
-            // calendar.setTime(new Date());
-            // if ("standard".equals(shippingMethod)) {
-            //     calendar.add(Calendar.DAY_OF_MONTH, 3);
-            // } else if ("fast".equals(shippingMethod)) {
-            //     calendar.add(Calendar.DAY_OF_MONTH, 2);
-            // } else if ("express".equals(shippingMethod)) {
-            //     calendar.add(Calendar.DAY_OF_MONTH, 1);
-            // }
-            // Date estimatedDeliveryDate = calendar.getTime();
             
             // Set these additional properties through request attributes
             request.setAttribute("order", order);

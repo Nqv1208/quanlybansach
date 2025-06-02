@@ -51,6 +51,10 @@ public class Order {
         return orderDate;
     }
 
+    public String getOrderDateFormatted() {
+        return orderDate != null ? new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(orderDate) : "";
+    }
+
     public void setOrderDate(Date orderDate) {
         this.orderDate = orderDate;
     }

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -266,5 +267,14 @@ public class OrderService {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    public static void main(String[] args) {
+        Date today = new Date();
+        LocalDate localDate = today.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = localDate.format(formatter);
     }
 } 

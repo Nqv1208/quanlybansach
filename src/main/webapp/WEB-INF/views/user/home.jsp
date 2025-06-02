@@ -33,7 +33,7 @@
                     <h1 class="hero-title">Khám phá thế giới qua từng trang sách</h1>
                     <p class="hero-subtitle">Tìm kiếm tri thức, cảm xúc và niềm vui qua hàng ngàn đầu sách chất lượng</p>
                     <div class="hero-search">
-                        <form action="${pageContext.request.contextPath}/shop/search" method="get">
+                        <form action="${pageContext.request.contextPath}/shop" method="get">
                             <input type="text" name="keyword" class="hero-search-input" placeholder="Tìm kiếm tên sách, tác giả...">
                             <button type="submit" class="hero-search-button"><i class="fas fa-search"></i> Tìm</button>
                         </form>
@@ -100,9 +100,9 @@
                                         <fmt:formatNumber value="${book.price}" type="currency" currencySymbol="" maxFractionDigits="0" /> ₫
                                     </p>
                                     <div class="card-actions">
-                                        <button type="button" class="btn btn-primary btn-cart" data-book-id="${book.bookId}" data-quantity="1">
+                                        <a href="${pageContext.request.contextPath}/book-detail?id=${book.bookId}" class="btn btn-primary btn-cart">
                                             <i class="fas fa-shopping-cart me-1"></i> Thêm vào giỏ
-                                        </button>
+                                        </a>
                                         <a href="#" class="btn-wishlist"><i class="far fa-heart"></i></a>
                                     </div>
                                 </div>

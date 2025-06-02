@@ -156,7 +156,7 @@ public class OrderDAO {
                Order order = new Order();
                order.setOrderId(rs.getInt("order_id"));
                order.setCustomerId(rs.getInt("customer_id"));
-               order.setOrderDate(rs.getDate("order_date"));
+               order.setOrderDate(rs.getTimestamp("order_date"));
                order.setTotalAmount(rs.getBigDecimal("total_amount"));
                order.setStatus(rs.getString("status"));
                order.setShippingAddress(rs.getString("shipping_address"));
@@ -246,7 +246,7 @@ public class OrderDAO {
          
          try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                stmt.setInt(1, order.getCustomerId());
-               stmt.setDate(2, new java.sql.Date(order.getOrderDate().getTime()));
+               stmt.setTimestamp(2, new java.sql.Timestamp(order.getOrderDate().getTime()));
                stmt.setBigDecimal(3, order.getTotalAmount());
                stmt.setString(4, order.getStatus());
                stmt.setString(5, order.getShippingAddress());

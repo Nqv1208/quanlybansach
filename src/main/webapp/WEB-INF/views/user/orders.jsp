@@ -115,7 +115,7 @@
                             <div class="order-header">
                                 <div>
                                     <div class="order-number">Đơn hàng #${order.orderId}</div>
-                                    <div class="order-date">Ngày đặt: <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" /></div>
+                                    <div class="order-date">Ngày đặt: ${order.getOrderDateFormatted()}</div>
                                 </div>
                                 <div class="order-status ${order.status}">
                                     <c:choose>
