@@ -2388,6 +2388,9 @@ WHERE o.customer_id = 5
 ORDER BY o.order_date DESC
 
 -------------------------------------
+SELECT * FROM dbo.ORDERS
+WHERE customer_id = 12
+-------------------------------------
 SELECT * FROM dbo.AUTHORS
 -------------------------------------
 SELECT * FROM dbo.BOOKS

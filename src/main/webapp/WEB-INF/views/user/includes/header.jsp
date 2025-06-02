@@ -24,10 +24,10 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">Danh mục</a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop?category=1">Văn học Việt Nam</a></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop?category=2">Văn học nước ngoài</a></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop?category=3">Sách thiếu nhi</a></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop?category=4">Kỹ năng sống</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop/search?category=1">Văn học Việt Nam</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop/search?category=2">Văn học nước ngoài</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop/search?category=3">Sách thiếu nhi</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop/search?category=4">Kỹ năng sống</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/shop">Tất cả danh mục</a></li>
                         </ul>

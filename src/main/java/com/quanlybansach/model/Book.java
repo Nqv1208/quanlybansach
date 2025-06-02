@@ -192,6 +192,7 @@ public class Book {
                 ", publicationDate=" + publicationDate +
                 ", description='" + description + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", avgRating='" + avgRating + '\'' +
                 '}';
     }
 } 

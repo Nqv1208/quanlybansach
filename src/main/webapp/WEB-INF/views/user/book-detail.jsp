@@ -110,7 +110,7 @@
                                     </button>
                                 </form>
                                 
-                                <form id="buyNowForm" action="${pageContext.request.contextPath}/cart/add" method="post" class="d-inline-block">
+                                <form id="buyNowForm" action="${pageContext.request.contextPath}/checkout?bookId=${book.bookId}" method="get" class="d-inline-block">
                                     <input type="hidden" name="bookId" value="${book.bookId}">
                                     <input type="hidden" name="quantity" id="buyQuantity" value="1">
                                     <input type="hidden" name="redirect" value="checkout">
@@ -142,7 +142,7 @@
                 <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="false">Thông tin chi tiết</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Đánh giá (0)</button>
+                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Đánh giá (${book.reviewCount})</button>
             </li>
         </ul>
         <div class="tab-content" id="bookTabContent">
@@ -263,68 +263,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JS -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Khởi tạo toast
-            const cartToast = document.getElementById('cartToast');
-            if (cartToast) {
-                const toast = new bootstrap.Toast(cartToast);
-                
-                // Hiển thị toast khi form được submit
-                const addToCartForm = document.getElementById('addToCartForm');
-                if (addToCartForm) {
-                    addToCartForm.addEventListener('submit', function() {
-                        // Cập nhật số lượng từ input
-                        document.getElementById('cartQuantity').value = document.querySelector('.quantity-input').value;
-                    });
-                }
-                
-                const buyNowForm = document.getElementById('buyNowForm');
-                if (buyNowForm) {
-                    buyNowForm.addEventListener('submit', function() {
-                        // Cập nhật số lượng từ input
-                        document.getElementById('buyQuantity').value = document.querySelector('.quantity-input').value;
-                    });
-                }
-            }
-            
-            // Quantity control
-            const decreaseBtn = document.querySelector('.decrease-btn');
-            const increaseBtn = document.querySelector('.increase-btn');
-            const quantityInput = document.querySelector('.quantity-input');
-            
-            if (decreaseBtn && increaseBtn && quantityInput) {
-                decreaseBtn.addEventListener('click', function() {
-                    let value = parseInt(quantityInput.value, 10);
-                    value = isNaN(value) ? 1 : value;
-                    if (value > 1) {
-                        value--;
-                        quantityInput.value = value;
-                    }
-                });
-                
-                increaseBtn.addEventListener('click', function() {
-                    let value = parseInt(quantityInput.value, 10);
-                    value = isNaN(value) ? 1 : value;
-                    const max = parseInt(quantityInput.getAttribute('max'), 10);
-                    if (value < max) {
-                        value++;
-                        quantityInput.value = value;
-                    }
-                });
-                
-                quantityInput.addEventListener('change', function() {
-                    let value = parseInt(this.value, 10);
-                    const max = parseInt(this.getAttribute('max'), 10);
-                    value = isNaN(value) ? 1 : value;
-                    if (value < 1) {
-                        this.value = 1;
-                    } else if (value > max) {
-                        this.value = max;
-                    }
-                });
-            }
-        });
-    </script>
+    <script src="${pageContext.request.contextPath}/js/user/book-detail.js"></script>
 </body>
 </html>

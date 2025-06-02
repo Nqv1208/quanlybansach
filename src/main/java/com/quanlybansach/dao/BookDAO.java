@@ -138,10 +138,9 @@ public class BookDAO {
     public static void main(String[] args) {
         
         BookDAO bookDAO = new BookDAO();
-        if(bookDAO.deleteBook(1)) {
-            System.out.println("Delete book success!");
-        } else {
-            System.out.println("Delete book failed!");
+        List<Book> books = bookDAO.getAllBooks();
+        for (Book book : books) {
+            System.out.println(book.toString());
         }
     }
     

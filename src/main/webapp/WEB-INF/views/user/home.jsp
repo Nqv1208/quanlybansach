@@ -33,7 +33,7 @@
                     <h1 class="hero-title">Khám phá thế giới qua từng trang sách</h1>
                     <p class="hero-subtitle">Tìm kiếm tri thức, cảm xúc và niềm vui qua hàng ngàn đầu sách chất lượng</p>
                     <div class="hero-search">
-                        <form action="${pageContext.request.contextPath}/shop" method="get">
+                        <form action="${pageContext.request.contextPath}/shop/search" method="get">
                             <input type="text" name="keyword" class="hero-search-input" placeholder="Tìm kiếm tên sách, tác giả...">
                             <button type="submit" class="hero-search-button"><i class="fas fa-search"></i> Tìm</button>
                         </form>
