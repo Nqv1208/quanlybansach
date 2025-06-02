@@ -47,7 +47,7 @@ public class CheckoutServlet extends HttpServlet {
         System.out.println("CheckoutServlet - Path Info: " + pathInfo);
         
         try {
-            // Main checkout page (no path info or root path)
+            // Chuyển hướng dựa trên pathInfo
             if (pathInfo == null || pathInfo.equals("/")) {
                     showCheckoutPage(request, response);
             } else {
@@ -66,7 +66,7 @@ public class CheckoutServlet extends HttpServlet {
         System.out.println("CheckoutServlet - Path Info: " + pathInfo);
         
         try {
-            // Use pathInfo to determine the action
+            // Sử dụng pathInfo để xác định hành động
             if (pathInfo != null && pathInfo.equals("/place-order")) {
                 placeOrder(request, response);
             } else {
@@ -81,6 +81,8 @@ public class CheckoutServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Account account = (Account) session.getAttribute("account");
         String itemsParam = request.getParameter("items");
+        String itemsParam2 = request.getParameter("bookId");
+        String quantityParam = request.getParameter("quantity");
 
         if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -96,21 +98,21 @@ public class CheckoutServlet extends HttpServlet {
         System.out.println("CheckoutServlet - Cart: " + cart.toString());
         
         session.removeAttribute("checkoutCart");
-        // Create a new cart for checkout with selected items only
+        // Tạo một giỏ hàng mới để chứa các mục được chọn
         Cart checkoutCart = new Cart();
         
         if (itemsParam != null && !itemsParam.isEmpty()) {
             try {
-                // Parse the items parameter (comma-separated list of book IDs)
+                // Chuyển đổi tham số items thành mảng các ID
                 String[] itemsArray = itemsParam.split(",");
                 
                 for (String itemIdStr : itemsArray) {
                     Integer itemId = Integer.parseInt(itemIdStr.trim());
                     
-                    // Find matching cart item
+                    // Tìm kiếm trong giỏ hàng để lấy thông tin bookId và quantity
                     for (CartItem item : cart.getItems()) {
                         if (item.getBook() != null && itemId.equals(item.getBook().getBookId())) {
-                            // Create a new cart item and add to checkout cart
+                            // Tạo CartItem mới với bookId và quantity
                             CartItem checkoutItem = new CartItem(item.getBook().getBookId(), item.getQuantity());
                             checkoutItem.setBook(item.getBook());
                             checkoutCart.getItems().add(checkoutItem);
@@ -120,7 +122,7 @@ public class CheckoutServlet extends HttpServlet {
                 }
                 
                 if (checkoutCart.getItems().isEmpty()) {
-                    // If no items were added (invalid IDs), redirect back to cart
+                    // Nếu không có item nào khớp, redirect về giỏ hàng
                     response.sendRedirect(request.getContextPath() + "/cart");
                     return;
                 }
@@ -130,8 +132,26 @@ public class CheckoutServlet extends HttpServlet {
                 return;
             }
         } else {
-            // If no items parameter, use entire cart
-            checkoutCart = cart;
+            if (itemsParam2 != null && !itemsParam2.isEmpty()) {
+                try {
+                    // Chuyển đổi tham số bookId thành Integer
+                    Integer bookId = Integer.parseInt(itemsParam2.trim());
+                    Integer quantity = (quantityParam != null && !quantityParam.isEmpty()) ? Integer.parseInt(quantityParam) : 1;
+                    
+                    // Tạo một CartItem mới với bookId và quantity
+                    CartItem checkoutItem = new CartItem(bookId, quantity);
+                    checkoutCart.getItems().add(checkoutItem);
+                    
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parsing book ID: " + e.getMessage());
+                    response.sendRedirect(request.getContextPath() + "/shop");
+                    return;
+                }
+            } else {
+                // Nếu không có tham số items, redirect về giỏ hàng
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
         }
         
         // Calculate cart summary for selected items

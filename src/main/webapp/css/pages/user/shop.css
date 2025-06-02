@@ -98,6 +98,7 @@ body {
 .sorting-options {
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 .sort-by-label {
@@ -264,4 +265,18 @@ body {
     .sort-select {
         width: 100%;
     }
+}
+
+/* Price range inputs */
+.price-range-inputs {
+    margin-bottom: var(--spacing-m);
+}
+
+.price-range-inputs .form-control {
+    text-align: center;
+}
+
+.price-separator {
+    color: var(--light-text-color);
+    margin: var(--spacing-xs) 0;
 } 

@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
+   // Context path detection
+   const contextPath = window.location.pathname.includes('/shop') 
+      ? window.location.pathname.substring(0, window.location.pathname.indexOf('/shop')) 
+      : '';
+
    // Create filter form to handle all filter options
    const filterForm = document.createElement('form');
    filterForm.id = 'filterForm';
@@ -6,46 +11,59 @@ document.addEventListener('DOMContentLoaded', function() {
    filterForm.action = contextPath + '/shop';
    document.body.appendChild(filterForm);
 
-   // Handle category filter checkboxes
-   document.querySelectorAll('.category-filter').forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-            const categoryId = this.value;
-            
-            // Uncheck other categories if this one is checked
-            if (this.checked) {
-               document.querySelectorAll('.category-filter').forEach(cb => {
-                  if (cb !== this) {
-                        cb.checked = false;
-                  }
-               });
-            }
-            
-            updateFilter('category', this.checked ? categoryId : '');
+   // Handle reset filters button - redirects to shop with no parameters
+   const resetFiltersBtn = document.querySelector('.filter-sidebar .btn-outline-danger');
+   if (resetFiltersBtn) {
+      resetFiltersBtn.addEventListener('click', function(e) {
+         e.preventDefault();
+         window.location.href = this.getAttribute('href');
       });
-   });
+   }
 
-   // Handle author filter checkboxes
-   document.querySelectorAll('.author-filter').forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-            const authorId = this.value;
-            
-            // Uncheck other authors if this one is checked
-            if (this.checked) {
-               document.querySelectorAll('.author-filter').forEach(cb => {
-                  if (cb !== this) {
-                        cb.checked = false;
-                  }
-               });
-            }
-            
-            updateFilter('author', this.checked ? authorId : '');
-      });
+   // Function to update URL with filters instead of using form submission
+   function updateUrlWithFilters(paramName, paramValue) {
+      const currentUrl = new URL(window.location.href);
+      const searchParams = currentUrl.searchParams;
+   
+      if (paramValue && paramValue.trim() !== '') {
+         searchParams.set(paramName, paramValue);
+      } else {
+         searchParams.delete(paramName);
+      }
+   
+      searchParams.set('page', 1);
+   
+      // Force to /shop/search
+      const baseUrl = contextPath + '/shop/search';
+      window.location.href = baseUrl + '?' + searchParams.toString();
+   }
+
+ // New: Multi-select category filter
+document.querySelectorAll('.category-filter').forEach(checkbox => {
+   checkbox.addEventListener('change', function () {
+      const selected = [...document.querySelectorAll('.category-filter:checked')]
+         .map(cb => cb.value)
+         .join(',');
+
+      updateUrlWithFilters('category', selected);
    });
+});
+
+// New: Multi-select author filter
+document.querySelectorAll('.author-filter').forEach(checkbox => {
+   checkbox.addEventListener('change', function () {
+      const selected = [...document.querySelectorAll('.author-filter:checked')]
+         .map(cb => cb.value)
+         .join(',');
+
+      updateUrlWithFilters('author', selected);
+   });
+});
 
    // Handle rating filter radio buttons
    document.querySelectorAll('input[name="rating"]').forEach(radio => {
       radio.addEventListener('change', function() {
-            updateFilter('rating', this.value);
+         updateUrlWithFilters('rating', this.value);
       });
    });
 
@@ -53,25 +71,51 @@ document.addEventListener('DOMContentLoaded', function() {
    const sortSelect = document.querySelector('.sort-select');
    if (sortSelect) {
       sortSelect.addEventListener('change', function() {
-            updateFilter('sort', this.value);
+         updateUrlWithFilters('sort', this.value);
       });
    }
 
    // Handle price range filter
-   const priceRange = document.getElementById('priceRange');
-   const minPriceDisplay = document.getElementById('minPrice');
-   const maxPriceDisplay = document.getElementById('maxPrice');
-   const applyPriceBtn = document.querySelector('.filter-section .btn');
+   const minPriceInput = document.getElementById('minPriceInput');
+   const maxPriceInput = document.getElementById('maxPriceInput');
+   const applyPriceFilter = document.getElementById('applyPriceFilter');
 
-   if (priceRange && applyPriceBtn) {
-      priceRange.addEventListener('input', function() {
-            const value = this.value;
-            maxPriceDisplay.textContent = new Intl.NumberFormat('vi-VN').format(value) + '₫';
-      });
-      
-      applyPriceBtn.addEventListener('click', function() {
-            updateFilter('maxPrice', priceRange.value);
-            updateFilter('minPrice', '0');
+   minPriceInput?.addEventListener('input', function () {
+      this.value = this.value.replace(/[^0-9]/g, '');
+   });
+
+   maxPriceInput?.addEventListener('input', function () {
+      this.value = this.value.replace(/[^0-9]/g, '');
+   });
+
+   if (minPriceInput && maxPriceInput && applyPriceFilter) {
+      // Apply price filter
+      applyPriceFilter.addEventListener('click', function(e) {
+         e.preventDefault();
+         const currentUrl = new URL(window.location.href);
+         const searchParams = currentUrl.searchParams;
+         
+         const minPrice = minPriceInput.value.trim();
+         const maxPrice = maxPriceInput.value.trim();
+         
+         // Only add parameters if they have values
+         if (minPrice) {
+            searchParams.set('minPrice', minPrice);
+         } else {
+            searchParams.delete('minPrice');
+         }
+         
+         if (maxPrice) {
+            searchParams.set('maxPrice', maxPrice);
+         } else {
+            searchParams.delete('maxPrice');
+         }
+         
+         // Reset to page 1 when filtering
+         searchParams.set('page', 1);
+         
+         // Navigate to the new URL with updated parameters
+         window.location.href = currentUrl.toString();
       });
    }
 
@@ -79,216 +123,73 @@ document.addEventListener('DOMContentLoaded', function() {
    const searchForm = document.querySelector('.filter-section form');
    if (searchForm) {
       searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const keyword = this.querySelector('input[name="keyword"]').value;
-            updateFilter('keyword', keyword);
-      });
-   }
-
-   // Function to update filters and submit form
-   function updateFilter(name, value) {
-      let input = filterForm.querySelector(`input[name="${name}"]`);
-      
-      if (!input) {
-            input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            filterForm.appendChild(input);
-      }
-      
-      input.value = value;
-      
-      // Keep existing pagination, sort, and other parameters
-      preserveExistingParameters(filterForm);
-      
-      // Submit the form
-      filterForm.submit();
-   }
-
-   // Function to preserve existing parameters from URL
-   function preserveExistingParameters(form) {
-      const urlParams = new URLSearchParams(window.location.search);
-      
-      // List of parameters to preserve if they exist in URL
-      const paramsToPreserve = [
-            'sort', 'page', 'keyword', 'category', 'author', 
-            'minPrice', 'maxPrice', 'rating', 'stock'
-      ];
-      
-      paramsToPreserve.forEach(param => {
-            // Only preserve if not already set in the current form submission
-            if (urlParams.has(param) && !form.querySelector(`input[name="${param}"]`)) {
-               const input = document.createElement('input');
-               input.type = 'hidden';
-               input.name = param;
-               input.value = urlParams.get(param);
-               form.appendChild(input);
-            }
+         e.preventDefault();
+         const keyword = this.querySelector('input[name="keyword"]').value;
+         updateUrlWithFilters('keyword', keyword);
       });
    }
 
    // Handle pagination links
    document.querySelectorAll('.pagination .page-link').forEach(link => {
       link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Extract page number from the link's href
-            const hrefParams = new URLSearchParams(this.getAttribute('href').split('?')[1]);
-            const page = hrefParams.get('page');
-            
-            if (page) {
-               updateFilter('page', page);
-            }
+         e.preventDefault();
+         
+         // Extract page number from the link's href
+         const hrefParams = new URLSearchParams(this.getAttribute('href').split('?')[1]);
+         const page = hrefParams.get('page');
+         
+         if (page) {
+            updateUrlWithFilters('page', page);
+         }
       });
    });
 
-   // Initialize filter form with current URL parameters
-   function initializeFilterForm() {
+   // Initialize filter selections based on URL parameters
+   function initializeFilterSelections() {
       const urlParams = new URLSearchParams(window.location.search);
       
-      // Create hidden inputs for all current parameters
-      urlParams.forEach((value, key) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = value;
-            filterForm.appendChild(input);
-      });
-      
-      // Check the appropriate category checkbox
+      // Check multiple category checkboxes
       if (urlParams.has('category')) {
-            const categoryId = urlParams.get('category');
-            const categoryCheckbox = document.querySelector(`.category-filter[value="${categoryId}"]`);
-            if (categoryCheckbox) {
-               categoryCheckbox.checked = true;
-            }
+         const ids = urlParams.get('category').split(',');
+         ids.forEach(id => {
+            const cb = document.querySelector(`.category-filter[value="${id}"]`);
+            if (cb) cb.checked = true;
+         });
       }
       
-      // Check the appropriate author checkbox
+      // Check multiple author checkboxes
       if (urlParams.has('author')) {
-            const authorId = urlParams.get('author');
-            const authorCheckbox = document.querySelector(`.author-filter[value="${authorId}"]`);
-            if (authorCheckbox) {
-               authorCheckbox.checked = true;
-            }
+         const ids = urlParams.get('author').split(',');
+         ids.forEach(id => {
+            const cb = document.querySelector(`.author-filter[value="${id}"]`);
+            if (cb) cb.checked = true;
+         });
       }
       
       // Check the appropriate rating radio
       if (urlParams.has('rating')) {
-            const rating = urlParams.get('rating');
-            const ratingRadio = document.querySelector(`input[name="rating"][value="${rating}"]`);
-            if (ratingRadio) {
-               ratingRadio.checked = true;
-            }
+         const rating = urlParams.get('rating');
+         const ratingRadio = document.querySelector(`input[name="rating"][value="${rating}"]`);
+         if (ratingRadio) {
+            ratingRadio.checked = true;
+         }
       }
       
-      // Set the price range if applicable
-      if (urlParams.has('maxPrice') && priceRange) {
-            priceRange.value = urlParams.get('maxPrice');
-            maxPriceDisplay.textContent = new Intl.NumberFormat('vi-VN').format(priceRange.value) + '₫';
+      // Set the price range inputs if applicable
+      if (urlParams.has('minPrice') && minPriceInput) {
+          minPriceInput.value = urlParams.get('minPrice');
+      }
+      
+      if (urlParams.has('maxPrice') && maxPriceInput) {
+          maxPriceInput.value = urlParams.get('maxPrice');
       }
       
       // Set the sort select if applicable
       if (urlParams.has('sort') && sortSelect) {
-            sortSelect.value = urlParams.get('sort');
+         sortSelect.value = urlParams.get('sort');
       }
    }
-
-   function searchBooks() {
-      
-      const formData = new FormData();
-      formData.append('keyword', document.querySelector('input[name="keyword"]').value);
-      formData.append('category', document.querySelector('input[name="category"]').value);
-      formData.append('author', document.querySelector('input[name="author"]').value);
-      formData.append('minPrice', document.querySelector('input[name="minPrice"]').value);
-      formData.append('maxPrice', document.querySelector('input[name="maxPrice"]').value);
-      formData.append('rating', document.querySelector('input[name="rating"]').value);
-      formData.append('sort', document.querySelector('.sort-select').value);
-
-      // Lấy context path từ URL hiện tại
-      const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf('/shop'));
-
-      fetch(contextPath + '/shop/search', {
-            method: 'POST',
-            body: formData
-      })
-      .then(response => {
-         if (!response.ok) {
-            throw new Error('Lỗi khi tìm kiếm sách');
-         }
-         return response.json();
-      })
-      .then(data => {
-         // Handle the response data (e.g., update the book list)
-         const bookList = document.querySelector('.products-list');
-         bookList.innerHTML = ''; // Clear existing books
-         
-         data.books.forEach(book => {
-            bookItem.innerHTML = `
-               <div class="col-lg-4 col-md-6 mb-4">
-                     <div class="card h-100">
-                        <!-- Category Badge -->
-                        <span class="category-badge">${book.categoryName}</span>
-                        
-                        <!-- Stock Status -->
-                        <c:choose>
-                           <c:when test="${book.stockQuantity > 10}">
-                                 <span class="stock-status in-stock">Còn hàng</span>
-                           </c:when>
-                           <c:when test="${book.stockQuantity > 0 && book.stockQuantity <= 10}">
-                                 <span class="stock-status low-stock">Sắp hết</span>
-                           </c:when>
-                           <c:otherwise>
-                                 <span class="stock-status out-of-stock">Hết hàng</span>
-                           </c:otherwise>
-                        </c:choose>
-                        
-                        <div class="card-img-container">
-                           <img src="${book.imageUrl}" class="card-img-top" alt="${book.title}">
-                        </div>
-                        <div class="card-body">
-                           <h5 class="card-title">${book.title}</h5>
-                           <p class="card-author">${book.authorName}</p>
-                           <div class="d-flex align-items-center mb-2">
-                                 <div class="me-2">
-                                    <c:forEach begin="1" end="5" var="i">
-                                       <c:choose>
-                                             <c:when test="${i <= book.avgRating}">
-                                                <i class="fas fa-star text-warning"></i>
-                                             </c:when>
-                                             <c:when test="${i <= book.avgRating + 0.5}">
-                                                <i class="fas fa-star-half-alt text-warning"></i>
-                                             </c:when>
-                                             <c:otherwise>
-                                                <i class="far fa-star text-warning"></i>
-                                             </c:otherwise>
-                                       </c:choose>
-                                    </c:forEach>
-                                 </div>
-                                 <small class="text-muted">(${book.reviewCount})</small>
-                           </div>
-                           <p class="card-price"><fmt:formatNumber value="${book.price}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></p>
-                           <div class="d-flex gap-2">
-                                 <a href="${pageContext.request.contextPath}/book-detail?id=${book.bookId}" class="btn btn-outline-primary flex-grow-1">Chi tiết</a>
-                                 <!-- <c:if test="${book.stockQuantity > 0}">
-                                    <button type="button" class="btn btn-primary btn-add-to-cart" data-book-id="${book.bookId}" data-quantity="1">
-                                       <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                 </c:if> -->
-                           </div>
-                        </div>
-                     </div>
-               </div>
-            `;
-            bookList.appendChild(bookItem);
-         });
-      })
-      .catch(error => {
-         console.error('Error:', error);
-         alert('Có lỗi xảy ra khi tìm kiếm sách. Vui lòng thử lại sau.');
-      });
-   }
    
-   // Initialize the filter form with current parameters
-   initializeFilterForm();
+   // Initialize filter selections
+   initializeFilterSelections();
 });

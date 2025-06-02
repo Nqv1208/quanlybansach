@@ -79,29 +79,29 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="fullName" class="form-label fw-medium">Họ và tên</label>
-                                <input type="text" class="form-control" id="fullName" name="fullName" value="${sessionScope.user.fullName}" required>
+                                <input type="text" class="form-control" id="fullName" name="fullName" value="${sessionScope.customer.name}" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="phone" class="form-label fw-medium">Số điện thoại</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" value="${sessionScope.user.phone}" required>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="${sessionScope.customer.phone}" required>
                             </div>
                             <div class="col-12">
                                 <label for="email" class="form-label fw-medium">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="${sessionScope.user.email}" required>
+                                <input type="email" class="form-control" id="email" name="email" value="${sessionScope.customer.email}" required>
                             </div>
                             <div class="col-12">
                                 <label for="address" class="form-label fw-medium">Địa chỉ</label>
-                                <input type="text" class="form-control" id="address" name="address" value="${sessionScope.user.address}" required>
+                                <input type="text" class="form-control" id="address" name="address" value="${sessionScope.customer.address}" required>
                             </div>
                             <div class="col-md-4">
                                 <label for="province" class="form-label fw-medium">Tỉnh/Thành phố</label>
                                 <select class="form-select" id="province" name="province" required>
                                     <option value="">Chọn Tỉnh/Thành phố</option>
-                                    <option value="HN" ${sessionScope.user.province == 'HN' ? 'selected' : ''}>Hà Nội</option>
-                                    <option value="HCM" ${sessionScope.user.province == 'HCM' ? 'selected' : ''}>TP. Hồ Chí Minh</option>
-                                    <option value="DN" ${sessionScope.user.province == 'DN' ? 'selected' : ''}>Đà Nẵng</option>
-                                    <option value="HP" ${sessionScope.user.province == 'HP' ? 'selected' : ''}>Hải Phòng</option>
-                                    <option value="CT" ${sessionScope.user.province == 'CT' ? 'selected' : ''}>Cần Thơ</option>
+                                    <option value="HN" ${sessionScope.customer.address == 'HN' ? 'selected' : ''}>Hà Nội</option>
+                                    <option value="HCM" ${sessionScope.customer.address == 'HCM' ? 'selected' : ''}>TP. Hồ Chí Minh</option>
+                                    <option value="DN" ${sessionScope.customer.address == 'DN' ? 'selected' : ''}>Đà Nẵng</option>
+                                    <option value="HP" ${sessionScope.customer.address == 'HP' ? 'selected' : ''}>Hải Phòng</option>
+                                    <option value="CT" ${sessionScope.customer.address == 'CT' ? 'selected' : ''}>Cần Thơ</option>
                                     <!-- Thêm các tỉnh khác -->
                                 </select>
                             </div>
@@ -261,7 +261,7 @@
                     <h3 class="summary-title border-bottom pb-3 mb-4"><i class="fas fa-shopping-basket me-2 text-primary"></i>Tóm tắt đơn hàng</h3>
                     
                     <div class="order-items mb-4" style="max-height: 300px; overflow-y: auto;">
-                        <c:forEach var="item" items="${cart.items}">
+                        <c:forEach var="item" items="${sessionScope.checkoutCart.items}">
                             <div class="order-item d-flex mb-3 pb-3 border-bottom">
                                 <img src="${item.book.imageUrl}" alt="${item.book.title}" class="item-image me-3" style="width: 60px; height: 60px; object-fit: cover;">
                                 <div class="item-details flex-grow-1">

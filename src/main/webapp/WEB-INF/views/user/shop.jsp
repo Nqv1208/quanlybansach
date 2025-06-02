@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -45,7 +46,7 @@
                 <div class="filter-card mb-4">
                     <h4 class="filter-title">Tìm kiếm</h4>
                     <div class="filter-section">
-                        <form action="${pageContext.request.contextPath}/shop" method="get">
+                        <form action="${pageContext.request.contextPath}/shop/search" method="get">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="Tên sách, tác giả..." name="keyword" value="${param.keyword}">
                                 <button class="btn btn-primary" type="submit">
@@ -60,28 +61,36 @@
                 <div class="filter-card">
                     <h4 class="filter-title">Danh mục</h4>
                     <div class="filter-section">
-                        <c:forEach var="category" items="${categories}">
-                            <div class="form-check">
-                                <input class="form-check-input category-filter" type="checkbox" value="${category.categoryId}" id="category${category.categoryId}"
-                                    ${param.category == category.categoryId ? 'checked' : ''}>
-                                <label class="form-check-label" for="category${category.categoryId}">
-                                    ${category.name} (${category.bookCount})
-                                </label>
-                            </div>
-                        </c:forEach>
+                        <form action="${pageContext.request.contextPath}/shop/search" method="get"></form>
+                            <c:forEach var="category" items="${categories}">
+                                <div class="form-check">
+                                    <input class="form-check-input category-filter" type="checkbox" name="category" value="${category.categoryId}" id="category${category.categoryId}"
+                                        ${param.category == category.categoryId ? 'checked' : ''}>
+                                    <label class="form-check-label" for="category${category.categoryId}">
+                                        ${category.name} (${category.bookCount})
+                                    </label>
+                                </div>
+                            </c:forEach>
+                        </form>
                     </div>
                 </div>
                 
                 <!-- Price Range Filter -->
                 <div class="filter-card">
-                    <h4 class="filter-title">Khoảng giá</h4>
+                    <h4 class="filter-title">Khoảng Giá</h4>
                     <div class="filter-section">
-                        <input type="range" class="form-range" min="0" max="1000000" step="10000" id="priceRange">
-                        <div class="price-values">
-                            <span id="minPrice">0₫</span>
-                            <span id="maxPrice">1.000.000₫</span>
-                        </div>
-                        <button class="btn btn-primary btn-sm w-100 mt-2">Áp dụng</button>
+                        <form action="${pageContext.request.contextPath}/shop/search" method="get">
+                            <div class="price-range-inputs">
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" id="minPriceInput" placeholder="TỪ" value="${param.minPrice != null ? param.minPrice : ''}">
+                                </div>
+                                <div class="price-separator text-center mb-2">—</div>
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" id="maxPriceInput" placeholder="ĐẾN" value="${param.maxPrice != null ? param.maxPrice : ''}">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100" id="applyPriceFilter">ÁP DỤNG</button>
+                        </form>
                     </div>
                 </div>
                 
@@ -89,36 +98,17 @@
                 <div class="filter-card">
                     <h4 class="filter-title">Tác giả</h4>
                     <div class="filter-section">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="author1">
-                            <label class="form-check-label" for="author1">
-                                Nguyễn Nhật Ánh
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="author2">
-                            <label class="form-check-label" for="author2">
-                                Tô Hoài
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="author3">
-                            <label class="form-check-label" for="author3">
-                                J.K. Rowling
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="author4">
-                            <label class="form-check-label" for="author4">
-                                Dale Carnegie
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="author5">
-                            <label class="form-check-label" for="author5">
-                                Paulo Coelho
-                            </label>
-                        </div>
+                        <form action="${pageContext.request.contextPath}/shop/search" method="get">
+                            <c:forEach var="author" items="${authors}">
+                                <div class="form-check">
+                                    <input class="form-check-input author-filter" type="checkbox" name="author" value="${author.authorId}" id="author${author.authorId}"
+                                        ${param.author == author.authorId ? 'checked' : ''}>
+                                    <label class="form-check-label" for="author${author.authorId}">
+                                        ${author.name} (${author.bookCount})
+                                    </label>
+                                </div>
+                            </c:forEach>
+                        </form>
                     </div>
                 </div>
                 
@@ -126,40 +116,49 @@
                 <div class="filter-card">
                     <h4 class="filter-title">Đánh giá</h4>
                     <div class="filter-section">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="rating" id="rating5">
-                            <label class="form-check-label" for="rating5">
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="rating" id="rating4">
-                            <label class="form-check-label" for="rating4">
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="far fa-star text-warning"></i>
-                                & trở lên
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="rating" id="rating3">
-                            <label class="form-check-label" for="rating3">
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="fas fa-star text-warning"></i>
-                                <i class="far fa-star text-warning"></i>
-                                <i class="far fa-star text-warning"></i>
-                                & trở lên
-                            </label>
-                        </div>
+                        <form action="${pageContext.request.contextPath}/shop/search" method="get">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rating" id="rating5" value="5" ${param.rating == '5' ? 'checked' : ''}>
+                                <label class="form-check-label" for="rating5">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rating" id="rating4" value="4" ${param.rating == '4' ? 'checked' : ''}>
+                                <label class="form-check-label" for="rating4">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="far fa-star text-warning"></i>
+                                    trở lên
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rating" id="rating3" value="3" ${param.rating == '3' ? 'checked' : ''}>
+                                <label class="form-check-label" for="rating3">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="far fa-star text-warning"></i>
+                                    <i class="far fa-star text-warning"></i>
+                                    trở lên
+                                </label>
+                            </div>
+                        </form>
                     </div>
                 </div>
+                <!-- Reset Filters Button -->
+                <div class="filter-card mb-4">
+                    <a href="${pageContext.request.contextPath}/shop" class="btn btn-outline-danger w-100">
+                        <i class="fas fa-times-circle me-1"></i> Xóa tất cả bộ lọc
+                    </a>
+                </div>
+                
             </div>
             
             <!-- Products Grid -->
@@ -172,7 +171,7 @@
                                 Không tìm thấy sách nào
                             </c:when>
                             <c:otherwise>
-                                Hiển thị ${(currentPage-1)*booksPerPage + 1} - ${Math.min(currentPage*booksPerPage, totalBooks)} của ${totalBooks} sách
+                                Hiển thị ${startIndex} - ${endIndex} của ${totalBooks} sách
                             </c:otherwise>
                         </c:choose>
                     </div>
